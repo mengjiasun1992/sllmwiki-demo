@@ -55,7 +55,9 @@ The web is an everyday example: a browser sends a request message to a web serve
 
 ## 5. Key ideas
 
-**Autonomous nodes, joined by messages.** A node can be any communicating device, from a datacenter server to a phone or a car. [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction) Nodes act independently but are programmed toward common goals, which they reach by exchanging messages. [\[7\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#21-characteristic-1-collection-of-autonomous-computing-elements) Each computer has its own address space, so unlike threads on one machine they can't share memory; most practical distributed systems are message-passing. [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction) Each computer therefore has only a limited, incomplete view of the system. [\[8\]](../sources/distributed-systems-wikipedia-distributed-computing.md#introduction)
+Five ideas follow from the definition, each building on the one before; together they explain why a distributed system behaves unlike a program on one computer.
+
+**Autonomous nodes, joined by messages.** A node can be any communicating device, from a datacenter server to a phone or a car. [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction) Nodes act independently but are programmed toward common goals, which they reach by exchanging messages. [\[7\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#21-characteristic-1-collection-of-autonomous-computing-elements) Each computer has its own memory, its own address space, so unlike threads on one machine they can't share memory; most practical distributed systems are message-passing. [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction) Each computer therefore has only a limited, incomplete view of the system. [\[8\]](../sources/distributed-systems-wikipedia-distributed-computing.md#introduction)
 
 **No global clock.** Because nodes are independent, each keeps its own time; "we cannot assume that there is something like a global clock", which makes synchronization and coordination fundamental problems. [\[7\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#21-characteristic-1-collection-of-autonomous-computing-elements)
 
@@ -82,6 +84,8 @@ sequenceDiagram
 **Why distribute.** Some applications are inherently distributed, such as sending a message between two phones; others distribute for reliability, for performance by serving users from a nearby node, or because the problem is too big for one machine. [\[9\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#about-distributed-systems)
 
 ## 6. Boundaries
+
+The term is often confused with its neighbours; these lines set it apart.
 
 **Not computer networking.** Networking gets a message to its destination, which a distributed system sees only as a channel with some latency and bandwidth; distributed systems study how nodes coordinate, deciding what messages to send and how to handle them. [\[5\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#distributed-systems-and-computer-networking)
 
@@ -128,12 +132,13 @@ sequenceDiagram
 
 ## 9. Metadata
 
-- **Version:** 1.3
+- **Version:** 1.4
 - **Template:** concept_brief_overview
 - **Model:** claude-opus-5-5
 - **Created:** 2026-10-20
 - **Last modified:** 2026-10-21
 - **History:**
+  - 1.4 (2026-10-21): Lint (Context first): Key ideas and Boundaries open with what they cover; 'address space' glossed.
   - 1.3 (2026-10-21): Examples rule: set the scene of the amazon.com outage (the catalog service and the load balancer) before telling it; added a Load balancer Terminology row.
   - 1.2 (2026-10-21): Lint: the amazon.com outage is Amazon's, not AWS's; Lamport's 'an hour or two' wait; parallel computing processors 'may' share memory.
   - 1.1 (2026-10-21): Reworked under the current template and writing guide: added Kleppmann's course notes (plain definition, message passing, partial failure, why distribute, distributed systems versus networking), a flowchart of the definition and a sequence diagram of the unknown outcome, and new Terminology rows.

@@ -15,11 +15,13 @@ The principles that recur across the classic papers, textbooks and cloud provide
 | **Load balancer** | A component that spreads incoming requests across several interchangeable servers. |
 | **Checksum** | A small value computed from a block of data and sent with it, so the receiver can detect corrupted bits. |
 | **Leader** | The one server in a cluster that the others take direction from. |
+| **DNS** | The Domain Name System, the internet's directory that maps names such as example.com to machine addresses. |
 | **Partition** | A break in communication that splits the nodes into groups that can't reach each other. |
 | **Partition mode** | Brewer's explicit mode a system enters on detecting a partition, limiting or recording operations until recovery. |
 | **CAP** | Consistency, availability, partition tolerance: a shared-data system can't have all three during a partition. |
 | **Eventual consistency** | Replicas may disagree for a while, but converge once updates are exchanged. |
 | **Invariant** | A rule the data must always satisfy, such as unique keys or a balance of zero or more. |
+| **Version vector** | A list attached to a copy of data, holding for each node the logical time of its last update to it; two lists neither of which is ahead of the other mark concurrent updates. |
 | **Consensus** | Getting a group of machines to agree on values, such as the order of commands, despite some of them failing. |
 | **Replicated state machine** | Identical, deterministic state machines on several servers that apply the same commands in the same order. |
 | **Majority (quorum)** | More than half of a group's servers. |
@@ -35,6 +37,8 @@ The principles that recur across the classic papers, textbooks and cloud provide
 | **Admission control** | Deciding at the door which requests a service accepts, so that it doesn't take on more than it can serve. |
 | **Load shedding** | Rejecting some requests on purpose when overloaded, to keep serving the rest. |
 | **Graceful degradation** | Serving a reduced or lower-quality result instead of failing outright. |
+| **Circuit breaker** | A guard that stops calls to a failing dependency for a while, so callers fail fast instead of piling up. |
+| **Bulkhead** | A partition of resources, such as separate thread pools per dependency, so one failing part can't exhaust them all. |
 | **Cascading failure** | A failure that spreads from one component to others through positive feedback, such as overload moving to the survivors. |
 | **[sllmwiki_reasoning]** | The narrative's own reasoning: a conclusion, comparison or reconstruction no cited source states. |
 | **[sllmwiki_gap]** | Something the question needs that the sources don't answer. |
@@ -44,6 +48,8 @@ The principles that recur across the classic papers, textbooks and cloud provide
 The survey covers the principles for building and running distributed services: failure, load, agreement, time and change. It names the foundations beneath them (consistency, consensus, logical time) without their algorithms, and leaves out security. [sllmwiki_reasoning] The items come from the classic lists (the fallacies, Hamilton's tenets), AWS's and Azure's official lists, and each main area of the field: those at least two sources state or one authoritative source puts first, overlaps merged.
 
 ## 4. At a glance
+
+The thirteen items, one per row, in the order the next section takes them.
 
 | Item | In one line | Sources |
 |---|---|---|
@@ -63,9 +69,11 @@ The survey covers the principles for building and running distributed services: 
 
 ## 5. The main items
 
+Each item has the same shape: what it says, why it matters, one example, and a question to go deeper.
+
 ### 5.1 Expect failure
 
-**What.** Hamilton opens with Bill Hoffman's three tenets, and puts "expect failures" first: any component may crash or be stopped at any time, and the service must survive without human action. [\[1\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-1) AWS aims not to magnify a few failures into an outage, [\[2\]](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#failures-happen) and Azure's first principle, self-healing, starts from failures being inevitable. [\[3\]](../sources/distributed-system-design-azure-design-principles.md#core-principles)
+**What.** James Hamilton's paper on designing and deploying internet-scale services opens with Bill Hoffman's three tenets, and puts "expect failures" first: any component may crash or be stopped at any time, and the service must survive without human action. [\[1\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-1) AWS aims not to magnify a few failures into an outage, [\[2\]](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#failures-happen) and Azure's first principle, self-healing, starts from failures being inevitable. [\[3\]](../sources/distributed-system-design-azure-design-principles.md#core-principles)
 
 **Why.** Better hardware lowers the rate of faults but never to zero, so many distributed systems tolerate faults instead. [\[4\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability) A caller can't always tell what failed: a timed-out request may or may not have taken effect. [\[24\]](../sources/distributed-system-design-aws-challenges-distributed-systems.md#handling-failure-modes-in-hard-real-time-distributed-systems)
 
@@ -105,7 +113,7 @@ The survey covers the principles for building and running distributed services: 
 
 ### 5.5 Choose consistency deliberately
 
-**What.** Brewer's CAP theorem: across a partition, nodes that accept updates become inconsistent, and nodes that stay consistent must act unavailable. Brewer calls "2 of 3" misleading: partitions are rare, the choice can differ per operation, and each property is a matter of degree. [\[10\]](../sources/distributed-system-design-brewer-cap-twelve-years-later.md#why-2-of-3-is-missleading) Azure asks to minimize coordination. [\[3\]](../sources/distributed-system-design-azure-design-principles.md#core-principles)
+**What.** Eric Brewer proposed CAP, and twelve years later looked back at how it should be read. His theorem: across a partition, nodes that accept updates become inconsistent, and nodes that stay consistent must act unavailable. Brewer calls "2 of 3" misleading: partitions are rare, the choice can differ per operation, and each property is a matter of degree. [\[10\]](../sources/distributed-system-design-brewer-cap-twelve-years-later.md#why-2-of-3-is-missleading) Azure asks to minimize coordination. [\[3\]](../sources/distributed-system-design-azure-design-principles.md#core-principles)
 
 **Why.** The decision comes at every timeout: cancel and lose availability, or proceed and risk inconsistency. [\[28\]](../sources/distributed-system-design-brewer-cap-twelve-years-later.md#cap-latency-connection) Giving up consistency means knowing every invariant to restore afterwards. [\[29\]](../sources/distributed-system-design-brewer-cap-twelve-years-later.md#cap-confusion)
 
@@ -139,7 +147,7 @@ $$
 
 The price: in a partition, only the side with a quorum proceeds. [\[30\]](../sources/distributed-system-design-brewer-cap-twelve-years-later.md#managing-partitions)
 
-**Example.** GFS and HDFS are large-scale systems run by a single cluster leader, a server the others take direction from. [\[12\]](../sources/distributed-system-design-ongaro-raft-consensus.md#page-2) [sllmwiki_reasoning] If two servers each believed they were the leader, or the cluster's configuration were lost when the leader crashed, the servers would act on conflicting instructions. Such systems therefore choose their leader, and store the configuration that must survive a leader's crash, in a separate replicated state machine such as ZooKeeper. [\[12\]](../sources/distributed-system-design-ongaro-raft-consensus.md#page-2)
+**Example.** The Google File System (GFS) and the Hadoop Distributed File System (HDFS) are large-scale systems run by a single cluster leader, a server the others take direction from. [\[12\]](../sources/distributed-system-design-ongaro-raft-consensus.md#page-2) [sllmwiki_reasoning] If two servers each believed they were the leader, or the cluster's configuration were lost when the leader crashed, the servers would act on conflicting instructions. Such systems therefore choose their leader, and store the configuration that must survive a leader's crash, in a separate replicated state machine such as ZooKeeper. [\[12\]](../sources/distributed-system-design-ongaro-raft-consensus.md#page-2)
 
 **Deeper.** How do Paxos and Raft reach agreement, and what do they cost?
 
@@ -227,6 +235,8 @@ call_with_retries(request, max_attempts, base, cap):
 **Deeper.** How do staged rollouts and fault injection work in practice?
 
 ## 6. How they relate
+
+The items aren't independent: some follow from others, and some pull against each other. The diagram maps those links, and the paragraph after it walks through them.
 
 ```mermaid
 flowchart LR
@@ -338,12 +348,13 @@ Colors mark areas: red failure, blue data and time, yellow calls and load, green
 
 ## 10. Metadata
 
-- **Version:** 2.3
+- **Version:** 2.4
 - **Template:** survey
 - **Model:** claude-opus-5-5
 - **Created:** 2026-10-20
 - **Last modified:** 2026-10-21
 - **History:**
+  - 2.4 (2026-10-21): Lint (Context first): Hamilton's paper and Brewer introduced before their claims; GFS and HDFS spelled out; At a glance, The main items and How they relate open with what they hold; Terminology rows for DNS, version vector, circuit breaker and bulkhead.
   - 2.3 (2026-10-21): Examples rule: set the scene of Brewer's ATM, GFS and HDFS's leader election, the MIT gateway and the amazon.com outage before each, and glossed 'undrained'; added Terminology rows for load balancer, checksum and leader.
   - 2.2 (2026-10-21): Lint: the three tenets credited to Bill Hoffman via Hamilton; fallacies attribution removed where its section didn't support it; the transparency claim reworded to match van Steen's section 3.2.2.
   - 2.1 (2026-10-21): Reworked under the current survey template and shared writing guide: a state diagram of Brewer's partition management, a colored flowchart of how the items relate, retry pseudocode, TeX for the 243-call sum and the 2f+1 majority; added Kleppmann on faults and fault tolerance; fixed a misattributed Hamilton quote; trimmed to the 2200-word budget.

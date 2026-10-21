@@ -19,6 +19,8 @@ Software that smooths a stream of measurements usually weighs three moving avera
 | **Replica** | One of several identical copies of a service, any of which can answer a request. |
 | **Load balancer** | A component that picks, for each request, which replica serves it. |
 | **Percentile** | The $q$th percentile of latency is the time that $q$% of requests finish within. |
+| **TCP** | The internet's protocol for delivering a stream of data reliably: a sender resends data it gets no acknowledgement for within a timeout. |
+| **RTT** | Round-trip time: from sending a packet until its acknowledgement arrives. |
 | **Linux kernel** | The core of the Linux operating system, the code that manages the hardware and runs beneath every program. |
 | **Window** | The fixed set of most recent samples an SMA or WMA averages over. |
 | **Lag** | How far a smoothed value trails behind changes in the data. |
@@ -26,6 +28,7 @@ Software that smooths a stream of measurements usually weighs three moving avera
 | **Frequency response** | How much of each frequency in the input a filter lets through; a low-pass filter keeps slow changes and removes fast ones. |
 | **$H(f)$** | The SMA's frequency response at frequency $f$, as a fraction of the sampling rate (0 to 0.5). |
 | **FIR, IIR** | Finite and infinite impulse response: whether one sample's influence on the output ends (an SMA) or only fades (an EWMA). |
+| **RC circuit** | A resistor-capacitor circuit, the simplest analog low-pass filter. |
 | **Phase** | How a filter shifts the parts of a signal in time; a nonlinear phase makes a rising edge and a falling edge come out shaped differently. |
 | **Circular buffer** | A fixed-size array reused in a ring, holding the window's samples. |
 | **Fixed point** | Storing fractions as integers scaled by a power of two, so arithmetic needs only integer operations and shifts. |
@@ -36,13 +39,15 @@ Software that smooths a stream of measurements usually weighs three moving avera
 
 ## 3. The choice
 
-A service is often deployed as several identical copies, called replicas, and a load balancer spreads the requests across them. Replicas fail, and they also turn slow, and a good load balancer has to keep the whole system fast even then; with replicas running at different speeds, which one should get the next request is not obvious. [\[1\]](../sources/ewma-linkerd-beyond-round-robin.md#beyond-round-robin-load-balancing-for-latency) Linkerd's authors compared three answers. Round robin sends requests to each replica in turn. Least loaded counts each replica's outstanding requests, those sent but not yet answered, and picks the smallest count. Peak EWMA keeps a moving average of each replica's round-trip time, weighted by its outstanding requests, and picks the lowest. [\[1\]](../sources/ewma-linkerd-beyond-round-robin.md#beyond-round-robin-load-balancing-for-latency) In their simulation, one client sent 1000 requests a second across 11 replicas that answered in a median of 167 ms; after 15 seconds, one replica was slowed to 2 seconds for 30 seconds, like a bad garbage-collection pause. [\[2\]](../sources/ewma-linkerd-beyond-round-robin.md#experiment-setup) The results are read by percentile: holding latency low up to the 99.9th percentile means that only one request in a thousand was slow. Round robin was slow above the 95th percentile, least loaded above the 99th, and peak EWMA only above the 99.9th; with a 1-second timeout, the caller would have seen about 95%, 99% and 99.9% of requests succeed. [\[3\]](../sources/ewma-linkerd-beyond-round-robin.md#results) [sllmwiki_reasoning] It compared balancers, not averages; the average sets per-replica memory and how fast slowdowns show.
+A service is often deployed as several identical copies, called replicas, and a load balancer spreads the requests across them. Replicas fail, and they also turn slow, and a good load balancer has to keep the whole system fast even then; with replicas running at different speeds, which one should get the next request is not obvious. [\[1\]](../sources/ewma-linkerd-beyond-round-robin.md#beyond-round-robin-load-balancing-for-latency) The authors of Linkerd, open-source software that balances load this way, compared three answers. Round robin sends requests to each replica in turn. Least loaded counts each replica's outstanding requests, those sent but not yet answered, and picks the smallest count. Peak EWMA keeps a moving average of each replica's round-trip time, weighted by its outstanding requests, and picks the lowest. [\[1\]](../sources/ewma-linkerd-beyond-round-robin.md#beyond-round-robin-load-balancing-for-latency) In their simulation, one client sent 1000 requests a second across 11 replicas that answered in a median of 167 ms; after 15 seconds, one replica was slowed to 2 seconds for 30 seconds, like a bad garbage-collection pause, when a program stops to reclaim memory. [\[2\]](../sources/ewma-linkerd-beyond-round-robin.md#experiment-setup) The results are read by percentile: holding latency low up to the 99.9th percentile means that only one request in a thousand was slow. Round robin was slow above the 95th percentile, least loaded above the 99th, and peak EWMA only above the 99.9th; with a 1-second timeout, the caller would have seen about 95%, 99% and 99.9% of requests succeed. [\[3\]](../sources/ewma-linkerd-beyond-round-robin.md#results) [sllmwiki_reasoning] It compared balancers, not averages; the average sets per-replica memory and how fast slowdowns show.
 
 Candidates:
 
 - **EWMA:** each update moves a fraction $\alpha$ toward the new sample, so past samples' weights shrink exponentially. [\[4\]](../sources/moving-averages-wikipedia-moving-average.md#exponential-moving-average)
 - **SMA:** the mean of the last $N$ samples, each with equal weight. [\[5\]](../sources/moving-averages-nist-single-moving-average.md#6421-single-moving-average)
 - **WMA:** within the last $N$ samples, weights fall in arithmetic progression from $N$ for the newest to 1 for the oldest. [\[6\]](../sources/moving-averages-wikipedia-moving-average.md#weighted-moving-average)
+
+In this narrative's notation, the EWMA and the SMA are:
 
 $$
 s_t = \alpha x_t + (1 - \alpha) s_{t-1}
@@ -86,10 +91,10 @@ xychart-beta
 
 ```text
 SMA, window N:  total = total + x - ring[i]; ring[i] = x; i = (i + 1) mod N; m = total / N
-EWMA, factor a: s = s + a * (x - s)
+EWMA, factor alpha: s = s + alpha * (x - s)
 ```
 
-[sllmwiki_reasoning] Some code needs each update to be as cheap as possible: TCP updates its round-trip estimate on every acknowledged packet, and the Linux kernel offers its own code a ready-made EWMA. With $\alpha = 1/2^n$, both TCP's estimator and the kernel's EWMA replace the multiplication by shifts on scaled integers. [\[18\]](../sources/ewma-jacobson-congestion-avoidance.md#practice) [\[19\]](../sources/ewma-linux-kernel-average-h-source.md#L23-L26) The SMA works best in integers, since floating-point round-off makes its running total drift. [\[11\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-8)
+[sllmwiki_reasoning] Some code needs each update to be as cheap as possible: TCP updates its round-trip estimate on every acknowledged packet, and the Linux kernel offers its own code a ready-made EWMA. With $\alpha$ a power of two ($1/2$, $1/4$, $1/8$, ...), both TCP's estimator and the kernel's EWMA replace the multiplication by shifts on scaled integers. [\[18\]](../sources/ewma-jacobson-congestion-avoidance.md#practice) [\[19\]](../sources/ewma-linux-kernel-average-h-source.md#L23-L26) The SMA works best in integers, since floating-point round-off makes its running total drift. [\[11\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-8)
 
 **Edges.** An SMA "can also be disproportionately influenced by old data dropping out or new data coming in". [\[16\]](../sources/moving-averages-wikipedia-moving-average.md#simple-moving-average) [sllmwiki_reasoning] In an EWMA a spike's influence shrinks every update instead of vanishing $N$ samples later.
 
@@ -200,12 +205,13 @@ flowchart TD
 
 ## 9. Metadata
 
-- **Version:** 1.4
+- **Version:** 1.5
 - **Template:** comparison
 - **Model:** claude-opus-5-5
 - **Created:** 2026-10-20
 - **Last modified:** 2026-10-21
 - **History:**
+  - 1.5 (2026-10-21): Lint (Context first): Linkerd and a garbage-collection pause introduced; the two formulas open with what they are; the pseudocode writes alpha, not a, and the shift rule no longer uses an undefined n; Terminology rows for TCP, RTT and RC circuit.
   - 1.4 (2026-10-21): Examples rule: set the scene of Linkerd's load-balancer experiment (replicas, the three algorithms, the setup, how to read percentiles), and of TCP's retransmission timer, the Linux kernel's EWMA and the load average where they appear; added Terminology rows.
   - 1.3 (2026-10-21): Lint: per-gap alpha for irregular samples marked as reasoning; the Abstract's frequency claim matches the table (the EWMA separates fairly); the window is written N throughout; the kernel's update is called shifts and adds; trimmed to the 1,200-word budget.
   - 1.2 (2026-10-21): Rework under the current comparison template and writing guide: new DSP, fixed-point and TCP sources fill the noise, frequency-response, phase and cost dimensions; weight-by-age chart, decision flowchart, update pseudocode and TeX; remaining WMA and irregular-sampling gaps marked.
