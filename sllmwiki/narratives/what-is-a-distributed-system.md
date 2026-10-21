@@ -17,6 +17,7 @@ A distributed system is a set of independent computers that cooperate over a net
 | **Timeout** | Giving up on a reply after waiting a set time. |
 | **Distribution transparency** | Hiding from users that processes and data are spread across machines. |
 | **Middleware** | The software layer that gives a distributed system's applications common services, as an operating system does for one computer. |
+| **Load balancer** | A component that spreads incoming requests across several servers doing the same job. |
 | **Latency** | The delay from sending a message until it arrives. |
 | **Bandwidth** | The volume of data a channel carries per unit of time. |
 | **[sllmwiki_reasoning]** | The narrative's own reasoning: a conclusion, comparison or reconstruction no cited source states. |
@@ -50,7 +51,7 @@ flowchart LR
 
 Lamport gave the user's view in a 1987 email at DEC's research centre: "A distributed system is one in which the failure of a computer you didn't even know existed can render your own computer unusable." [\[4\]](../sources/distributed-systems-lamport-definition-email.md) He wrote it because workstations had grown dependent on programs running elsewhere, so a server outage left users waiting an hour or two. [\[4\]](../sources/distributed-systems-lamport-definition-email.md)
 
-The web is an everyday example: a browser sends a request message to a web server, which replies with a message holding the page. [\[5\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#distributed-systems-and-computer-networking) It also shows the risk. In one Amazon outage a catalog server with a full disk answered every request quickly and emptily, so the load balancer sent it ever more traffic, and one machine's fault took down amazon.com. [\[6\]](../sources/distributed-system-design-aws-challenges-distributed-systems.md#distributed-bugs-spread-epidemically)
+The web is an everyday example: a browser sends a request message to a web server, which replies with a message holding the page. [\[5\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#distributed-systems-and-computer-networking) It also shows the risk, in an outage at Amazon. The amazon.com website doesn't hold its product information itself: it asks a remote catalog service, a group of servers, and a load balancer between the website and those servers decides which one gets each request. [\[6\]](../sources/distributed-system-design-aws-challenges-distributed-systems.md#distributed-bugs-spread-epidemically) [sllmwiki_reasoning] Sending more requests to the servers that answer fastest keeps pages quick, as long as a fast answer is also a correct one. One catalog server's disk filled up, and because the error was mishandled it began answering every request at once with an empty response. The load balancer didn't notice the responses were empty, only that they were much faster than the other servers', so it sent that server a huge share of the traffic, and the whole website went down because one server couldn't supply product information. [\[6\]](../sources/distributed-system-design-aws-challenges-distributed-systems.md#distributed-bugs-spread-epidemically)
 
 ## 5. Key ideas
 
@@ -127,12 +128,13 @@ sequenceDiagram
 
 ## 9. Metadata
 
-- **Version:** 1.2
+- **Version:** 1.3
 - **Template:** concept_brief_overview
 - **Model:** claude-opus-5-5
 - **Created:** 2026-10-20
 - **Last modified:** 2026-10-21
 - **History:**
+  - 1.3 (2026-10-21): Examples rule: set the scene of the amazon.com outage (the catalog service and the load balancer) before telling it; added a Load balancer Terminology row.
   - 1.2 (2026-10-21): Lint: the amazon.com outage is Amazon's, not AWS's; Lamport's 'an hour or two' wait; parallel computing processors 'may' share memory.
   - 1.1 (2026-10-21): Reworked under the current template and writing guide: added Kleppmann's course notes (plain definition, message passing, partial failure, why distribute, distributed systems versus networking), a flowchart of the definition and a sequence diagram of the unknown outcome, and new Terminology rows.
   - 1.0 (2026-10-20): First version.

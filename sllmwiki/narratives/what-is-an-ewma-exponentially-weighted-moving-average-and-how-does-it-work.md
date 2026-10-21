@@ -23,6 +23,7 @@ An exponentially weighted moving average (EWMA) smooths a stream of measurements
 | **$f_c$** | The cutoff frequency, in cycles per sample (0 to 0.5). |
 | **$p$, $k$, $S_t$** | Fixed-point form: $p$ fractional bits, $\alpha = 1/2^k$, and the stored integer $S_t = 2^p s_t$. |
 | **RTT, SRTT, RTTVAR, RTO** | TCP's round-trip time, its smoothed value, its smoothed variation, and the retransmission timeout. |
+| **Linux kernel** | The core of the Linux operating system, the code that manages the hardware and runs beneath every program. |
 | **IIR filter** | Infinite impulse response filter: each output depends on earlier outputs, so one input affects all later outputs. |
 | **SMA** | Simple moving average: the plain mean of the last $N$ samples. |
 | **$x$, $y[n]$ (Smith)** | In Smith's filter notation, $x$ is the decay between samples and $y[n]$ the output; used only where his formula is quoted. |
@@ -32,15 +33,15 @@ An exponentially weighted moving average (EWMA) smooths a stream of measurements
 
 Suppose a client times each reply from a server: 100 ms, 100 ms, then one slow reply of 400 ms. It wants one number for "how slow is this server now", to set a timeout or pick a server. [sllmwiki_reasoning] The latest sample jumps with every outlier, the mean of all samples barely moves when the server really slows down, and the estimate must be cheap enough to update on every request.
 
-Forecasting texts frame the same gap: simple exponential smoothing sits between the naive method, all weight on the last observation, and the average method, equal weights on all. [\[1\]](../sources/ewma-fpp3-simple-exponential-smoothing.md#81-simple-exponential-smoothing) TCP meets it in its retransmission timer, where Jacobson calls a good round-trip-time estimator the single most important feature of a protocol implementation that must survive heavy load. [\[2\]](../sources/ewma-jacobson-congestion-avoidance.md#conservation-at-equilibrium-round-trip-timing) The only prerequisite is a weighted average: a sum of values times weights that add up to one.
+Forecasting texts frame the same gap: simple exponential smoothing sits between the naive method, all weight on the last observation, and the average method, equal weights on all. [\[1\]](../sources/ewma-fpp3-simple-exponential-smoothing.md#81-simple-exponential-smoothing) TCP, the protocol that delivers a stream of data reliably across a network, meets the same gap and is this narrative's running example. When no feedback comes back from the receiver, a retransmission timer makes the sender send the data again; the timer's length is the retransmission timeout (RTO). [\[2\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#1-introduction) The RTO has to track the round-trip time (RTT): the time from sending a packet until the sender receives the receiver's acknowledgement of it. The RTT and its variation grow quickly with load: on a network at 75% of capacity, it should be expected to vary by a factor of sixteen. A timer set too short retransmits packets that were only delayed, wasting bandwidth on duplicates just when the network is struggling, "the network equivalent of pouring gasoline on a fire". [\[3\]](../sources/ewma-jacobson-congestion-avoidance.md#conservation-at-equilibrium-round-trip-timing) [sllmwiki_reasoning] A timer set too long leaves a lost packet unsent for longer than it need be. So the sender estimates the RTT from each acknowledgement, and Jacobson calls a good estimator the single most important feature of a protocol implementation that must survive heavy load. [\[3\]](../sources/ewma-jacobson-congestion-avoidance.md#conservation-at-equilibrium-round-trip-timing) The only prerequisite is a weighted average: a sum of values times weights that add up to one.
 
 ## 4. What is an EWMA?
 
-NIST describes the EWMA as a statistic that "averages the data in a way that gives less and less weight to data as they are further removed in time". [\[3\]](../sources/ewma-nist-ewma-control-charts.md#6324-ewma-control-charts) It is a special case of the incremental normalised weighted mean, [\[4\]](../sources/ewma-finch-incremental-weighted-mean-variance.md#page-1) and, as a recursive formula, a first-order IIR filter. [\[5\]](../sources/moving-averages-wikipedia-moving-average.md#exponential-moving-average)
+NIST describes the EWMA as a statistic that "averages the data in a way that gives less and less weight to data as they are further removed in time". [\[4\]](../sources/ewma-nist-ewma-control-charts.md#6324-ewma-control-charts) It is a special case of the incremental normalised weighted mean, [\[5\]](../sources/ewma-finch-incremental-weighted-mean-variance.md#page-1) and, as a recursive formula, a first-order IIR filter. [\[6\]](../sources/moving-averages-wikipedia-moving-average.md#exponential-moving-average)
 
 ## 5. How does it work?
 
-The idea: keep one value, treat it as the prediction of the next sample, and when the sample arrives, move the prediction a fraction $\alpha$ of the way toward it. Jacobson reads TCP's estimator exactly so: the new prediction is the old one plus a fraction of the prediction error. [\[6\]](../sources/ewma-jacobson-congestion-avoidance.md#theory) In the diagram, blue boxes hold the state and yellow boxes are what enters and leaves it.
+The idea: keep one value, treat it as the prediction of the next sample, and when the sample arrives, move the prediction a fraction $\alpha$ of the way toward it. Jacobson reads TCP's estimator exactly so: the new prediction is the old one plus a fraction of the prediction error. [\[7\]](../sources/ewma-jacobson-congestion-avoidance.md#theory) In the diagram, blue boxes hold the state and yellow boxes are what enters and leaves it.
 
 ```mermaid
 flowchart LR
@@ -55,18 +56,18 @@ flowchart LR
     class B,E io
 ```
 
-1. **Start → sample.** The average needs a starting value: the first sample, a target, or the mean of the first few samples. [\[7\]](../sources/ewma-nist-single-exponential-smoothing.md#6431-single-exponential-smoothing) TCP seeds SRTT with the first RTT measurement. [\[8\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm)
+1. **Start → sample.** The average needs a starting value: the first sample, a target, or the mean of the first few samples. [\[8\]](../sources/ewma-nist-single-exponential-smoothing.md#6431-single-exponential-smoothing) TCP seeds SRTT with the first RTT measurement. [\[9\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm)
 2. **Sample → error.** The error is how far the sample lies from the current prediction.
-3. **Error → update.** The average moves by $\alpha$ times the error. [\[6\]](../sources/ewma-jacobson-congestion-avoidance.md#theory) Collected, it is the usual form:
+3. **Error → update.** The average moves by $\alpha$ times the error. [\[7\]](../sources/ewma-jacobson-congestion-avoidance.md#theory) Collected, it is the usual form:
 
 $$
 s_t = \alpha x_t + (1 - \alpha) s_{t-1}
 $$
 
-4. **Update → read.** $s_t$ is the current estimate, the value compared with control limits, or the forecast for the next step. [\[9\]](../sources/ewma-fpp3-simple-exponential-smoothing.md#component-form)
-5. **Read → next sample.** Nothing else is kept: an EWMA stores only its latest value, where an $N$-point moving average stores $N$ points. [\[10\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average)
+4. **Update → read.** $s_t$ is the current estimate, the value compared with control limits, or the forecast for the next step. [\[10\]](../sources/ewma-fpp3-simple-exponential-smoothing.md#component-form)
+5. **Read → next sample.** Nothing else is kept: an EWMA stores only its latest value, where an $N$-point moving average stores $N$ points. [\[11\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average)
 
-[sllmwiki_reasoning] In the latency example, with $\alpha = 1/8$ and $s_0$ the first sample, the average reads 100, 100, then $100 + (400 - 100)/8 = 137.5$ ms. The procedure below follows Finch's incremental form, [\[11\]](../sources/ewma-finch-incremental-weighted-mean-variance.md#page-7) seeding from the first sample as TCP does. [\[8\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm)
+[sllmwiki_reasoning] In the latency example, with $\alpha = 1/8$ and $s_0$ the first sample, the average reads 100, 100, then $100 + (400 - 100)/8 = 137.5$ ms. The procedure below follows Finch's incremental form, [\[12\]](../sources/ewma-finch-incremental-weighted-mean-variance.md#page-7) seeding from the first sample as TCP does. [\[9\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm)
 
 ```text
 state: s (unset)
@@ -76,13 +77,13 @@ on sample x:
     return s
 ```
 
-**Why "exponential".** Substituting the update into itself writes $s_t$ as a weighted sum of every sample and the starting value: [\[12\]](../sources/ewma-finch-incremental-weighted-mean-variance.md#page-8) [\[13\]](../sources/ewma-fpp3-simple-exponential-smoothing.md#weighted-average-form)
+**Why "exponential".** Substituting the update into itself writes $s_t$ as a weighted sum of every sample and the starting value: [\[13\]](../sources/ewma-finch-incremental-weighted-mean-variance.md#page-8) [\[14\]](../sources/ewma-fpp3-simple-exponential-smoothing.md#weighted-average-form)
 
 $$
 s_t = (1 - \alpha)^t s_0 + \sum_{i=1}^{t} \alpha (1 - \alpha)^{t-i} x_i
 $$
 
-The weights fall geometrically with age and always sum to one. [\[12\]](../sources/ewma-finch-incremental-weighted-mean-variance.md#page-8) With $\alpha = 0.2$ the newest sample weighs 0.2, the one before 0.16, then 0.128; with $\alpha = 0.8$, 0.8, 0.16, then 0.032. [\[1\]](../sources/ewma-fpp3-simple-exponential-smoothing.md#81-simple-exponential-smoothing) [sllmwiki_reasoning] The chart plots those weights, computed from the formula, for the eight newest samples (age 0 is $x_t$): a large $\alpha$ forgets fast, a small one spreads its weight far back.
+The weights fall geometrically with age and always sum to one. [\[13\]](../sources/ewma-finch-incremental-weighted-mean-variance.md#page-8) With $\alpha = 0.2$ the newest sample weighs 0.2, the one before 0.16, then 0.128; with $\alpha = 0.8$, 0.8, 0.16, then 0.032. [\[1\]](../sources/ewma-fpp3-simple-exponential-smoothing.md#81-simple-exponential-smoothing) [sllmwiki_reasoning] The chart plots those weights, computed from the formula, for the eight newest samples (age 0 is $x_t$): a large $\alpha$ forgets fast, a small one spreads its weight far back.
 
 ```mermaid
 xychart-beta
@@ -93,7 +94,7 @@ xychart-beta
     line "alpha = 0.2" [0.2, 0.16, 0.128, 0.102, 0.082, 0.066, 0.052, 0.042]
 ```
 
-**Variant: tracking the spread as well.** TCP needs the variation of the round-trip time, not just its mean: a timer of twice the mean adapts to loads of at most 30%, and above that retransmits packets that were only delayed. [\[2\]](../sources/ewma-jacobson-congestion-avoidance.md#conservation-at-equilibrium-round-trip-timing) Jacobson keeps a second EWMA, of the mean deviation $\lvert e_t \rvert$, because variance needs a multiply and a square root, and argues that the mean deviation is a more conservative, larger estimate, putting the factor at about 1.25 for normal errors. [\[6\]](../sources/ewma-jacobson-congestion-avoidance.md#theory) [sllmwiki_reasoning] For normal errors the mean absolute deviation is in fact about 0.8 of the standard deviation ($\sqrt{2/\pi}$); the two are close either way. RFC 6298 makes this the standard, with $\alpha = 1/8$, $\beta = 1/4$, and RTO equal to SRTT plus the larger of the clock granularity and four times RTTVAR. [\[8\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm) In this narrative's notation, following the RFC:
+**Variant: tracking the spread as well.** TCP needs the variation of the round-trip time, not just its mean: a timer of twice the mean adapts to loads of at most 30%, and above that retransmits packets that were only delayed. [\[3\]](../sources/ewma-jacobson-congestion-avoidance.md#conservation-at-equilibrium-round-trip-timing) Jacobson keeps a second EWMA, of the mean deviation $\lvert e_t \rvert$, because variance needs a multiply and a square root, and argues that the mean deviation is a more conservative, larger estimate, putting the factor at about 1.25 for normal errors. [\[7\]](../sources/ewma-jacobson-congestion-avoidance.md#theory) [sllmwiki_reasoning] For normal errors the mean absolute deviation is in fact about 0.8 of the standard deviation ($\sqrt{2/\pi}$); the two are close either way. RFC 6298 makes this the standard, with $\alpha = 1/8$, $\beta = 1/4$, and RTO equal to SRTT plus the larger of the clock granularity and four times RTTVAR. [\[9\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm) In this narrative's notation, following the RFC: $r$ is one RTT measurement, $s$ is SRTT, $v$ is RTTVAR, $G$ is the clock granularity, the smallest step of time the sender's clock can measure, and `rto` is the timeout set for the next packet. The RFC updates $v$ before $s$, so that the deviation is measured from the old average. [\[9\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm)
 
 ```text
 on RTT measurement r:
@@ -103,7 +104,7 @@ on RTT measurement r:
     rto := s + max(G, 4 * v)
 ```
 
-When the true variance is wanted, Finch derives an EWMA variance from the same incremental weighted mean; [\[12\]](../sources/ewma-finch-incremental-weighted-mean-variance.md#page-8) written here with $s$ and $v$:
+When the true variance is wanted, Finch derives an EWMA variance from the same incremental weighted mean; [\[13\]](../sources/ewma-finch-incremental-weighted-mean-variance.md#page-8) written here with $s$ and $v$:
 
 ```text
 on sample x:
@@ -112,13 +113,13 @@ on sample x:
     v := (1 - alpha) * (v + alpha * e * e)
 ```
 
-**Variant: fixed point.** Jacobson picks $\alpha = 1/2^k$ so that integer shifts replace the division, and keeps the scaled estimate to limit round-off. [\[14\]](../sources/ewma-jacobson-congestion-avoidance.md#practice) The Linux kernel's `DECLARE_EWMA` does the same: $p$ fractional bits, new values weighted $1/2^k$ and the old state the rest, with $2^k$ a power of two for efficiency. [\[15\]](../sources/ewma-linux-kernel-average-h-source.md#L10-L27) Its add helper computes
+**Variant: fixed point.** An EWMA often runs where each update must be cheap: TCP updates its estimates on every acknowledged packet, and Jacobson wants them computed quickly, in integer arithmetic. The obstacle is the fractions: $\alpha < 1$, so the update needs some scaling to stay in integers. [\[15\]](../sources/ewma-jacobson-congestion-avoidance.md#practice) [sllmwiki_reasoning] Plain integers would round the latency example's 137.5 ms down to 137, and with $\alpha = 1/8$ any gap of less than 8 units between a sample and the average would truncate to no change at all, leaving the average stuck short of the data. The fix is to store the average multiplied by a power of two, so that its low bits hold the fraction, and to make $\alpha$ a power of two too. Jacobson picks $\alpha = 1/2^k$ so that integer shifts replace the division, and keeps the scaled estimate to limit round-off. [\[15\]](../sources/ewma-jacobson-congestion-avoidance.md#practice) The Linux kernel offers its own code the same technique as a ready-made EWMA, generated by the macro `DECLARE_EWMA` with its precision and weight fixed when the code is compiled. [\[16\]](../sources/ewma-linux-kernel-average-h-source.md#L10-L27) It keeps $p$ fractional bits, with new values weighted $1/2^k$ and the old state the rest; $2^k$ must be a power of two for efficiency. [\[16\]](../sources/ewma-linux-kernel-average-h-source.md#L10-L27) Its add helper computes
 
 $$
 S_t = \left( 2^k S_{t-1} - S_{t-1} + 2^p x_t \right) / 2^k
 $$
 
-with shifts, seeding the state with the first value while it is still zero; [\[16\]](../sources/ewma-linux-kernel-average-h-source.md#L54-L70) reading shifts out the fractional bits. [\[17\]](../sources/ewma-linux-kernel-average-h-source.md#L45-L53) Following the kernel:
+with shifts, seeding the state with the first value while it is still zero; [\[17\]](../sources/ewma-linux-kernel-average-h-source.md#L54-L70) reading shifts out the fractional bits. [\[18\]](../sources/ewma-linux-kernel-average-h-source.md#L45-L53) Following the kernel:
 
 ```text
 state: S = 0                      # holds s * 2^p
@@ -130,42 +131,42 @@ read: return S >> p
 
 ## 6. Design decisions and trade-offs
 
-**Choosing $\alpha$.** Larger $\alpha$ means less smoothing; $\alpha = 1$ returns the raw series. [\[18\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing) Jacobson explains the trade-off: a large gain corrects a wrong estimate fast, a small one damps the noise, he puts the estimate's own standard deviation at $\alpha$ times the samples', and it converges with a time constant of $1/\alpha$ samples. Because the correction happens whatever the gain, a gain too small is almost always better than one too large. [\[6\]](../sources/ewma-jacobson-congestion-avoidance.md#theory) [sllmwiki_reasoning] For independent samples NIST's variance in the FAQ gives the exact factor, $\sqrt{\alpha/(2-\alpha)}$, which is larger: about 0.33 for $\alpha = 0.2$. Rules of thumb:
+**Choosing $\alpha$.** Larger $\alpha$ means less smoothing; $\alpha = 1$ returns the raw series. [\[19\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing) Jacobson explains the trade-off: a large gain corrects a wrong estimate fast, a small one damps the noise, he puts the estimate's own standard deviation at $\alpha$ times the samples', and it converges with a time constant of $1/\alpha$ samples. Because the correction happens whatever the gain, a gain too small is almost always better than one too large. [\[7\]](../sources/ewma-jacobson-congestion-avoidance.md#theory) [sllmwiki_reasoning] For independent samples NIST's variance in the FAQ gives the exact factor, $\sqrt{\alpha/(2-\alpha)}$, which is larger: about 0.33 for $\alpha = 0.2$. Rules of thumb:
 
-- typical gains: 0.1 to 0.2, after a long look at the raw data; [\[6\]](../sources/ewma-jacobson-congestion-avoidance.md#theory)
-- control charts: $\lambda$ "usually set between 0.2 and 0.3"; [\[3\]](../sources/ewma-nist-ewma-control-charts.md#6324-ewma-control-charts)
-- TCP: $1/8$ for the mean, $1/4$ for the deviation, the larger gain making the timer rise quickly when the RTT changes; [\[8\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm) [\[14\]](../sources/ewma-jacobson-congestion-avoidance.md#practice)
-- forecasting: fit $\alpha$ by minimising the squared one-step errors; [\[19\]](../sources/ewma-fpp3-simple-exponential-smoothing.md#optimisation)
-- matching an $N$-sample SMA: $\alpha = 2/(N + 1)$. [\[10\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average)
+- typical gains: 0.1 to 0.2, after a long look at the raw data; [\[7\]](../sources/ewma-jacobson-congestion-avoidance.md#theory)
+- control charts: $\lambda$ "usually set between 0.2 and 0.3"; [\[4\]](../sources/ewma-nist-ewma-control-charts.md#6324-ewma-control-charts)
+- TCP: $1/8$ for the mean, $1/4$ for the deviation, the larger gain making the timer rise quickly when the RTT changes; [\[9\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm) [\[15\]](../sources/ewma-jacobson-congestion-avoidance.md#practice)
+- forecasting: fit $\alpha$ by minimising the squared one-step errors; [\[20\]](../sources/ewma-fpp3-simple-exponential-smoothing.md#optimisation)
+- matching an $N$-sample SMA: $\alpha = 2/(N + 1)$. [\[11\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average)
 
-Too high, and the average chases noise; too low, and a step takes about $3/\alpha$ samples to reach 95% of its new level. [\[18\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing)
+Too high, and the average chases noise; too low, and a step takes about $3/\alpha$ samples to reach 95% of its new level. [\[19\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing)
 
-**Choosing $\alpha$ from time.** With samples $\Delta T$ apart, a time constant $\tau$ gives [\[20\]](../sources/ewma-wikipedia-exponential-smoothing.md#time-constant)
+**Choosing $\alpha$ from time.** With samples $\Delta T$ apart, a time constant $\tau$ gives [\[21\]](../sources/ewma-wikipedia-exponential-smoothing.md#time-constant)
 
 $$
 \alpha = 1 - e^{-\Delta T / \tau}
 $$
 
-The filter view says the same: a single-pole low-pass filter with decay $1 - \alpha$ per sample has a time constant of $d$ samples when $1 - \alpha = e^{-1/d}$, and a $-3$ dB cutoff $f_c$ when $1 - \alpha = e^{-2 \pi f_c}$. [\[21\]](../sources/ewma-smith-dspguide-recursive-filters.md#page-6) Smith writes the filter as $y[n] = (1 - x)\,x[n] + x\,y[n-1]$, with $x$ the decay between samples. [\[22\]](../sources/ewma-smith-dspguide-recursive-filters.md#page-5) [sllmwiki_reasoning] That is the EWMA with $\alpha = 1 - x$. The Unix load average is built this way: every 5 seconds it decays by a precomputed $e^{-5/\tau}$ with $\tau$ of 1, 5 and 15 minutes. [\[23\]](../sources/ewma-brendan-gregg-linux-load-averages.md#history)
+The filter view says the same: a single-pole low-pass filter with decay $1 - \alpha$ per sample has a time constant of $d$ samples when $1 - \alpha = e^{-1/d}$, and a $-3$ dB cutoff $f_c$ when $1 - \alpha = e^{-2 \pi f_c}$. [\[22\]](../sources/ewma-smith-dspguide-recursive-filters.md#page-6) Smith writes the filter as $y[n] = (1 - x)\,x[n] + x\,y[n-1]$, with $x$ the decay between samples. [\[23\]](../sources/ewma-smith-dspguide-recursive-filters.md#page-5) [sllmwiki_reasoning] That is the EWMA with $\alpha = 1 - x$. Unix systems report a load average, a measure of how busy the machine is: originally the number of processes running plus those waiting to run, averaged over time, so that a load of 10 on one CPU means one process running and nine waiting. [\[24\]](../sources/ewma-brendan-gregg-linux-load-averages.md#history) [sllmwiki_reasoning] The count jumps from moment to moment, so a raw reading says little, and an operator wants the recent trend over a few spans of time. The load average is built this way: every 5 seconds it decays by a precomputed $e^{-5/\tau}$ with $\tau$ of 1, 5 and 15 minutes. [\[24\]](../sources/ewma-brendan-gregg-linux-load-averages.md#history)
 
-**Choosing $s_0$.** The starting value's weight $(1 - \alpha)^t$ fades slowly when $\alpha$ is small, so it matters more then; [\[7\]](../sources/ewma-nist-single-exponential-smoothing.md#6431-single-exponential-smoothing) starting from the first sample gives it a large effect on early values, and averaging the first few samples is one remedy. [\[24\]](../sources/ewma-wikipedia-exponential-smoothing.md#choosing-the-initial-smoothed-value)
+**Choosing $s_0$.** The starting value's weight $(1 - \alpha)^t$ fades slowly when $\alpha$ is small, so it matters more then; [\[8\]](../sources/ewma-nist-single-exponential-smoothing.md#6431-single-exponential-smoothing) starting from the first sample gives it a large effect on early values, and averaging the first few samples is one remedy. [\[25\]](../sources/ewma-wikipedia-exponential-smoothing.md#choosing-the-initial-smoothed-value)
 
-**Floating or fixed point.** Single-precision floating point suits simple recursive filters; integers are possible but harder, as round-off can degrade the response or make the filter unstable. [\[25\]](../sources/ewma-smith-dspguide-recursive-filters.md#page-14) Fixed point buys shift-and-add updates at the cost of $\alpha$ restricted to powers of two and at most 30 fractional bits. [\[15\]](../sources/ewma-linux-kernel-average-h-source.md#L10-L27) [\[16\]](../sources/ewma-linux-kernel-average-h-source.md#L54-L70)
+**Floating or fixed point.** Single-precision floating point suits simple recursive filters; integers are possible but harder, as round-off can degrade the response or make the filter unstable. [\[26\]](../sources/ewma-smith-dspguide-recursive-filters.md#page-14) Fixed point buys shift-and-add updates at the cost of $\alpha$ restricted to powers of two and at most 30 fractional bits. [\[16\]](../sources/ewma-linux-kernel-average-h-source.md#L10-L27) [\[17\]](../sources/ewma-linux-kernel-average-h-source.md#L54-L70)
 
 ## 7. Limitations and failure modes
 
-- **Lag and phase.** Every moving average lags, and an EWMA's lag can't be removed by a fixed shift, as its weights are asymmetric. [\[10\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average) A recursive filter's phase is nonlinear, so a pulse's rising and falling edges come out looking different. [\[26\]](../sources/ewma-smith-dspguide-recursive-filters.md#page-10)
-- **History lingers.** The "one minute" load average reaches only about 0.62 of a new steady load after a minute, and the three averages reflect load well beyond their nominal windows. [\[27\]](../sources/ewma-brendan-gregg-linux-load-averages.md#the-three-numbers)
-- **Trends and seasons.** Simple exponential smoothing gives flat forecasts, suitable only for series with no trend or seasonal pattern; [\[28\]](../sources/ewma-fpp3-simple-exponential-smoothing.md#flat-forecasts) Holt's method adds a trend and Holt-Winters a season. [\[29\]](../sources/ewma-wikipedia-exponential-smoothing.md#double-exponential-smoothing-holt-linear)
-- **Sample rate.** A per-sample $\alpha$ remembers a number of samples, not a span of time: RFC 6298 warns that with many samples per round trip its gains "may keep an inadequate RTT history", an open research question. [\[30\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#3-taking-rtt-samples) [sllmwiki_reasoning] Deriving $\alpha$ from $\Delta T$, as in section 6, fixes the memory in time when samples arrive irregularly.
-- **Stale state.** An estimate can go wrong and stay wrong; TCP may clear SRTT and RTTVAR after repeated back-offs. [\[31\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#5-managing-the-rto-timer)
-- **Fixed-point bias.** Truncation biases each of Jacobson's scaled estimates by about half a clock tick, which his timeout calculation compensates. [\[14\]](../sources/ewma-jacobson-congestion-avoidance.md#practice) [sllmwiki_reasoning] The kernel's zero test also means a state that decays to exactly zero is reseeded by the next sample rather than averaged.
+- **Lag and phase.** Every moving average lags, and an EWMA's lag can't be removed by a fixed shift, as its weights are asymmetric. [\[11\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average) A recursive filter's phase is nonlinear, so a pulse's rising and falling edges come out looking different. [\[27\]](../sources/ewma-smith-dspguide-recursive-filters.md#page-10)
+- **History lingers.** The "one minute" load average reaches only about 0.62 of a new steady load after a minute, and the three averages reflect load well beyond their nominal windows. [\[28\]](../sources/ewma-brendan-gregg-linux-load-averages.md#the-three-numbers)
+- **Trends and seasons.** Simple exponential smoothing gives flat forecasts, suitable only for series with no trend or seasonal pattern; [\[29\]](../sources/ewma-fpp3-simple-exponential-smoothing.md#flat-forecasts) Holt's method adds a trend and Holt-Winters a season. [\[30\]](../sources/ewma-wikipedia-exponential-smoothing.md#double-exponential-smoothing-holt-linear)
+- **Sample rate.** A per-sample $\alpha$ remembers a number of samples, not a span of time: RFC 6298 warns that with many samples per round trip its gains "may keep an inadequate RTT history", an open research question. [\[31\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#3-taking-rtt-samples) [sllmwiki_reasoning] Deriving $\alpha$ from $\Delta T$, as in section 6, fixes the memory in time when samples arrive irregularly.
+- **Stale state.** An estimate can go wrong and stay wrong; TCP may clear SRTT and RTTVAR after repeated back-offs. [\[32\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#5-managing-the-rto-timer)
+- **Fixed-point bias.** Truncation biases each of Jacobson's scaled estimates by about half a clock tick, which his timeout calculation compensates. [\[15\]](../sources/ewma-jacobson-congestion-avoidance.md#practice) [sllmwiki_reasoning] The kernel's zero test also means a state that decays to exactly zero is reseeded by the next sample rather than averaged.
 
 ## 8. FAQ
 
-**Is an EWMA the same as exponential smoothing?** Yes: simple exponential smoothing is also called an exponentially weighted moving average. [\[18\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing)
+**Is an EWMA the same as exponential smoothing?** Yes: simple exponential smoothing is also called an exponentially weighted moving average. [\[19\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing)
 
-**Does it reduce noise?** Yes: for independent data its variance settles at $\lambda / (2 - \lambda)$ times the data's. [\[3\]](../sources/ewma-nist-ewma-control-charts.md#6324-ewma-control-charts)
+**Does it reduce noise?** Yes: for independent data its variance settles at $\lambda / (2 - \lambda)$ times the data's. [\[4\]](../sources/ewma-nist-ewma-control-charts.md#6324-ewma-control-charts)
 
 **How does it compare with a simple moving average?** A question of its own: [When should software use an EWMA instead of other moving averages?](when-should-software-use-an-ewma-instead-of-other-moving-averages.md)
 
@@ -188,45 +189,47 @@ The filter view says the same: a single-pole low-pass filter with decay $1 - \al
 ### 9.2 Citations
 
 1. [ewma-fpp3-simple-exponential-smoothing: 8.1 Simple exponential smoothing](../sources/ewma-fpp3-simple-exponential-smoothing.md#81-simple-exponential-smoothing)
-2. [ewma-jacobson-congestion-avoidance: Conservation at equilibrium: round-trip timing](../sources/ewma-jacobson-congestion-avoidance.md#conservation-at-equilibrium-round-trip-timing)
-3. [ewma-nist-ewma-control-charts: 6.3.2.4 EWMA control charts](../sources/ewma-nist-ewma-control-charts.md#6324-ewma-control-charts)
-4. [ewma-finch-incremental-weighted-mean-variance: Page 1](../sources/ewma-finch-incremental-weighted-mean-variance.md#page-1)
-5. [moving-averages-wikipedia-moving-average: Exponential moving average](../sources/moving-averages-wikipedia-moving-average.md#exponential-moving-average)
-6. [ewma-jacobson-congestion-avoidance: A.1 Theory](../sources/ewma-jacobson-congestion-avoidance.md#theory)
-7. [ewma-nist-single-exponential-smoothing: 6.4.3.1 Single exponential smoothing](../sources/ewma-nist-single-exponential-smoothing.md#6431-single-exponential-smoothing)
-8. [ewma-rfc6298-tcp-retransmission-timer: 2 The basic algorithm](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm)
-9. [ewma-fpp3-simple-exponential-smoothing: Component form](../sources/ewma-fpp3-simple-exponential-smoothing.md#component-form)
-10. [ewma-wikipedia-exponential-smoothing: Comparison with moving average](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average)
-11. [ewma-finch-incremental-weighted-mean-variance: Page 7](../sources/ewma-finch-incremental-weighted-mean-variance.md#page-7)
-12. [ewma-finch-incremental-weighted-mean-variance: Page 8](../sources/ewma-finch-incremental-weighted-mean-variance.md#page-8)
-13. [ewma-fpp3-simple-exponential-smoothing: Weighted average form](../sources/ewma-fpp3-simple-exponential-smoothing.md#weighted-average-form)
-14. [ewma-jacobson-congestion-avoidance: A.2 Practice](../sources/ewma-jacobson-congestion-avoidance.md#practice)
-15. [ewma-linux-kernel-average-h-source: lines 10-27, the header comment](../sources/ewma-linux-kernel-average-h-source.md#L10-L27)
-16. [ewma-linux-kernel-average-h-source: lines 54-70, the add helper](../sources/ewma-linux-kernel-average-h-source.md#L54-L70)
-17. [ewma-linux-kernel-average-h-source: lines 45-53, the read helper](../sources/ewma-linux-kernel-average-h-source.md#L45-L53)
-18. [ewma-wikipedia-exponential-smoothing: Basic (simple) exponential smoothing](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing)
-19. [ewma-fpp3-simple-exponential-smoothing: Optimisation](../sources/ewma-fpp3-simple-exponential-smoothing.md#optimisation)
-20. [ewma-wikipedia-exponential-smoothing: Time constant](../sources/ewma-wikipedia-exponential-smoothing.md#time-constant)
-21. [ewma-smith-dspguide-recursive-filters: Page 6](../sources/ewma-smith-dspguide-recursive-filters.md#page-6)
-22. [ewma-smith-dspguide-recursive-filters: Page 5](../sources/ewma-smith-dspguide-recursive-filters.md#page-5)
-23. [ewma-brendan-gregg-linux-load-averages: History](../sources/ewma-brendan-gregg-linux-load-averages.md#history)
-24. [ewma-wikipedia-exponential-smoothing: Choosing the initial smoothed value](../sources/ewma-wikipedia-exponential-smoothing.md#choosing-the-initial-smoothed-value)
-25. [ewma-smith-dspguide-recursive-filters: Page 14](../sources/ewma-smith-dspguide-recursive-filters.md#page-14)
-26. [ewma-smith-dspguide-recursive-filters: Page 10](../sources/ewma-smith-dspguide-recursive-filters.md#page-10)
-27. [ewma-brendan-gregg-linux-load-averages: The three numbers](../sources/ewma-brendan-gregg-linux-load-averages.md#the-three-numbers)
-28. [ewma-fpp3-simple-exponential-smoothing: Flat forecasts](../sources/ewma-fpp3-simple-exponential-smoothing.md#flat-forecasts)
-29. [ewma-wikipedia-exponential-smoothing: Double exponential smoothing (Holt linear)](../sources/ewma-wikipedia-exponential-smoothing.md#double-exponential-smoothing-holt-linear)
-30. [ewma-rfc6298-tcp-retransmission-timer: 3 Taking RTT samples](../sources/ewma-rfc6298-tcp-retransmission-timer.md#3-taking-rtt-samples)
-31. [ewma-rfc6298-tcp-retransmission-timer: 5 Managing the RTO timer](../sources/ewma-rfc6298-tcp-retransmission-timer.md#5-managing-the-rto-timer)
+2. [ewma-rfc6298-tcp-retransmission-timer: 1. Introduction](../sources/ewma-rfc6298-tcp-retransmission-timer.md#1-introduction)
+3. [ewma-jacobson-congestion-avoidance: Conservation at equilibrium: round-trip timing](../sources/ewma-jacobson-congestion-avoidance.md#conservation-at-equilibrium-round-trip-timing)
+4. [ewma-nist-ewma-control-charts: 6.3.2.4 EWMA control charts](../sources/ewma-nist-ewma-control-charts.md#6324-ewma-control-charts)
+5. [ewma-finch-incremental-weighted-mean-variance: Page 1](../sources/ewma-finch-incremental-weighted-mean-variance.md#page-1)
+6. [moving-averages-wikipedia-moving-average: Exponential moving average](../sources/moving-averages-wikipedia-moving-average.md#exponential-moving-average)
+7. [ewma-jacobson-congestion-avoidance: A.1 Theory](../sources/ewma-jacobson-congestion-avoidance.md#theory)
+8. [ewma-nist-single-exponential-smoothing: 6.4.3.1 Single exponential smoothing](../sources/ewma-nist-single-exponential-smoothing.md#6431-single-exponential-smoothing)
+9. [ewma-rfc6298-tcp-retransmission-timer: 2 The basic algorithm](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm)
+10. [ewma-fpp3-simple-exponential-smoothing: Component form](../sources/ewma-fpp3-simple-exponential-smoothing.md#component-form)
+11. [ewma-wikipedia-exponential-smoothing: Comparison with moving average](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average)
+12. [ewma-finch-incremental-weighted-mean-variance: Page 7](../sources/ewma-finch-incremental-weighted-mean-variance.md#page-7)
+13. [ewma-finch-incremental-weighted-mean-variance: Page 8](../sources/ewma-finch-incremental-weighted-mean-variance.md#page-8)
+14. [ewma-fpp3-simple-exponential-smoothing: Weighted average form](../sources/ewma-fpp3-simple-exponential-smoothing.md#weighted-average-form)
+15. [ewma-jacobson-congestion-avoidance: A.2 Practice](../sources/ewma-jacobson-congestion-avoidance.md#practice)
+16. [ewma-linux-kernel-average-h-source: lines 10-27, the header comment](../sources/ewma-linux-kernel-average-h-source.md#L10-L27)
+17. [ewma-linux-kernel-average-h-source: lines 54-70, the add helper](../sources/ewma-linux-kernel-average-h-source.md#L54-L70)
+18. [ewma-linux-kernel-average-h-source: lines 45-53, the read helper](../sources/ewma-linux-kernel-average-h-source.md#L45-L53)
+19. [ewma-wikipedia-exponential-smoothing: Basic (simple) exponential smoothing](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing)
+20. [ewma-fpp3-simple-exponential-smoothing: Optimisation](../sources/ewma-fpp3-simple-exponential-smoothing.md#optimisation)
+21. [ewma-wikipedia-exponential-smoothing: Time constant](../sources/ewma-wikipedia-exponential-smoothing.md#time-constant)
+22. [ewma-smith-dspguide-recursive-filters: Page 6](../sources/ewma-smith-dspguide-recursive-filters.md#page-6)
+23. [ewma-smith-dspguide-recursive-filters: Page 5](../sources/ewma-smith-dspguide-recursive-filters.md#page-5)
+24. [ewma-brendan-gregg-linux-load-averages: History](../sources/ewma-brendan-gregg-linux-load-averages.md#history)
+25. [ewma-wikipedia-exponential-smoothing: Choosing the initial smoothed value](../sources/ewma-wikipedia-exponential-smoothing.md#choosing-the-initial-smoothed-value)
+26. [ewma-smith-dspguide-recursive-filters: Page 14](../sources/ewma-smith-dspguide-recursive-filters.md#page-14)
+27. [ewma-smith-dspguide-recursive-filters: Page 10](../sources/ewma-smith-dspguide-recursive-filters.md#page-10)
+28. [ewma-brendan-gregg-linux-load-averages: The three numbers](../sources/ewma-brendan-gregg-linux-load-averages.md#the-three-numbers)
+29. [ewma-fpp3-simple-exponential-smoothing: Flat forecasts](../sources/ewma-fpp3-simple-exponential-smoothing.md#flat-forecasts)
+30. [ewma-wikipedia-exponential-smoothing: Double exponential smoothing (Holt linear)](../sources/ewma-wikipedia-exponential-smoothing.md#double-exponential-smoothing-holt-linear)
+31. [ewma-rfc6298-tcp-retransmission-timer: 3 Taking RTT samples](../sources/ewma-rfc6298-tcp-retransmission-timer.md#3-taking-rtt-samples)
+32. [ewma-rfc6298-tcp-retransmission-timer: 5 Managing the RTO timer](../sources/ewma-rfc6298-tcp-retransmission-timer.md#5-managing-the-rto-timer)
 
 ## 10. Metadata
 
-- **Version:** 1.4
+- **Version:** 1.5
 - **Template:** technical_brief_overview
 - **Model:** claude-opus-5-5
 - **Created:** 2026-10-20
 - **Last modified:** 2026-10-21
 - **History:**
+  - 1.5 (2026-10-21): Examples rule: set the scene of TCP's retransmission timer (RTO, RTT, what too short or too long a timer costs) in Background, defined the RFC pseudocode's quantities, explained why fixed point is needed before the Linux kernel's DECLARE_EWMA, and introduced the Unix load average; added a Linux kernel Terminology row.
   - 1.4 (2026-10-21): Lint: Jacobson's figures for the estimate's standard deviation and for mean deviation against standard deviation are now given as his, with reasoning notes giving NIST's exact factor and the normal-error ratio; the window is written N, not k; the fixed-point update is called shift-and-add.
   - 1.3 (2026-10-21): Rework under the current template and writing guide: adds Jacobson's prediction-error reading of the update, the explicit weights (Finch), a weights chart, pseudocode for the basic update, mean deviation (RFC 6298), EWMA variance and fixed-point (Linux kernel) variants, the single-pole filter's time constant and cutoff, and phase and fixed-point limitations.
   - 1.2 (2026-10-21): Lint: TCP's timeout formula now includes the clock-granularity floor; the update's alpha range left to Terminology.

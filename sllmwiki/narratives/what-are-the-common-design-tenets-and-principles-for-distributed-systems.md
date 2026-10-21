@@ -12,6 +12,9 @@ The principles that recur across the classic papers, textbooks and cloud provide
 | **Fault tolerance** | Designing a system to keep working while some of its parts are faulty. |
 | **Partial failure** | Some components or links fail while the rest keep running. |
 | **Single point of failure** | A component whose failure brings down the whole service. |
+| **Load balancer** | A component that spreads incoming requests across several interchangeable servers. |
+| **Checksum** | A small value computed from a block of data and sent with it, so the receiver can detect corrupted bits. |
+| **Leader** | The one server in a cluster that the others take direction from. |
 | **Partition** | A break in communication that splits the nodes into groups that can't reach each other. |
 | **Partition mode** | Brewer's explicit mode a system enters on detecting a partition, limiting or recording operations until recovery. |
 | **CAP** | Consistency, availability, partition tolerance: a shared-data system can't have all three during a partition. |
@@ -66,7 +69,7 @@ The survey covers the principles for building and running distributed services: 
 
 **Why.** Better hardware lowers the rate of faults but never to zero, so many distributed systems tolerate faults instead. [\[4\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability) A caller can't always tell what failed: a timed-out request may or may not have taken effect. [\[24\]](../sources/distributed-system-design-aws-challenges-distributed-systems.md#handling-failure-modes-in-hard-real-time-distributed-systems)
 
-**Example.** Hamilton's acid test: can operations kill any server at any time, undrained, and the service carry on? [\[7\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-2)
+**Example.** Hamilton's acid test: can operations kill any server at any time, undrained (without first moving its work elsewhere), and the service carry on? [\[7\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-2)
 
 **Deeper.** How do distributed systems handle partial failure and unknown outcomes?
 
@@ -106,7 +109,7 @@ The survey covers the principles for building and running distributed services: 
 
 **Why.** The decision comes at every timeout: cancel and lose availability, or proceed and risk inconsistency. [\[28\]](../sources/distributed-system-design-brewer-cap-twelve-years-later.md#cap-latency-connection) Giving up consistency means knowing every invariant to restore afterwards. [\[29\]](../sources/distributed-system-design-brewer-cap-twelve-years-later.md#cap-confusion)
 
-**Example.** Brewer manages a partition in three explicit steps: detect it, enter a partition mode that limits some operations or records extra information, and recover when communication returns, restoring consistency and compensating for mistakes. [\[30\]](../sources/distributed-system-design-brewer-cap-twelve-years-later.md#managing-partitions) An ATM in partition mode, for instance, caps net withdrawals at a bound such as \$200; the bank compensates afterwards. [\[31\]](../sources/distributed-system-design-brewer-cap-twelve-years-later.md#compensation-issues-in-an-automated-teller-machine)
+**Example.** Brewer manages a partition in three explicit steps: detect it, enter a partition mode that limits some operations or records extra information, and recover when communication returns, restoring consistency and compensating for mistakes. [\[30\]](../sources/distributed-system-design-brewer-cap-twelve-years-later.md#managing-partitions) Brewer's example is a bank's cash machine (ATM). It offers deposit, withdraw and check balance, and the invariant is that an account's balance stays at zero or more; only a withdrawal can break it. When a partition cuts the ATM off, it can't know the true balance: refusing all withdrawals would keep the balance safe but cost availability, and banks favour availability because it means revenue. So an ATM in partition mode caps net withdrawals at a bound, such as \$200: below it, withdrawals work; at it, they are refused. When the partition ends, a balance left below zero is compensated: the bank charges a fee and expects repayment, and since the cap bounds the risk, the problem stays small. [\[31\]](../sources/distributed-system-design-brewer-cap-twelve-years-later.md#compensation-issues-in-an-automated-teller-machine)
 
 ```mermaid
 stateDiagram-v2
@@ -136,7 +139,7 @@ $$
 
 The price: in a partition, only the side with a quorum proceeds. [\[30\]](../sources/distributed-system-design-brewer-cap-twelve-years-later.md#managing-partitions)
 
-**Example.** GFS and HDFS keep leader election in a replicated state machine such as ZooKeeper. [\[12\]](../sources/distributed-system-design-ongaro-raft-consensus.md#page-2)
+**Example.** GFS and HDFS are large-scale systems run by a single cluster leader, a server the others take direction from. [\[12\]](../sources/distributed-system-design-ongaro-raft-consensus.md#page-2) [sllmwiki_reasoning] If two servers each believed they were the leader, or the cluster's configuration were lost when the leader crashed, the servers would act on conflicting instructions. Such systems therefore choose their leader, and store the configuration that must survive a leader's crash, in a separate replicated state machine such as ZooKeeper. [\[12\]](../sources/distributed-system-design-ongaro-raft-consensus.md#page-2)
 
 **Deeper.** How do Paxos and Raft reach agreement, and what do they cost?
 
@@ -156,7 +159,7 @@ The price: in a partition, only the side with a quorum proceeds. [\[30\]](../sou
 
 **Why.** A low-level function charges every application and knows less than the application. [\[34\]](../sources/distributed-system-design-saltzer-end-to-end-arguments.md#performance-aspects) Retrying applications must suppress duplicates anyway, which covers the network's too. [\[35\]](../sources/distributed-system-design-saltzer-end-to-end-arguments.md#duplicate-message-suppression)
 
-**Example.** At MIT, a gateway with per-hop checksums still corrupted files. [\[36\]](../sources/distributed-system-design-saltzer-end-to-end-arguments.md#a-too-real-example)
+**Example.** At MIT, several local networks were joined by gateways, computers that pass packets from one network on to the next. Each hop from gateway to gateway carried a checksum, on the assumption that the main threat was bits corrupted in transmission, and application programmers took that to mean the network delivered data reliably. But data sitting in a gateway's memory between hops was unprotected. One gateway developed a fault that swapped a pair of bytes about once in every million it copied, and operating-system source files sent through it repeatedly were corrupted; their owners had to compare them by hand against old printed listings. [\[36\]](../sources/distributed-system-design-saltzer-end-to-end-arguments.md#a-too-real-example)
 
 **Deeper.** Where should reliability, ordering and security live in a layered system?
 
@@ -197,7 +200,7 @@ call_with_retries(request, max_attempts, base, cap):
 
 **What.** "The architecture of the site must prevent cascading failures. Always 'fail fast.'" [\[20\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-6) Google SRE defines a cascading failure as one "that grows over time as a result of positive feedback". [\[21\]](../sources/distributed-system-design-google-sre-cascading-failures.md#addressing-cascading-failures) Azure names circuit breakers and bulkheads. [\[3\]](../sources/distributed-system-design-azure-design-principles.md#core-principles)
 
-**Why.** One catalog server with a full disk answered fast with empty results, drew most traffic, and took down amazon.com. [\[43\]](../sources/distributed-system-design-aws-challenges-distributed-systems.md#distributed-bugs-spread-epidemically)
+**Why.** The amazon.com website gets its product information from a remote catalog service, a group of servers behind a load balancer that picks a server for each request. When one catalog server's disk filled up, a mishandled error made it answer every request quickly and with nothing. The load balancer saw only that it was much faster than the others, sent it a huge share of the traffic, and one server's fault took down the whole website. [\[43\]](../sources/distributed-system-design-aws-challenges-distributed-systems.md#distributed-bugs-spread-epidemically)
 
 **Example.** Hamilton builds a service from pods that each run independently, so one pod's failure doesn't affect another. [\[22\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-3)
 
@@ -335,12 +338,13 @@ Colors mark areas: red failure, blue data and time, yellow calls and load, green
 
 ## 10. Metadata
 
-- **Version:** 2.2
+- **Version:** 2.3
 - **Template:** survey
 - **Model:** claude-opus-5-5
 - **Created:** 2026-10-20
 - **Last modified:** 2026-10-21
 - **History:**
+  - 2.3 (2026-10-21): Examples rule: set the scene of Brewer's ATM, GFS and HDFS's leader election, the MIT gateway and the amazon.com outage before each, and glossed 'undrained'; added Terminology rows for load balancer, checksum and leader.
   - 2.2 (2026-10-21): Lint: the three tenets credited to Bill Hoffman via Hamilton; fallacies attribution removed where its section didn't support it; the transparency claim reworded to match van Steen's section 3.2.2.
   - 2.1 (2026-10-21): Reworked under the current survey template and shared writing guide: a state diagram of Brewer's partition management, a colored flowchart of how the items relate, retry pseudocode, TeX for the 243-call sum and the 2f+1 majority; added Kleppmann on faults and fault tolerance; fixed a misattributed Hamilton quote; trimmed to the 2200-word budget.
   - 2.0 (2026-10-21): Sources searched again for what the survey can't miss; added CAP and consistency, consensus, logical time and the end-to-end argument, and Azure's official list; merged timeouts with retries, and automation with testing; now thirteen items.
