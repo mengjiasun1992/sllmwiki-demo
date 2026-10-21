@@ -1,1 +1,13 @@
 # Narratives, keyed by question slug (design doc §4.4). Written by finish-narrative.py.
+
+distributed-systems-design-principles:
+  template: concept_brief_overview
+  tags:
+    primary: [distributed-systems-design-principles]
+    supporting: []
+  read:
+    azure-cloud-design-principles: 7d2ce5a2542820651b0bb86f57347ffa
+    aws-reliability-pillar-design-principles: 55a55ff8b937387083e5f6bcfd0dd72b
+    builders-library-timeouts-retries-backoff: 9acbbc4809808a878d33d38e48016a7a
+    cap-twelve-years-later-brewer: 6f4165216132a36601d4df1ae5f9de42
+    fallacies-of-distributed-computing: c58295fbc71293f2053a509c7aac57b8

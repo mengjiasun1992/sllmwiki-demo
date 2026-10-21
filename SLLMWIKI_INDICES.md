@@ -14,4 +14,4 @@ graph LR
 ```
 
 - [distributed-systems](sllmwiki/tags/distributed-systems.md): Systems of networked computers that coordinate to act as one
-  - [distributed-systems-design-principles](sllmwiki/tags/distributed-systems-design-principles.md): Tenets and principles for designing reliable, scalable distributed systems
+  - [distributed-systems-design-principles](sllmwiki/tags/distributed-systems-design-principles.md): Tenets and principles for designing reliable, scalable distributed systems (1 narrative)

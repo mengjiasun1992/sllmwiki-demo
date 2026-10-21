@@ -6,6 +6,10 @@ Tenets and principles for designing reliable, scalable distributed systems
 
 **Path:** [distributed-systems](distributed-systems.md) / distributed-systems-design-principles
 
+## Narratives
+
+- [What are the common design tenets and principles for distributed systems?](../narratives/distributed-systems-design-principles.md)
+
 ## Sources
 
 - [azure-cloud-design-principles](../sources/azure-cloud-design-principles.md): Microsoft's Azure Architecture Center index of design principles for cloud applications (dated 2025-09-25), meant to help build applications that withstand failures, scale with demand and evolve.
