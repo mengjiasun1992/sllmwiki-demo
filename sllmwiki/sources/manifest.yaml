@@ -1,1 +1,96 @@
 # Sources, keyed by slug (design doc §4.3). Written by fetch-source.py and manifest.py.
+
+ds-mixu-distsys-intro:
+  file: sources/ds-mixu-distsys-intro.md
+  kind: html
+  url: http://book.mixu.net/distsys/intro.html
+  ingested: "2026-10-20"
+  license: unknown
+  tags: [distributed-systems-fundamentals, distributed-systems-design-principles]
+  abstract: "Chapter 1 of Mikito Takada's free online book 'Distributed systems for fun and profit', a high-level introduction. It defines distributed programming as solving on multiple computers a problem you could solve on one, usually because it no longer fits on one: every system must do storage and computation, and beyond some scale a single-node hardware upgrade is impossible or too costly, so commodity hardware plus fault-tolerant software gives the best value. It sets out the goals: scalability (size, geographic, administrative), performance (latency, throughput, utilization, with trade-offs among them, and a speed-of-light floor on latency), and availability (uptime over uptime plus downtime, a table of nines) achieved through fault tolerance via redundancy, defined as behaving in a well-defined way when faults occur: you can't tolerate faults you haven't considered. It names the two physical constraints, number of nodes and distance between them, and their effects on failure probability, communication and latency; the role of guarantees (SLAs) and intelligibility; abstractions and models (system, failure, consistency) and the tension between many nodes and wanting the system to work like a single one. It closes with the two basic design techniques, partitioning and replication, their benefits, and why replication makes the choice of consistency model crucial."
+
+ds-mixu-distsys-abstractions:
+  file: sources/ds-mixu-distsys-abstractions.md
+  kind: html
+  url: http://book.mixu.net/distsys/abstractions.html
+  ingested: "2026-10-20"
+  license: unknown
+  tags: [distributed-systems-design-principles]
+  abstract: "Chapter 2 of Mikito Takada's 'Distributed systems for fun and profit', on the models used to reason about distributed systems. It characterizes distribution: programs run concurrently on independent nodes, connected by a network that can lose or delay messages, with no shared memory or clock; so knowledge is local, nodes fail independently, network and node failures are hard to tell apart, and clocks are unsynchronized. It defines a system model as the set of assumptions about nodes (crash-recovery versus Byzantine failure), links (reliable or lossy, network partitions) and timing (synchronous versus asynchronous; real systems are at best partially synchronous), noting that weaker assumptions make more robust designs. It states the consensus problem (agreement, integrity, termination, validity), then two impossibility results: FLP, which shows that deterministic consensus in an asynchronous system with even one crash failure cannot be guaranteed to terminate, forcing a choice between safety and liveness; and CAP, presented with CA, CP and AP designs, majority quorums tolerating f faults with 2f+1 nodes, and four conclusions about the tension between strong consistency, availability and latency. It ends with consistency models: linearizable and sequential (strong), client-centric, and eventual consistency, and why 'consistency' is a contract, not one property."
+
+ds-wikipedia-distributed-computing:
+  file: sources/ds-wikipedia-distributed-computing.md
+  kind: html
+  url: https://en.wikipedia.org/wiki/Distributed_computing
+  ingested: "2026-10-20"
+  license: CC-BY-SA-4.0
+  license_url: https://creativecommons.org/licenses/by-sa/4.0/
+  tags: [distributed-systems-fundamentals, distributed-systems-design-principles]
+  abstract: "Wikipedia's article on distributed computing, the field that studies distributed systems: computer systems whose inter-communicating components sit on different networked computers and coordinate by passing messages toward a common goal. The lead names three challenges (concurrency of components, the lack of a global clock, and independent failure of components), notes that one component failing does not bring the whole system down, that distributed systems cost more than monoliths, and that a well-designed one is more scalable and durable; it quotes Marc Brooker's marginal-cost definition of scalability. The Introduction says there is no single definition but two properties are commonly cited, autonomous nodes with their own local memory and communication by message passing, and lists further typical properties: tolerating failures of individual computers, unknown and changing structure, heterogeneity, and each computer's limited, incomplete view. Other sections contrast parallel (shared memory) and distributed (private memory, messages) computing, survey architectures (client-server, three-tier, n-tier, peer-to-peer, shared-nothing, cell-based architecture with fault isolation and circuit breakers), history, applications and examples, and the theoretical foundations: models of computation, complexity measures, leader election, consensus and the undecidability of properties of distributed systems in general."
+
+ds-lamport-definition-email:
+  file: sources/ds-lamport-definition-email.md
+  kind: text
+  url: https://lamport.azurewebsites.net/pubs/distributed-system.txt
+  published: "1987-05-28"
+  ingested: "2026-10-20"
+  license: unknown
+  tags: [distributed-systems-fundamentals]
+  abstract: "Leslie Lamport's 28 May 1987 email to colleagues at DEC's Systems Research Center (SRC), the origin of his often-quoted definition: a distributed system is one in which the failure of a computer you didn't even know existed can render your own computer unusable. Lamport writes that a machine-room electrical problem only highlighted a situation that had been getting progressively worse, as each new version of the system software made users' workstations more dependent on programs running elsewhere; waiting for a program to swap in is far less annoying than waiting hours for servers to be rebooted. He proposes a project to make the system more robust, without committing to an approach (stand-alone operation being one possibility), and volunteers to gather data on cases where a user's workstation became inoperative through no fault of its own. The short text is useful for its definition by failure, which frames a distributed system by hidden dependencies and partial failure rather than by architecture."
+
+ds-wikipedia-fallacies:
+  file: sources/ds-wikipedia-fallacies.md
+  kind: html
+  url: https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing
+  ingested: "2026-10-20"
+  license: CC-BY-SA-4.0
+  license_url: https://creativecommons.org/licenses/by-sa/4.0/
+  tags: [distributed-systems-design-principles]
+  abstract: "Wikipedia's article on the fallacies of distributed computing, the false assumptions that programmers new to distributed applications invariably make, as listed by L. Peter Deutsch and others at Sun Microsystems: the network is reliable; latency is zero; bandwidth is infinite; the network is secure; topology doesn't change; there is one administrator; transport cost is zero; the network is homogeneous. It describes each fallacy's effects, such as little error handling for network failures leading applications to stall or wait forever and fail to retry, unbounded traffic from ignoring latency and packet loss, bottlenecks from ignoring bandwidth, being blindsided by attackers, conflicting policies across administrators, and hidden network costs. Its history credits Deutsch with seven fallacies in 1994 (incorporating four from Bill Joy and Dave Lyon) and James Gosling with the eighth around 1997; Deutsch later added a ninth, that the party you communicate with is trustworthy, and in 2020 Mark Richards and Neal Ford added three more: versioning is simple, compensating updates always work, and observability is optional."
+
+ds-wikipedia-cap-theorem:
+  file: sources/ds-wikipedia-cap-theorem.md
+  kind: html
+  url: https://en.wikipedia.org/wiki/CAP_theorem
+  ingested: "2026-10-20"
+  license: CC-BY-SA-4.0
+  license_url: https://creativecommons.org/licenses/by-sa/4.0/
+  tags: [distributed-systems-design-principles]
+  abstract: "Wikipedia's article on the CAP theorem (Brewer's theorem): a distributed data store can provide at most two of consistency (every read receives the most recent write or an error), availability (every request to a non-failing node gets a response, not necessarily the latest data) and partition tolerance (the system keeps operating despite messages dropped or delayed between nodes). Because no distributed system is safe from network failures, partitions must generally be tolerated, so during a partition the real choice is between consistency (return an error or time out) and availability (answer with possibly stale data); without a partition both can be had. It notes that CAP consistency differs from ACID consistency and CAP availability from high availability, gives examples of CP and AP databases, and traces the history: Brewer's 1998-2000 conjecture, Gilbert and Lynch's 2002 proof, Brewer's 2012 clarification that 'two out of three' is misleading since partition management and recovery exist, Birman and Friedman's earlier 1996 result, and the PACELC extension (else, a latency/consistency trade-off), argued to be more appropriate for cloud systems."
+
+ds-aws-challenges-distributed-systems:
+  file: sources/ds-aws-challenges-distributed-systems.md
+  kind: html
+  url: https://aws.amazon.com/builders-library/challenges-with-distributed-systems/
+  ingested: "2026-10-20"
+  license: proprietary
+  tags: [distributed-systems-fundamentals, distributed-systems-design-principles]
+  abstract: "Jacob Gabrielson's 2019 Amazon Builders' Library article on why distributed systems are hard. Independent failures and nondeterminism cause the most impactful issues, and it is impossible always to know whether something failed. It sorts distributed systems by difficulty: offline (batch, big data), which get the benefits of scalability and fault tolerance with few downsides; soft real-time; and hard real-time request/reply services, the hardest and the article's focus. Using a networked Pac-Man example, it shows one request/reply round trip expanding into eight steps (post, deliver, validate request, update server state, post, deliver, validate reply, update client state), each able to fail independently, the 'eight failure modes of the apocalypse', because client, server and network do not share fate the way components of one machine do. A timeout yields an UNKNOWN result the code must still handle, especially with side effects such as a bank withdrawal. Testing state spaces explode; the same failures recur at every level of grouping (recursive distributed engineering); distributed bugs are often latent and spread epidemically, illustrated by an amazon.com outage where a load balancer sent traffic to a server returning fast empty responses. It summarizes the problems and advises distrusting everything."
+
+ds-aws-timeouts-retries-backoff:
+  file: sources/ds-aws-timeouts-retries-backoff.md
+  kind: html
+  url: https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/
+  ingested: "2026-10-20"
+  license: proprietary
+  tags: [distributed-systems-design-principles]
+  abstract: "Marc Brooker's 2019 Amazon Builders' Library article on the three essential tools Amazon uses to build resilient systems that tolerate failure without magnifying small failures into outages: timeouts, retries and backoff, plus jitter. Timeouts bound how long a client holds resources while waiting; the article advises a timeout on every remote call, chosen from the downstream service's latency percentile matching an acceptable false-timeout rate (e.g. p99.9), with pitfalls such as internet latency, tight latency distributions and timers that don't cover connection setup. Retries help with partial and transient failures but are 'selfish' and can worsen overload; capped exponential backoff, limited retry counts, retrying at a single layer of the stack (since retries multiply across layers, e.g. 243x for five layers of three), and local token-bucket retry limits (preferred over circuit breakers, which add modal behavior) contain them. APIs with side effects are only safe to retry if idempotent. Jitter adds randomness to spread correlated retries and periodic work; consistent per-host jitter keeps problems reproducible. It concludes that retries should be used cautiously, only when the dependency is healthy."
+
+ds-aws-idempotent-apis:
+  file: sources/ds-aws-idempotent-apis.md
+  kind: html
+  url: https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/
+  ingested: "2026-10-20"
+  license: proprietary
+  tags: [distributed-systems-design-principles]
+  abstract: "Malcolm Featonby's Amazon Builders' Library article on making retries safe with idempotent APIs. Complex operations, such as launching an EC2 instance, are decomposed into calls to smaller services; the simplest way to drive them to success is to retry failed calls, which AWS SDKs do by default, but that assumes a retry has no extra side effects. An idempotent operation is one that can be retried with no additional side effects. Rather than inferring duplicates from request parameters, which fails when a caller really wants two identical resources, Amazon's preferred approach is a unique caller-provided client request identifier (EC2's ClientToken) in the API contract; the service records it together with all mutating work as one atomic (ACID) operation, and returns a semantically equivalent response to a repeat, since answering 'ResourceAlreadyExists' would itself be a side effect from the client's point of view. Further sections cover default retry strategies, how long to keep request identifiers given late-arriving requests, and rejecting a reused identifier with different parameters. The conclusion cites Werner Vogels' 'expect the unexpected' and notes the extra cost and complexity of the 'at most once' contract, which isn't right for every service."
+
+ds-google-sre-cascading-failures:
+  file: sources/ds-google-sre-cascading-failures.md
+  kind: html
+  url: https://sre.google/sre-book/addressing-cascading-failures/
+  ingested: "2026-10-20"
+  license: CC-BY-NC-ND-4.0
+  license_url: https://creativecommons.org/licenses/by-nc-nd/4.0/
+  tags: [distributed-systems-design-principles]
+  abstract: "Chapter 22 of Google's Site Reliability Engineering book (2017), 'Addressing Cascading Failures' by Mike Ulrich, licensed CC BY-NC-ND 4.0. A cascading failure grows over time through positive feedback: when part of a system fails, it raises the probability that other parts fail, as when one overloaded replica's load shifts to the others. Using a Shakespeare search service example, it covers causes (server overload, exhaustion of CPU, memory, threads and file descriptors, and service unavailability), then ways to prevent overload: load testing, serving degraded results, rejecting requests when overloaded, queue management, load shedding and graceful degradation, careful retries (randomized exponential backoff, per-request retry limits, a server-wide retry budget, retrying at only one layer since attempts multiply across layers, clear retriable and non-retriable errors), latency and deadlines with deadline and cancellation propagation, and bimodal latency. It also covers slow startup and cold caches, always calling downward in the stack, triggering conditions (process death, updates, rollouts, organic growth, drains), testing until failure and beyond, and immediate remedies such as adding resources, dropping traffic and entering degraded modes. It closes that past a breaking point it is better to serve some errors than try to serve everything."
