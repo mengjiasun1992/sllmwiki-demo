@@ -1,1 +1,72 @@
 # Sources, keyed by slug (design doc §4.3). Written by fetch-source.py and manifest.py.
+
+ewma-nist-single-exponential-smoothing:
+  file: sources/ewma-nist-single-exponential-smoothing.md
+  kind: html
+  url: https://www.itl.nist.gov/div898/handbook/pmc/section4/pmc431.htm
+  ingested: "2026-10-20"
+  license: public-domain
+  license_url: https://www.nist.gov/oism/copyrights
+  tags: [ewma, moving-averages]
+  abstract: "Section 6.4.3.1 of the NIST/SEMATECH e-Handbook of Statistical Methods introduces single exponential smoothing, which it equates with the EWMA. It gives the basic equation S_t = alpha*y_{t-1} + (1-alpha)*S_{t-1}, with 0 < alpha <= 1 called the smoothing constant, following Hunter (1986), and notes Roberts' (1959) alternative that uses the current observation y_t instead. It discusses initialisation: setting S_2 = y_1, using the process target, or averaging the first four or five observations, and warns that the smaller alpha is, the more the initial EWMA matters. Expanding the recurrence shows why it is called exponential: the weights alpha(1-alpha)^i decrease geometrically and sum to 1-(1-alpha)^t, approaching one. A table shows that with alpha near 1 older observations are dampened quickly, and near 0 slowly; with alpha = 0.3 the weights on the four most recent past values are 0.21, 0.147, 0.103 and 0.072. It recommends choosing alpha to minimise the mean squared one-step forecast error, worked through on a 12-point example (MSE 19.0 at alpha = 0.1, 16.29 at alpha = 0.5), by trial-and-error grid search or a nonlinear optimiser such as Marquardt. Useful for the definition, the exponential weights, initialisation and choosing alpha."
+
+ewma-nist-ewma-control-charts:
+  file: sources/ewma-nist-ewma-control-charts.md
+  kind: html
+  url: https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc324.htm
+  ingested: "2026-10-20"
+  license: public-domain
+  license_url: https://www.nist.gov/oism/copyrights
+  tags: [ewma]
+  abstract: "Section 6.3.2.4 of the NIST/SEMATECH e-Handbook of Statistical Methods describes EWMA control charts for process monitoring. It defines the EWMA as a statistic that gives less and less weight to data further removed in time, computed as EWMA_t = lambda*Y_t + (1-lambda)*EWMA_{t-1} (Roberts, 1959), where EWMA_0 is the historical mean or target and 0 < lambda <= 1 sets the depth of memory. It contrasts EWMA charts with Shewhart charts: a Shewhart decision depends only on the latest measurement, while the EWMA averages all prior data and, by choice of lambda, can be made sensitive to small or gradual drift. Lambda = 1 degrades to a Shewhart chart; larger lambda weights recent data more, smaller lambda weights older data more; it is usually set between 0.2 and 0.3 (Hunter, 1986), a somewhat arbitrary choice, with Lucas and Saccucci (1990) tables to help. The variance of the EWMA statistic is approximately lambda/(2-lambda) times the data variance once t is not small, which gives control limits EWMA_0 +/- k*s_ewma with k usually 3. A worked example (target 50, s = 2.0539, lambda = 0.3) computes limits 47.41 and 52.59 and EWMA values for 20 points, showing an in-control process with an upward trend. Useful for the definition, the role of lambda, variance reduction and detecting drift."
+
+moving-averages-wikipedia-moving-average:
+  file: sources/moving-averages-wikipedia-moving-average.md
+  kind: html
+  url: https://en.wikipedia.org/wiki/Moving_average
+  ingested: "2026-10-20"
+  license: CC-BY-SA-4.0
+  license_url: https://creativecommons.org/licenses/by-sa/4.0/
+  tags: [moving-averages, ewma]
+  abstract: "The English Wikipedia article 'Moving average' surveys moving averages (rolling, running averages) used to smooth time series and highlight longer-term trends; mathematically a moving average is a convolution, a low-pass finite impulse response filter. It covers the simple moving average (SMA): the unweighted mean of the last k points, cheaply updated with a FIFO or circular buffer, lagging the latest datum by half the window when not centred, disproportionately influenced by old data dropping out, eliminating a periodic fluctuation of the window's period, and letting through much of the signal shorter than the window, which can create artifacts. It covers the cumulative average, the mean of all data so far with a simple incremental update, and the weighted moving average (WMA), whose weights in finance fall in arithmetic progression. Its exponential moving average section states that an EMA, also called an EWMA, is a first-order infinite impulse response filter whose weights decrease exponentially and never reach zero, per Hunter (1986). Later sections cover power-law and other weightings, the moving median, and the moving-average regression model. The HTML-to-markdown conversion dropped the article's formulas, so only its prose is usable. Useful for comparing the EWMA with the SMA, cumulative and weighted averages."
+
+ewma-wikipedia-exponential-smoothing:
+  file: sources/ewma-wikipedia-exponential-smoothing.md
+  kind: html
+  url: https://en.wikipedia.org/wiki/Exponential_smoothing
+  ingested: "2026-10-20"
+  license: CC-BY-SA-4.0
+  license_url: https://creativecommons.org/licenses/by-sa/4.0/
+  tags: [ewma, moving-averages]
+  abstract: "The English Wikipedia article 'Exponential smoothing' describes exponential smoothing, or the exponential moving average, which smooths time series with an exponential window function, assigning exponentially decreasing weights over time where a simple moving average weights past observations equally; in signal processing it is a low-pass filter. It traces the history from Poisson through Brown (1956) and Holt (1957). Simple exponential smoothing is a weighted average of the current observation and the previous smoothed statistic, with smoothing factor alpha in (0,1); larger alpha means less smoothing and more responsiveness. It needs no minimum number of observations, though a constant signal takes about 3/alpha stages to reach 95% of its value, and every sample must be seen because weights decay rather than vanish. It is equivalent to ARIMA(0,1,1). It relates alpha to a time constant via the sampling interval, discusses initial values (averaging ten or more periods), choosing alpha by minimising squared one-step errors, and the 'exponential' name from geometric weights. Compared with a moving average, both introduce lag, but an EWMA's lag can't be corrected by a fixed shift; with alpha = 2/(k+1) both have similar forecast error; and an EWMA keeps only its last value while a moving average keeps k points. It also covers Holt's double and Holt-Winters triple smoothing. The conversion dropped its formulas."
+
+ewma-rfc6298-tcp-retransmission-timer:
+  file: sources/ewma-rfc6298-tcp-retransmission-timer.md
+  kind: text
+  url: https://www.rfc-editor.org/rfc/rfc6298.txt
+  published: "2011-06-01"
+  ingested: "2026-10-20"
+  license: LicenseRef-IETF-Trust-BCP78
+  license_url: https://trustee.ietf.org/license-info
+  tags: [ewma-in-software]
+  abstract: "RFC 6298 (IETF Standards Track, June 2011; Paxson, Allman, Chu, Sargent) defines the algorithm TCP senders must use to compute and manage their retransmission timer (RTO), obsoleting RFC 2988 and making the algorithm a MUST. Section 2 keeps two state variables: SRTT, the smoothed round-trip time, and RTTVAR, the round-trip time variation. On the first RTT measurement R, SRTT = R and RTTVAR = R/2; on each later measurement R', RTTVAR = (1-beta)*RTTVAR + beta*|SRTT - R'| and then SRTT = (1-alpha)*SRTT + alpha*R', with alpha = 1/8 and beta = 1/4 as suggested by Jacobson and Karels (1988). Both are exponentially weighted moving averages, of the RTT and of its absolute deviation. The RTO is SRTT + max(G, 4*RTTVAR), where G is the clock granularity, rounded up to at least one second, with an optional maximum of at least 60 seconds. Before any measurement the RTO should be one second. Later sections cover taking RTT samples (Karn's algorithm: not from retransmitted segments), clock granularity, managing the timer, backing off on repeated timeouts, and security considerations. Useful as a standards-track example of software using EWMAs to track a noisy, changing quantity, its mean and its spread, with constant state per connection."
+
+ewma-dropwizard-metrics-ewma:
+  file: sources/ewma-dropwizard-metrics-ewma.md
+  kind: text
+  url: https://raw.githubusercontent.com/dropwizard/metrics/release/4.2.x/metrics-core/src/main/java/com/codahale/metrics/EWMA.java
+  ingested: "2026-10-20"
+  license: Apache-2.0
+  license_url: https://github.com/dropwizard/metrics/blob/release/4.2.x/LICENSE
+  tags: [ewma-in-software]
+  abstract: "EWMA.java from Dropwizard Metrics 4.2.x (Apache-2.0), a widely used Java metrics library, implements an exponentially weighted moving average of an event rate. It provides one-, five- and fifteen-minute EWMAs 'equivalent to the UNIX load average', ticked every five seconds, with smoothing constants alpha = 1 - exp(-interval/window), e.g. 1 - exp(-5/60) for one minute, so that alpha follows from the tick interval and the desired time window. Events are counted with update(n) into a LongAdder; tick() takes the count since the last tick, divides by the interval to get an instant rate, and updates rate = rate + alpha*(instantRate - rate), initialising the rate to the first instant rate. getRate converts the rate to any time unit. The state is a single double and a counter, regardless of how many events occur or how long the window is. Its Javadoc cites the TeamQuest papers on UNIX load averages and Wikipedia's exponential moving average section. Useful as an example of software using an EWMA for rate metrics (requests per second over 1, 5, 15 minutes), deriving alpha from a time constant, and initialising from the first sample."
+
+ewma-linux-kernel-loadavg:
+  file: sources/ewma-linux-kernel-loadavg.md
+  kind: text
+  url: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/kernel/sched/loadavg.c
+  ingested: "2026-10-20"
+  license: GPL-2.0-only
+  license_url: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/COPYING
+  tags: [ewma-in-software]
+  abstract: "kernel/sched/loadavg.c from the Linux kernel (GPL-2.0) computes the global load average shown by uptime and /proc/loadavg. Its header comment states that the load average is an exponentially decaying average of nr_running + nr_uninterruptible, updated once every LOAD_FREQ as avenrun[n] = avenrun[n]*exp_n + nr_active*(1-exp_n), with three averages (1, 5 and 15 minutes) using decay constants EXP_1, EXP_5 and EXP_15 in fixed-point arithmetic. Much of the file deals with doing this cheaply on large machines: per-CPU deltas folded into a global count instead of summing every CPU, uninterruptible tasks counted only in aggregate, and a sample taken 10 ticks after the window. For tickless (NO_HZ) kernels, when updates are missed for n intervals, calc_load_n catches up in one step by raising the decay factor to the nth power, derived in a comment from the geometric series: a_n = a_0*e^n + a*(1-e^n), computed with fixed_power_int in O(log n). The comment calls the load average 'a silly number but people think its important'. Useful as an example of an EWMA in an operating system: constant state, cheap updates, several time scales from one input, and closed-form catch-up over skipped intervals."

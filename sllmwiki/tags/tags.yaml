@@ -1,2 +1,18 @@
 # The tag tree: each tag's description, parent and SMEs (design doc §4.2).
 # Written by manifest.py; children, sources and narratives are derived.
+
+time-series-smoothing:
+  description: Smoothing noisy sequences of measurements over time
+  parent: null
+
+moving-averages:
+  description: "Moving averages in general: simple, weighted, cumulative and exponential, and how they compare"
+  parent: time-series-smoothing
+
+ewma:
+  description: "The exponentially weighted moving average: its recurrence, smoothing factor, bias and memory"
+  parent: moving-averages
+
+ewma-in-software:
+  description: "Using EWMAs in software: load averages, RTT estimation, latency and rate metrics"
+  parent: moving-averages
