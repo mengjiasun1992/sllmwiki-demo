@@ -6,6 +6,10 @@ Design tenets and principles for building distributed systems: failure, consiste
 
 **Path:** [distributed-systems](distributed-systems.md) / distributed-system-design
 
+## Narratives
+
+- [What are the common design tenets and principles for distributed systems?](../narratives/what-are-the-common-design-tenets-and-principles-for-distributed-systems.md)
+
 ## Sources
 
 - [distributed-systems-van-steen-tanenbaum-brief-intro](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md): Open-access survey article by Maarten van Steen and Andrew S.

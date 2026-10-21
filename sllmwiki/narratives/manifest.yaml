@@ -30,3 +30,75 @@ what-is-a-distributed-system:
   models:
     1.1: claude-opus-5-5
 
+what-are-the-common-design-tenets-and-principles-for-distributed-systems:
+  template: survey
+  tags:
+    primary: [distributed-system-design]
+    supporting: [distributed-systems]
+  read:
+    distributed-system-design-aws-challenges-distributed-systems: 67d0c00f5dc53a8978250dae977aab22
+    distributed-systems-kleppmann-cambridge-notes: 7df7ddc48dcd93c6900e0e9b58b1daeb
+    distributed-system-design-lamport-time-clocks: 1766a8116819e3fe4abe6d6efc398254
+    distributed-system-design-ongaro-raft-consensus: 8f59cad47feb860272d008e32ed857a8
+    distributed-system-design-wikipedia-fallacies: c58295fbc71293f2053a509c7aac57b8
+    distributed-system-design-aws-timeouts-retries-backoff: 9acbbc4809808a878d33d38e48016a7a
+    distributed-system-design-google-sre-cascading-failures: 131211ca83149bc80cf30f298952790b
+    distributed-systems-van-steen-tanenbaum-brief-intro: 32423ae1abbf816f8038d2dfaa2b0213
+    distributed-system-design-aws-well-architected-reliability-principles: 55a55ff8b937387083e5f6bcfd0dd72b
+    distributed-system-design-azure-design-principles: c94159586f29b96b12ac3a430aca409e
+    distributed-system-design-saltzer-end-to-end-arguments: 4028e3f2a32e4b42aa526ef4267104c9
+    distributed-system-design-hamilton-internet-scale-services: e0fba39abfaea03337f0fa285c66bfe2
+    distributed-system-design-brewer-cap-twelve-years-later: 6f4165216132a36601d4df1ae5f9de42
+  grades:
+    distributed-systems-van-steen-tanenbaum-brief-intro:
+      relevance: high
+      authority: B
+    distributed-system-design-wikipedia-fallacies:
+      relevance: high
+      authority: C
+    distributed-system-design-hamilton-internet-scale-services:
+      relevance: high
+      authority: A
+    distributed-system-design-aws-timeouts-retries-backoff:
+      relevance: high
+      authority: C
+    distributed-system-design-aws-challenges-distributed-systems:
+      relevance: medium
+      authority: C
+    distributed-system-design-google-sre-cascading-failures:
+      relevance: high
+      authority: B
+    distributed-system-design-aws-well-architected-reliability-principles:
+      relevance: high
+      authority: A
+    ewma-linkerd-beyond-round-robin:
+      relevance: low
+      authority: C
+    distributed-system-design-azure-design-principles:
+      relevance: high
+      authority: A
+    distributed-system-design-brewer-cap-twelve-years-later:
+      relevance: high
+      authority: A
+    distributed-system-design-ongaro-raft-consensus:
+      relevance: medium
+      authority: A
+    distributed-system-design-lamport-time-clocks:
+      relevance: medium
+      authority: A
+    distributed-system-design-saltzer-end-to-end-arguments:
+      relevance: high
+      authority: A
+    distributed-systems-lamport-definition-email:
+      relevance: low
+      authority: A
+    distributed-systems-wikipedia-distributed-computing:
+      relevance: low
+      authority: C
+    distributed-systems-kleppmann-cambridge-notes:
+      relevance: medium
+      authority: B
+  models:
+    2.0: claude-opus-5-5
+    2.1: claude-opus-5-5
+
