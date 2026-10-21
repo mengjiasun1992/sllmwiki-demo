@@ -1,1 +1,52 @@
 # Sources, keyed by slug (design doc §4.3). Written by fetch-source.py and manifest.py.
+
+raft-dissertation-basic-raft:
+  file: sources/raft-dissertation-basic-raft.md
+  kind: text
+  url: https://raw.githubusercontent.com/ongardie/dissertation/master/basicraft/consensus.tex
+  published: "2014-08-01"
+  ingested: "2026-10-20"
+  license: CC-BY-4.0
+  license_url: https://github.com/ongardie/dissertation/blob/master/LICENSE
+  tags: [raft-leader-election]
+  abstract: "The basic Raft chapter of Diego Ongaro's 2014 Stanford PhD dissertation, Consensus: Bridging Theory and Practice (LaTeX source, CC BY 4.0), which expands the Raft paper. It presents the core algorithm for managing a replicated log. Raft basics: a cluster of typically five servers, each a leader, follower or candidate; time divided into numbered terms that act as a logical clock, each beginning with an election; at most one leader per term; servers adopt larger terms they see and step down when stale; two RPCs, RequestVote and AppendEntries. Leader election: followers that hear no heartbeat within an election timeout increment their term, become candidates, vote for themselves and request votes in parallel; a majority of the full cluster wins; each server votes at most once per term, first come first served; a candidate steps down on seeing a leader of an equal or higher term; randomized timeouts (e.g. 150-300 ms) make split votes rare and resolve them; a ranking design was rejected as less understandable. Log replication; Safety, including the election restriction (voters refuse candidates whose log, compared by last term then length, is less up-to-date, giving Leader Completeness) and the commitment rule; crashes; persisting current term and vote so a server never votes twice in a term; the timing requirement broadcastTime << electionTimeout << MTBF; and the optional leadership transfer extension using TimeoutNow."
+
+raft-dissertation-leader-election-eval:
+  file: sources/raft-dissertation-leader-election-eval.md
+  kind: text
+  url: https://raw.githubusercontent.com/ongardie/dissertation/master/leaderelection/leaderelection.tex
+  published: "2014-08-01"
+  ingested: "2026-10-20"
+  license: CC-BY-4.0
+  license_url: https://github.com/ongardie/dissertation/blob/master/LICENSE
+  tags: [raft-leader-election]
+  abstract: "The opening of the leader election evaluation chapter of Diego Ongaro's dissertation (CC BY 4.0). It explains why leader election needs evaluating: leaders should be replaced within a fraction of a second, yet FLP impossibility means no fault-tolerant consensus protocol can deterministically terminate in a purely asynchronous model, which shows up in Raft as split votes; with randomized timeouts the analysis is probabilistic and holds only under assumptions (unsynchronized random timeouts, clocks running at similar rates, timely servers and networks), while safety holds regardless. It then lists the chapter's conclusions: without a split vote, elections complete about a third of the way into the timeout range; split vote rates stay low (under 40% for reasonable clusters) when the timeout range is 10-20 times the one-way network latency; the number of terms needed is geometric with mean 1/(1 - split vote rate), so a leader is elected in under about 20 one-way latencies on average; a real LAN elected leaders in about 35 ms with aggressive timeouts and a simulated US-wide WAN typically in half a second, 99.9% within 3 s; the log comparison in RequestVote barely affects performance; and the basic algorithm can be disrupted by servers that rejoin with higher terms, which Pre-Vote addresses. The detailed sections are included by reference and not saved here."
+
+raft-dissertation-prevote:
+  file: sources/raft-dissertation-prevote.md
+  kind: text
+  url: https://raw.githubusercontent.com/ongardie/dissertation/master/leaderelection/prevote.tex
+  published: "2014-08-01"
+  ingested: "2026-10-20"
+  license: CC-BY-4.0
+  license_url: https://github.com/ongardie/dissertation/blob/master/LICENSE
+  tags: [raft-leader-election]
+  abstract: "The Pre-Vote section of the leader election chapter of Diego Ongaro's dissertation (CC BY 4.0). It describes a downside of Raft's basic leader election: a server partitioned from the cluster stops receiving heartbeats, keeps incrementing its term in elections it cannot win, and when it reconnects its larger term propagates through RequestVote requests or AppendEntries responses, forcing the current leader to step down and a new election to take place; such events are rare and each deposes one leader. The Pre-Vote extension adds a phase before an election: a candidate increments its term only after learning from a majority that they would grant it their votes, that is, its log is sufficiently up-to-date and they have heard no heartbeat from a valid leader for at least a baseline election timeout. The idea was inspired by ZooKeeper, where a server must receive a majority of votes before computing a new epoch. A partitioned server therefore cannot raise its term while partitioned or after rejoining, and returns to follower in the same term once it hears the leader. The author recommends Pre-Vote for deployments wanting extra robustness and reports from AvailSim simulations that it does not significantly harm election performance."
+
+raft-etcd-readme:
+  file: sources/raft-etcd-readme.md
+  kind: text
+  url: https://raw.githubusercontent.com/etcd-io/raft/main/README.md
+  ingested: "2026-10-20"
+  license: Apache-2.0
+  license_url: https://github.com/etcd-io/raft/blob/main/LICENSE
+  tags: [raft-leader-election]
+  abstract: "The README of etcd-io/raft (Apache-2.0), the Go Raft library used by etcd, Kubernetes, CockroachDB, TiDB and others, which it describes as the most widely used Raft library in production. It implements only the core algorithm, leaving network transport and storage to the user, and models Raft as a deterministic state machine whose inputs are messages (local timer ticks or peer messages) and whose outputs are messages, log entries and state changes. Its features include leader election, log replication, log compaction, membership changes, the leadership transfer extension, linearizable read-only queries (ReadIndex and lease-based), and optional enhancements such as pipelining, flow control, batching, and automatic stepping down when the leader loses quorum. Usage examples configure a node with ElectionTick and HeartbeatTick; the application calls Node.Tick() at regular intervals, since the library measures the heartbeat and election timeouts in abstract ticks rather than wall-clock time. Implementation notes say it follows the final Raft thesis, except that a membership change takes effect when its entry is applied rather than appended, and that proposing a membership change is disallowed while another is uncommitted; three or more nodes are recommended. For the election question it shows how a production implementation exposes election and heartbeat timeouts and the quorum-loss step-down."
+
+raft-paper-extended:
+  kind: link
+  url: https://raft.github.io/raft.pdf
+  ingested: "2026-10-20"
+  license: proprietary
+  tags: [raft-leader-election]
+  abstract: "In Search of an Understandable Consensus Algorithm (Extended Version), by Diego Ongaro and John Ousterhout, Stanford University; the extended version of the USENIX ATC 2014 paper. Its abstract: Raft is a consensus algorithm for managing a replicated log. It produces a result equivalent to (multi-)Paxos, and it is as efficient as Paxos, but its structure is different from Paxos; this makes Raft more understandable than Paxos and also provides a better foundation for building practical systems. In order to enhance understandability, Raft separates the key elements of consensus, such as leader election, log replication, and safety, and it enforces a stronger degree of coherency to reduce the number of states that must be considered. Results from a user study demonstrate that Raft is easier for students to learn than Paxos. Raft also includes a new mechanism for changing the cluster membership, which uses overlapping majorities to guarantee safety. The paper's Section 5.2 describes leader election (terms, heartbeats, election timeouts, RequestVote, randomized timeouts against split votes), Section 5.4.1 the election restriction, Section 5.6 timing and availability, and Figure 2 condenses the algorithm. It is kept as a link because the site serves it as a PDF, which the wiki cannot save yet; its dissertation-based expansion is saved instead (raft-dissertation-basic-raft)."

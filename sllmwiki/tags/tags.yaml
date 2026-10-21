@@ -1,2 +1,18 @@
 # The tag tree: each tag's description, parent and SMEs (design doc §4.2).
 # Written by manifest.py; children, sources and narratives are derived.
+
+distributed-systems:
+  description: Systems of networked machines that coordinate to act as one
+  parent: null
+
+consensus:
+  description: Algorithms that get a group of servers to agree on values despite failures
+  parent: distributed-systems
+
+raft:
+  description: The Raft consensus algorithm for managing a replicated log
+  parent: consensus
+
+raft-leader-election:
+  description: "How Raft servers elect a leader: terms, timeouts, votes and the election restriction"
+  parent: raft
