@@ -1,1 +1,59 @@
 # Sources, keyed by slug (design doc §4.3). Written by fetch-source.py and manifest.py.
+
+azure-cloud-design-principles:
+  file: sources/azure-cloud-design-principles.md
+  kind: text
+  url: https://raw.githubusercontent.com/MicrosoftDocs/architecture-center/main/docs/guide/design-principles/index.md
+  ingested: "2026-10-20"
+  license: CC-BY-4.0
+  license_url: https://github.com/MicrosoftDocs/architecture-center/blob/main/LICENSE
+  tags: [distributed-systems-design-principles]
+  abstract: "Microsoft's Azure Architecture Center index of design principles for cloud applications (dated 2025-09-25), meant to help build applications that withstand failures, scale with demand and evolve. It groups eleven principles. Core: design for self-healing (detect failures, respond gracefully, recover automatically with retries, health endpoint monitoring, circuit breakers and bulkheads, since in distributed systems failures are inevitable); make all things redundant (no single points of failure: load balancers, multiple instances, replicas, multi-zone or multi-region); minimize coordination (decoupled, asynchronous components, eventual consistency where appropriate, domain events); design to scale out (horizontal scaling, no session stickiness, autoscaling on live metrics); partition around limits (horizontal, vertical or functional partitioning, partition keys that avoid hotspots). Operational: design for operations (logging, distributed tracing, standard metrics, automation); use managed services; use an identity service. Strategic: design for evolution (loose coupling, encapsulated domain knowledge, asynchronous messaging, versioned APIs); build for the needs of the business (RTOs, SLAs, SLOs, domain modelling); and perform failure mode analysis early. A closing list shows how they combine: start with business requirements, design for failure, plan for scale, use managed services, support operations and build for change. Each principle links to its own article, not saved here."
+
+fallacies-of-distributed-computing:
+  file: sources/fallacies-of-distributed-computing.md
+  kind: html
+  url: https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing
+  ingested: "2026-10-20"
+  license: CC-BY-SA-4.0
+  license_url: https://creativecommons.org/licenses/by-sa/4.0/
+  tags: [distributed-systems-design-principles]
+  abstract: "Wikipedia's article on the fallacies of distributed computing: false assumptions that programmers new to distributed applications make, attributed to L. Peter Deutsch and others at Sun Microsystems. It lists the eight original fallacies: the network is reliable; latency is zero; bandwidth is infinite; the network is secure; topology doesn't change; there is one administrator; transport cost is zero; the network is homogeneous. For each it gives an effect: applications with little error handling that stall or wait forever during network outages and fail to retry; unbounded traffic that increases dropped packets; bottlenecks from ignoring bandwidth limits; being blindsided by malicious users; topology changes affecting bandwidth and latency; conflicting policies from multiple administrators; hidden network costs; and the problems of the first three fallacies when assuming a homogeneous network. Its history traces the list from Bill Joy and Dave Lyon's fallacies of networked computing, through Deutsch's seven in 1994 and James Gosling's eighth around 1997, to a ninth from Deutsch (the party you communicate with is trustworthy) and three added by Mark Richards and Neal Ford in 2020: versioning is simple, compensating updates always work, observability is optional. Used to orient; it cites the original sources."
+
+aws-reliability-pillar-design-principles:
+  file: sources/aws-reliability-pillar-design-principles.md
+  kind: text
+  url: https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/design-principles.html
+  ingested: "2026-10-20"
+  license: proprietary
+  license_url: https://aws.amazon.com/terms/
+  tags: [distributed-systems-design-principles]
+  abstract: "The design principles of the Reliability Pillar of the AWS Well-Architected Framework: five principles that help increase a cloud workload's reliability. Automatically recover from failure: monitor key performance indicators that measure business value and run automation when a threshold is breached, for notification, tracking and automated recovery, and with more sophisticated automation anticipate failures before they occur. Test recovery procedures: in the cloud, test how the workload fails and validate recovery by simulating failures or recreating past ones, exposing failure pathways before a real failure. Scale horizontally to increase aggregate workload availability: replace one large resource with many small ones so a single failure has less impact and requests don't share a common point of failure. Stop guessing capacity: resource saturation is a common cause of failure, so monitor demand and utilization and automate adding or removing resources, within quotas. Manage change through automation: make infrastructure changes through automation that is itself tracked and reviewed. The page is short and introduces the pillar's best practices that follow it."
+
+cap-twelve-years-later-brewer:
+  file: sources/cap-twelve-years-later-brewer.md
+  kind: html
+  url: https://www.infoq.com/articles/cap-twelve-years-later-how-the-rules-have-changed/
+  published: "2012-05-30"
+  ingested: "2026-10-20"
+  license: proprietary
+  tags: [distributed-systems-design-principles]
+  abstract: "Eric Brewer's 2012 article (IEEE Computer, republished on InfoQ) revisiting the CAP theorem he introduced: a networked shared-data system can have at most two of consistency, high availability and tolerance to network partitions. He argues the '2 of 3' formulation was always misleading: partitions are rare, so there is little reason to forfeit C or A when there is none; the choice between C and A can be made many times at fine granularity, per subsystem, operation, data or user; and all three properties are continuous rather than binary. The modern goal is to maximize the combinations of consistency and availability that make sense for the application, with explicit plans for operating during a partition and recovering after it: detect the partition, enter an explicit partition mode that may limit some operations, and start partition recovery when communication returns, making the state on both sides consistent and compensating for mistakes made during the partition. He relates CAP to ACID and BASE, ties it to latency (the partition decision taken at a timeout: cancel and lose availability, or proceed and risk inconsistency), notes the hidden cost of forfeiting consistency (having to know every invariant), and discusses which operations should proceed, techniques such as commutative operations and CRDT-like lattices, and compensation, illustrated by ATMs."
+
+builders-library-timeouts-retries-backoff:
+  file: sources/builders-library-timeouts-retries-backoff.md
+  kind: html
+  url: https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/
+  ingested: "2026-10-20"
+  license: proprietary
+  license_url: https://aws.amazon.com/terms/
+  tags: [distributed-systems-design-principles]
+  abstract: "An Amazon Builders' Library article by Marc Brooker on three tools Amazon uses to build resilient systems: timeouts, retries and backoff, plus jitter. Failures happen whenever one service calls another, so Amazon designs systems to tolerate failure and avoid magnifying a small percentage of failures into an outage. Timeouts bound how long a client holds resources waiting; set one on every remote call, choosing the value from the downstream service's latency percentiles and an acceptable false-timeout rate. Retries let clients survive partial and transient failures, but they are 'selfish': under overload they add load and delay recovery. Backoff (capped exponential) spaces retries; limit the number of retries; retry at a single point in the stack, since retries at every layer multiply load (243x for five layers of three tries); limit retries locally with a token bucket rather than relying only on circuit breakers, which add hard-to-test modal behavior; retry calls with side effects only when the API is idempotent; and know which failures are worth retrying. Jitter adds randomness to backoff and to timers and periodic jobs to spread out correlated spikes. The conclusion: transient failures and latency are inevitable in distributed systems, and retries must be used with caution so they don't amplify overload."
+
+end-to-end-arguments-saltzer:
+  kind: link
+  url: https://web.mit.edu/Saltzer/www/publications/endtoend/endtoend.pdf
+  ingested: "2026-10-20"
+  license: proprietary
+  tags: [distributed-systems-design-principles]
+  abstract: "Saltzer, Reed and Clark's 1984 paper in ACM Transactions on Computer Systems presents the end-to-end argument: functions such as reliable delivery, duplicate suppression, encryption and acknowledgement can be completely and correctly implemented only with the knowledge of the application at the endpoints of a communication system, so providing them in the lower layers of the system is at most a performance enhancement, not a correctness guarantee. The authors illustrate it with careful file transfer, delivery guarantees, secure transmission, duplicate message suppression, FIFO delivery and transaction management, and argue it as a guideline for placing functions among the modules of a distributed system. Recorded as a link: the paper is served only as a PDF, which the wiki's fetcher can't save yet, so the narrative does not cite its sections."
