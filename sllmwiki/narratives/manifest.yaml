@@ -1,7 +1,7 @@
 # Narratives, keyed by question slug (design doc §4.4). Written by finish-narrative.py.
 
 distributed-systems-design-principles:
-  template: concept_brief_overview
+  template: survey
   tags:
     primary: [distributed-systems-design-principles]
     supporting: []
@@ -11,3 +11,37 @@ distributed-systems-design-principles:
     builders-library-timeouts-retries-backoff: 9acbbc4809808a878d33d38e48016a7a
     cap-twelve-years-later-brewer: 6f4165216132a36601d4df1ae5f9de42
     fallacies-of-distributed-computing: c58295fbc71293f2053a509c7aac57b8
+    eventually-consistent-vogels: 47f30a2c6ff5e03cfbfa124fce72143d
+    sre-book-addressing-cascading-failures: 131211ca83149bc80cf30f298952790b
+    sre-book-distributed-consensus: 62f5c28e58a259145868c7cdcc74c287
+    builders-library-shuffle-sharding: 9b04bf6b8c466de8a4ed8ac69ed73213
+  grades:
+    azure-cloud-design-principles:
+      relevance: high
+      authority: A
+    fallacies-of-distributed-computing:
+      relevance: medium
+      authority: C
+    aws-reliability-pillar-design-principles:
+      relevance: high
+      authority: A
+    cap-twelve-years-later-brewer:
+      relevance: medium
+      authority: A
+    builders-library-timeouts-retries-backoff:
+      relevance: medium
+      authority: A
+    sre-book-addressing-cascading-failures:
+      relevance: medium
+      authority: A
+    sre-book-distributed-consensus:
+      relevance: medium
+      authority: A
+    eventually-consistent-vogels:
+      relevance: medium
+      authority: A
+    builders-library-shuffle-sharding:
+      relevance: medium
+      authority: A
+  models:
+    2.0: claude-opus-5-5
