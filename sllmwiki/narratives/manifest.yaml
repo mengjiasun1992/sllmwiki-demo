@@ -1,1 +1,25 @@
 # Narratives, keyed by question slug (design doc §4.4). Written by finish-narrative.py.
+
+what-is-an-ewma-and-how-does-it-work:
+  template: concept_brief_overview
+  tags:
+    primary: [ewma]
+    supporting: [moving-averages]
+  read:
+    moving-averages-wikipedia-moving-average: c696ee9386e754cbb9394a3a59044fb7
+    ewma-wikipedia-exponential-smoothing: 6f68d15f3e72da8c0ab3beeb9b958d33
+    ewma-nist-single-exponential-smoothing: ac60767f01c33040fdac1b713e229fa0
+    ewma-nist-ewma-control-charts: 751aecb3cd947c0702ab27a26dc314f1
+
+when-should-software-use-an-ewma-instead-of-other-moving-averages:
+  template: technical_brief_overview
+  tags:
+    primary: [ewma-in-software]
+    supporting: [ewma, moving-averages]
+  read:
+    ewma-nist-ewma-control-charts: 751aecb3cd947c0702ab27a26dc314f1
+    moving-averages-wikipedia-moving-average: c696ee9386e754cbb9394a3a59044fb7
+    ewma-wikipedia-exponential-smoothing: 6f68d15f3e72da8c0ab3beeb9b958d33
+    ewma-rfc6298-tcp-retransmission-timer: 9f6ea8f50358c14af0dd547add31b4c4
+    ewma-dropwizard-metrics-ewma: 53da80eb5ea267a7632097887274385f
+    ewma-linux-kernel-loadavg: 98d7d34481cb552f7f1389a22923de75

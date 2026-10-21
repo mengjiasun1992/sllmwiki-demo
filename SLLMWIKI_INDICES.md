@@ -20,6 +20,6 @@ graph LR
 ```
 
 - [time-series-smoothing](sllmwiki/tags/time-series-smoothing.md): Smoothing noisy sequences of measurements over time
-  - [moving-averages](sllmwiki/tags/moving-averages.md): Moving averages in general: simple, weighted, cumulative and exponential, and how they compare
-    - [ewma](sllmwiki/tags/ewma.md): The exponentially weighted moving average: its recurrence, smoothing factor, bias and memory
-    - [ewma-in-software](sllmwiki/tags/ewma-in-software.md): Using EWMAs in software: load averages, RTT estimation, latency and rate metrics
+  - [moving-averages](sllmwiki/tags/moving-averages.md): Moving averages in general: simple, weighted, cumulative and exponential, and how they compare (2 narratives)
+    - [ewma](sllmwiki/tags/ewma.md): The exponentially weighted moving average: its recurrence, smoothing factor, bias and memory (2 narratives)
+    - [ewma-in-software](sllmwiki/tags/ewma-in-software.md): Using EWMAs in software: load averages, RTT estimation, latency and rate metrics (1 narrative)

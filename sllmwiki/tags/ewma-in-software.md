@@ -6,6 +6,10 @@ Using EWMAs in software: load averages, RTT estimation, latency and rate metrics
 
 **Path:** [time-series-smoothing](time-series-smoothing.md) / [moving-averages](moving-averages.md) / ewma-in-software
 
+## Narratives
+
+- [When should software use an EWMA instead of other moving averages?](../narratives/when-should-software-use-an-ewma-instead-of-other-moving-averages.md)
+
 ## Sources
 
 - [ewma-rfc6298-tcp-retransmission-timer](../sources/ewma-rfc6298-tcp-retransmission-timer.md): RFC 6298 (IETF Standards Track, June 2011; Paxson, Allman, Chu, Sargent) defines the algorithm TCP senders must use to compute and manage their retransmission timer (RTO), obsoleting RFC 2988 and…
