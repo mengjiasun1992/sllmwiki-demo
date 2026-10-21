@@ -57,3 +57,46 @@ end-to-end-arguments-saltzer:
   license: proprietary
   tags: [distributed-systems-design-principles]
   abstract: "Saltzer, Reed and Clark's 1984 paper in ACM Transactions on Computer Systems presents the end-to-end argument: functions such as reliable delivery, duplicate suppression, encryption and acknowledgement can be completely and correctly implemented only with the knowledge of the application at the endpoints of a communication system, so providing them in the lower layers of the system is at most a performance enhancement, not a correctness guarantee. The authors illustrate it with careful file transfer, delivery guarantees, secure transmission, duplicate message suppression, FIFO delivery and transaction management, and argue it as a guideline for placing functions among the modules of a distributed system. Recorded as a link: the paper is served only as a PDF, which the wiki's fetcher can't save yet, so the narrative does not cite its sections."
+
+sre-book-addressing-cascading-failures:
+  file: sources/sre-book-addressing-cascading-failures.md
+  kind: html
+  url: https://sre.google/sre-book/addressing-cascading-failures/
+  published: "2016-04-16"
+  ingested: "2026-10-20"
+  license: CC-BY-NC-ND-4.0
+  license_url: https://sre.google/books/
+  tags: [distributed-systems-design-principles]
+  abstract: "Chapter 22 of Google's Site Reliability Engineering book (Mike Ulrich), on cascading failures: failures that grow through positive feedback, as when one overloaded replica fails and shifts its load onto the others until all fail. Overload is the most common cause, along with resource exhaustion (CPU, memory, threads, file descriptors) and service unavailability, where crash-looping servers can't recover even when load drops a little. To prevent overload, in rough priority order: load test to find capacity limits and the overload failure mode; serve degraded results; make servers reject requests early and cheaply when overloaded; rate-limit at higher layers; plan capacity (for example N+2). It covers short queues, load shedding and graceful degradation (kept simple and exercised regularly, since an unused code path often doesn't work); retries done carefully (randomized exponential backoff, per-request limits, a server-wide retry budget, retrying at one layer only, since attempts multiply across layers, and clear retriable versus permanent error codes); deadlines, deadline and cancellation propagation, and failing fast to avoid bimodal-latency thread exhaustion; slow startup and cold caches; avoiding intra-layer communication ('always go downward in the stack'); triggering conditions such as rollouts and drains; testing until failure; and immediate mitigations. It closes that past the breaking point some user-visible errors are better than trying to serve every request, and that changes meant to improve the steady state can raise the risk of large outages."
+
+sre-book-distributed-consensus:
+  file: sources/sre-book-distributed-consensus.md
+  kind: html
+  url: https://sre.google/sre-book/managing-critical-state/
+  published: "2016-04-16"
+  ingested: "2026-10-20"
+  license: CC-BY-NC-ND-4.0
+  license_url: https://sre.google/books/
+  tags: [distributed-systems-design-principles]
+  abstract: "Chapter 23 of Google's Site Reliability Engineering book (Laura Nolan), on managing critical state with distributed consensus. Running a system across sites to survive failures requires a consistent view of state: which process leads, group membership, whether a message is committed or a lease held, a key's value. Distributed consensus, agreement among processes over an unreliable network, is fundamental, and the chapter recommends formally proven, thoroughly tested consensus systems whenever leader election, critical shared state or distributed locking appear. It explains CAP (partitions are inevitable, so the real question is how consistency and availability work for the application), contrasts ACID and BASE, and warns that eventual consistency surprises developers, notably with clock drift; correctness of critical state can't be sacrificed for reliability or performance. Case studies show split-brain from heartbeat-based leader election, failover requiring human intervention, and faulty gossip-based group membership: ad hoc methods always have reliability problems. It covers the FLP impossibility result and how systems get practical liveness through redundancy and randomized backoff; Paxos, Raft, Zab; patterns built on replicated state machines (datastores, configuration stores, leader election, locking, queues), often consumed as a service such as Zookeeper or Chubby; performance (Multi-Paxos, leases, batching, latency); deployment (majority quorums of 2f+1 replicas, three as a minimum and five preferred, replica location across failure domains); and monitoring."
+
+eventually-consistent-vogels:
+  file: sources/eventually-consistent-vogels.md
+  kind: html
+  url: https://www.allthingsdistributed.com/2008/12/eventually_consistent.html
+  published: "2008-12-19"
+  ingested: "2026-10-20"
+  license: proprietary
+  tags: [distributed-systems-design-principles]
+  abstract: "Werner Vogels' 'Eventually Consistent - Revisited' (All Things Distributed, December 2008; revised for ACM Queue): building reliable distributed systems at worldwide scale demands trade-offs between consistency and availability. At Amazon's scale, events with a low probability are guaranteed to happen and must be designed for up front, and replication, used everywhere for performance and availability, can't be made perfectly transparent. After a history of the problem and Brewer's CAP conjecture (of consistency, availability and partition tolerance only two can hold at once), he defines client-side consistency models: strong, weak (with an inconsistency window) and eventual, and its variants causal, read-your-writes, session, monotonic read and monotonic write consistency, noting monotonic reads and read-your-writes are the most desirable. On the server side, with N replicas, W write acknowledgements and R read replicas, W+R>N gives strong consistency, while W+R<=N gives eventual consistency; configurations trade read speed, write speed, durability and availability, and with a majority quorum the minority side of a partition becomes unavailable. Some applications, such as Amazon's write-always shopping cart, keep both sides of a partition writable and merge afterwards; Dynamo puts these trade-offs under the application's control. He concludes that inconsistency must be tolerated for performance under concurrency and for availability during partitions, and that whether it is acceptable depends on the application, which must be aware of the guarantees its storage provides."
+
+builders-library-shuffle-sharding:
+  file: sources/builders-library-shuffle-sharding.md
+  kind: html
+  url: https://aws.amazon.com/builders-library/workload-isolation-using-shuffle-sharding/
+  published: "2019-12-05"
+  ingested: "2026-10-20"
+  license: proprietary
+  license_url: https://aws.amazon.com/terms/
+  tags: [distributed-systems-design-principles]
+  abstract: "An Amazon Builders' Library article by Colm MacCárthaigh (2019) on workload isolation with shuffle sharding, told through building Amazon Route 53's DNS service, whose biggest challenge is DDoS attacks: adding capacity is a losing strategy against cheap botnets, and scrubbing appliances were too costly. Without sharding, every worker serves every request: efficient and redundant, but a poisonous request or a flood cascades through all workers and the scope of impact is everything and everyone. Ordinary sharding trades efficiency for a smaller scope of impact: with four shards a problem affects a quarter of the service. Shuffle sharding assigns each customer to a virtual shard made of a combination of workers; with eight workers and shards of two there are 28 combinations, so a problem affects about 1/28 of customers, and if clients are fault tolerant (for example by retrying) customers that share one worker with an affected one keep being served. The isolation improves as workers and customers grow. Route 53 uses 2,048 virtual name servers and shards of four, about 730 billion combinations, so each domain gets a unique shard and an attacked domain can be isolated onto dedicated capacity. Amazon has since embedded shuffle sharding in many systems, including recursive shuffle sharding, and offers the open-source Infima library; it usually comes at no added cost."
