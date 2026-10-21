@@ -6,6 +6,11 @@ What a distributed system is: definitions, characteristics, and why build one
 
 **Path:** [distributed-systems](distributed-systems.md) / distributed-systems-fundamentals
 
+## Narratives
+
+- [What is a distributed system?](../narratives/what-is-a-distributed-system.md)
+- [What are the common design tenets and principles for distributed systems?](../narratives/what-are-the-common-design-tenets-and-principles-for-distributed-systems.md) (supporting)
+
 ## Sources
 
 - [ds-mixu-distsys-intro](../sources/ds-mixu-distsys-intro.md): Chapter 1 of Mikito Takada's free online book 'Distributed systems for fun and profit', a high-level introduction.

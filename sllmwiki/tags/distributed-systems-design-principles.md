@@ -6,6 +6,10 @@ Common design tenets: fallacies, CAP and consistency trade-offs, fault tolerance
 
 **Path:** [distributed-systems](distributed-systems.md) / distributed-systems-design-principles
 
+## Narratives
+
+- [What are the common design tenets and principles for distributed systems?](../narratives/what-are-the-common-design-tenets-and-principles-for-distributed-systems.md)
+
 ## Sources
 
 - [ds-mixu-distsys-intro](../sources/ds-mixu-distsys-intro.md): Chapter 1 of Mikito Takada's free online book 'Distributed systems for fun and profit', a high-level introduction.
