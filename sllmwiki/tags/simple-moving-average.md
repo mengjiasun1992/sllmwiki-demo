@@ -6,6 +6,10 @@ Simple and weighted windowed moving averages, the alternatives to an EWMA
 
 **Path:** [moving-averages](moving-averages.md) / simple-moving-average
 
+## Narratives
+
+- [When should software use an EWMA instead of other moving averages?](../narratives/when-should-software-use-an-ewma-instead-of-other-moving-averages.md) (supporting)
+
 ## Sources
 
 - [moving-averages-nist-single-moving-average](../sources/moving-averages-nist-single-moving-average.md): Section 6.4.2.1 of the NIST/SEMATECH e-Handbook of Statistical Methods introduces the single moving average as a smoothing process: instead of summarising all past data at once, it takes the mean…

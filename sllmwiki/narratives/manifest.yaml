@@ -164,3 +164,68 @@ what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work:
     1.2: claude-opus-5-5
     1.3: claude-opus-5-5
 
+when-should-software-use-an-ewma-instead-of-other-moving-averages:
+  template: comparison
+  tags:
+    primary: [ewma]
+    supporting: [simple-moving-average]
+  read:
+    ewma-nist-single-exponential-smoothing: ac60767f01c33040fdac1b713e229fa0
+    ewma-fpp3-simple-exponential-smoothing: 964e95fa7e97eb3f0874401fea890a28
+    ewma-finch-incremental-weighted-mean-variance: 9b23fd57716bba726bd5d7acd20df2e1
+    ewma-jacobson-congestion-avoidance: ed22e00c5925ef31eae5dc0da1f1af23
+    moving-averages-wikipedia-moving-average: fbc27d5b9aec0196d3eb9db9bfd09727
+    ewma-wikipedia-exponential-smoothing: 0fcb850ab987581d8dad64506e6de66e
+    ewma-linkerd-beyond-round-robin: ca085647a26b3fd8cd57c20cf0135c50
+    ewma-brendan-gregg-linux-load-averages: 510007f404a093e93f0a36186b2ae6a4
+    moving-averages-nist-single-moving-average: 15fd5bbea83b801d30a7e8e5d9859f78
+    ewma-smith-dspguide-recursive-filters: 79c4813ab5bef686018e4f92c86f1541
+    moving-averages-smith-dspguide-moving-average-filters: db872b37b363d25dfdfae1f6f6b6147e
+    ewma-linux-kernel-average-h-source: bd3b56afca59a2033a3f6bc97d2807f3
+    ewma-rfc6298-tcp-retransmission-timer: c5cbe420c9cd68b1575fa80ae07324d9
+  grades:
+    ewma-nist-ewma-control-charts:
+      relevance: low
+      authority: B
+    ewma-nist-single-exponential-smoothing:
+      relevance: medium
+      authority: B
+    moving-averages-nist-single-moving-average:
+      relevance: high
+      authority: B
+    ewma-rfc6298-tcp-retransmission-timer:
+      relevance: high
+      authority: A
+    moving-averages-wikipedia-moving-average:
+      relevance: high
+      authority: C
+    ewma-wikipedia-exponential-smoothing:
+      relevance: high
+      authority: C
+    ewma-linkerd-beyond-round-robin:
+      relevance: high
+      authority: C
+    ewma-brendan-gregg-linux-load-averages:
+      relevance: high
+      authority: C
+    ewma-fpp3-simple-exponential-smoothing:
+      relevance: medium
+      authority: B
+    ewma-jacobson-congestion-avoidance:
+      relevance: medium
+      authority: A
+    ewma-finch-incremental-weighted-mean-variance:
+      relevance: medium
+      authority: B
+    ewma-smith-dspguide-recursive-filters:
+      relevance: high
+      authority: B
+    ewma-linux-kernel-average-h-source:
+      relevance: high
+      authority: A
+    moving-averages-smith-dspguide-moving-average-filters:
+      relevance: high
+      authority: B
+  models:
+    1.1: claude-opus-5-5
+    1.2: claude-opus-5-5
