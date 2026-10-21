@@ -6,6 +6,10 @@ The exponentially weighted moving average: its recurrence, smoothing factor, and
 
 **Path:** [moving-averages](moving-averages.md) / ewma
 
+## Narratives
+
+- [What is an EWMA (exponentially weighted moving average), and how does it work?](../narratives/what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work.md)
+
 ## Sources
 
 - [ewma-nist-ewma-control-charts](../sources/ewma-nist-ewma-control-charts.md): Section 6.3.2.4 of the NIST/SEMATECH e-Handbook of Statistical Methods introduces the Exponentially Weighted Moving Average (EWMA) as a process-monitoring statistic that averages data while giving less and less weight to…
