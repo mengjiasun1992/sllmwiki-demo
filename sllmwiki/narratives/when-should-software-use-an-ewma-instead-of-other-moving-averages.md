@@ -2,7 +2,7 @@
 
 ## 1. Abstract
 
-Software that smooths a stream of measurements usually weighs three moving averages: the exponentially weighted moving average (EWMA), which keeps one number and lets each past sample's weight fade geometrically; the simple moving average (SMA), the plain mean of the last $N$ samples; and the weighted moving average (WMA), which favours recent samples inside a fixed window. Choose the EWMA when you keep many estimates and memory matters, when the estimate drives a control decision such as a timeout or a routing choice, or when there is no window to fill first: it stores a single value, updates in constant time, even with integer shifts alone, and has no edge where an old sample drops out and jolts the result. TCP's retransmission timer, the Linux load average and latency-aware load balancers use it. Choose the SMA when the number must mean exactly "the mean of the last $N$ samples", when a known cycle should be averaged out over one period, or when you want the least noise for the sharpest response to a step. The WMA sits between them, and the sources say little about it. None of the three separates frequency bands well, and all are pulled by outliers and lag behind trends: a moving median or a trend-aware method fits those cases. When samples arrive irregularly, derive the EWMA's $\alpha$ from the time between them.
+Software that smooths a stream of measurements usually weighs three moving averages: the exponentially weighted moving average (EWMA), which keeps one number and lets each past sample's weight fade geometrically; the simple moving average (SMA), the plain mean of the last $N$ samples; and the weighted moving average (WMA), which favours recent samples inside a fixed window. Choose the EWMA when you keep many estimates and memory matters, when the estimate drives a control decision such as a timeout or a routing choice, or when there is no window to fill first: it stores a single value, updates in constant time, even with integer shifts alone, and has no edge where an old sample drops out and jolts the result. TCP's retransmission timer, the Linux load average and latency-aware load balancers use it. Choose the SMA when the number must mean exactly "the mean of the last $N$ samples", when a known cycle should be averaged out over one period, or when you want the least noise for the sharpest response to a step. The WMA sits between them, and the sources say little about it. The SMA separates frequency bands very poorly and the EWMA only fairly, and all three are pulled by outliers and lag behind trends: a moving median or a trend-aware method fits those cases. When samples arrive irregularly, derive the EWMA's $\alpha$ from the time between them.
 
 ## 2. Terminology
 
@@ -32,7 +32,7 @@ Software that smooths a stream of measurements usually weighs three moving avera
 
 ## 3. The choice
 
-A load balancer keeps a latency estimate per replica, updated per response. In Linkerd's simulation, a moving average of each replica's round-trip time, weighted by its outstanding requests, held latency down to the 99.9th percentile when one replica slowed, where round robin degraded from the 95th. [\[1\]](../sources/ewma-linkerd-beyond-round-robin.md#results) [sllmwiki_reasoning] It compared balancers, not averages; the average sets each replica's memory cost and how fast a slowdown shows.
+A load balancer keeps a latency estimate per replica, updated per response. In Linkerd's simulation, a moving average of each replica's round-trip time, weighted by its outstanding requests, held latency down to the 99.9th percentile when one replica slowed, where round robin degraded from the 95th. [\[1\]](../sources/ewma-linkerd-beyond-round-robin.md#results) [sllmwiki_reasoning] It compared balancers, not averages; the average sets per-replica memory and how fast slowdowns show.
 
 Candidates:
 
@@ -67,7 +67,7 @@ xychart-beta
 | Dimension | EWMA | SMA | WMA |
 |---|---|---|---|
 | State kept | The last average only [\[7\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average) | The last $N$ samples [\[7\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average) | The last $N$ samples, a total and a numerator [\[4\]](../sources/moving-averages-wikipedia-moving-average.md#weighted-moving-average) |
-| Update cost | Constant; shifts only, in fixed point [\[8\]](../sources/ewma-linux-kernel-average-h-source.md#L66-L69) | Constant: one add, one subtract [\[9\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-8) | Constant [\[4\]](../sources/moving-averages-wikipedia-moving-average.md#weighted-moving-average) |
+| Update cost | Constant; shifts and adds, in fixed point [\[8\]](../sources/ewma-linux-kernel-average-h-source.md#L66-L69) | Constant: one add, one subtract [\[9\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-8) | Constant [\[4\]](../sources/moving-averages-wikipedia-moving-average.md#weighted-moving-average) |
 | Old samples | Fade, never zero [\[2\]](../sources/moving-averages-wikipedia-moving-average.md#exponential-moving-average) | Equal, then zero [\[3\]](../sources/moving-averages-nist-single-moving-average.md#6421-single-moving-average) | Fall linearly to zero [\[4\]](../sources/moving-averages-wikipedia-moving-average.md#weighted-moving-average) |
 | Noise for a given step sharpness | No better than the SMA [\[10\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-3) | The least of any linear filter [\[10\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-3) | Not stated by the sources |
 | Separating frequencies | Fair, like an RC circuit [\[11\]](../sources/ewma-smith-dspguide-recursive-filters.md#page-6) | Very poor [\[12\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-4) | Not stated by the sources |
@@ -78,7 +78,7 @@ xychart-beta
 
 ## 5. Dimensions to think through
 
-**Memory and update cost.** With one estimate per replica or key, this adds up. An EWMA keeps only its latest value; a $k$-point moving average keeps $k$ points. [\[7\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average) Both update in constant time. The SMA adds the newest sample and subtracts the oldest whatever $N$ is, the fastest digital filter, [\[9\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-8) as sketched here:
+**Memory and update cost.** An EWMA keeps only its latest value; an $N$-point moving average keeps $N$ points. [\[7\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average) Both update in constant time. The SMA adds the newest sample and subtracts the oldest whatever $N$ is, the fastest digital filter, [\[9\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-8) as sketched here:
 
 ```text
 SMA, window N:  total = total + x - ring[i]; ring[i] = x; i = (i + 1) mod N; m = total / N
@@ -89,7 +89,7 @@ With $\alpha = 1/2^n$, both TCP's estimator and the Linux kernel's EWMA replace 
 
 **Edges.** An SMA "can also be disproportionately influenced by old data dropping out or new data coming in". [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#simple-moving-average) [sllmwiki_reasoning] In an EWMA a spike's influence shrinks every update instead of vanishing $N$ samples later.
 
-**Noise against responsiveness.** For random noise, the SMA gives the lowest noise for a given step sharpness of any linear filter, reducing noise by the square root of $N$. [\[10\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-3) An SMA lags the latest sample by half its window; [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#simple-moving-average) with $\alpha = 2/(k+1)$, an EWMA and a $k$-point SMA have about the same forecast error, but no fixed shift corrects the EWMA's lag. [\[7\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average)
+**Noise against responsiveness.** For random noise, the SMA gives the lowest noise for a given step sharpness of any linear filter, reducing noise by the square root of $N$. [\[10\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-3) An SMA lags the latest sample by half its window; [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#simple-moving-average) with $\alpha = 2/(N+1)$, an EWMA and an $N$-point SMA have about the same forecast error, but no fixed shift corrects the EWMA's lag. [\[7\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average)
 
 **Frequencies and edges.** The SMA separates frequency bands very poorly: [\[12\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-4)
 
@@ -103,11 +103,13 @@ Yet averaging over exactly one period removes that cycle. [\[14\]](../sources/mo
 
 **Start-up.** An EWMA gives a value once two samples are in, but takes about $3/\alpha$ samples to settle, [\[15\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing) and its starting value can weigh unreasonably on early results. [\[19\]](../sources/ewma-wikipedia-exponential-smoothing.md#choosing-the-initial-smoothed-value) An SMA is a cumulative average until its window fills. [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#simple-moving-average)
 
-**Irregular samples.** An SMA loses less when samples are skipped. [\[15\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing) A per-sample EWMA remembers samples, not time: with many samples per round trip, RFC 6298's constants "may keep an inadequate RTT history". [\[20\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#3-taking-rtt-samples) Deriving $\alpha$ from the gap ties its memory to $\tau$: [\[21\]](../sources/ewma-wikipedia-exponential-smoothing.md#time-constant)
+**Irregular samples.** An SMA loses less when samples are skipped. [\[15\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing) A per-sample EWMA remembers samples, not time: with many samples per round trip, RFC 6298's constants "may keep an inadequate RTT history". [\[20\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#3-taking-rtt-samples) $\tau$ gives $\alpha$ from the sampling interval: [\[21\]](../sources/ewma-wikipedia-exponential-smoothing.md#time-constant)
 
 $$
 \alpha = 1 - e^{-\Delta T / \tau}
 $$
+
+[sllmwiki_reasoning] Recomputing it per gap ties the memory to $\tau$, not to a sample count.
 
 [sllmwiki_gap] The sources don't compare the candidates on uneven data, or give the WMA's lag, warm-up or frequency response.
 
@@ -192,12 +194,13 @@ flowchart TD
 
 ## 9. Metadata
 
-- **Version:** 1.2
+- **Version:** 1.3
 - **Template:** comparison
 - **Model:** claude-opus-5-5
 - **Created:** 2026-10-20
 - **Last modified:** 2026-10-21
 - **History:**
+  - 1.3 (2026-10-21): Lint: per-gap alpha for irregular samples marked as reasoning; the Abstract's frequency claim matches the table (the EWMA separates fairly); the window is written N throughout; the kernel's update is called shifts and adds; trimmed to the 1,200-word budget.
   - 1.2 (2026-10-21): Rework under the current comparison template and writing guide: new DSP, fixed-point and TCP sources fill the noise, frequency-response, phase and cost dimensions; weight-by-age chart, decision flowchart, update pseudocode and TeX; remaining WMA and irregular-sampling gaps marked.
   - 1.1 (2026-10-21): Lint: start-up claims match the source (a value once two samples are in); WMA skipped-samples and two unsupported EWMA cells now gaps; the sample-rate pitfall worded as RFC 6298 puts it; the Linkerd experiment's scope stated; WMA window written N throughout.
   - 1.0 (2026-10-20): First version.

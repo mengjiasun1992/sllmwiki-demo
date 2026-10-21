@@ -62,7 +62,7 @@ The survey covers the principles for building and running distributed services: 
 
 ### 5.1 Expect failure
 
-**What.** Hamilton puts "expect failures" first among three tenets: any component may crash or be stopped at any time, and the service must survive without human action. [\[1\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-1) AWS aims not to magnify a few failures into an outage, [\[2\]](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#failures-happen) and Azure's first principle, self-healing, starts from failures being inevitable. [\[3\]](../sources/distributed-system-design-azure-design-principles.md#core-principles)
+**What.** Hamilton opens with Bill Hoffman's three tenets, and puts "expect failures" first: any component may crash or be stopped at any time, and the service must survive without human action. [\[1\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-1) AWS aims not to magnify a few failures into an outage, [\[2\]](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#failures-happen) and Azure's first principle, self-healing, starts from failures being inevitable. [\[3\]](../sources/distributed-system-design-azure-design-principles.md#core-principles)
 
 **Why.** Better hardware lowers the rate of faults but never to zero, so many distributed systems tolerate faults instead. [\[4\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability) A caller can't always tell what failed: a timed-out request may or may not have taken effect. [\[24\]](../sources/distributed-system-design-aws-challenges-distributed-systems.md#handling-failure-modes-in-hard-real-time-distributed-systems)
 
@@ -72,9 +72,9 @@ The survey covers the principles for building and running distributed services: 
 
 ### 5.2 Don't hide the network
 
-**What.** The fallacies of distributed computing, collected by L. Peter Deutsch and others at Sun, are eight false assumptions: the network is reliable, latency is zero, bandwidth is infinite, the network is secure, topology doesn't change, there is one administrator, transport cost is zero, and the network is homogeneous. [\[5\]](../sources/distributed-system-design-wikipedia-fallacies.md#the-fallacies) Van Steen and Tanenbaum list them as pitfalls. [\[6\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#35-pitfalls)
+**What.** The fallacies of distributed computing are eight false assumptions: the network is reliable, latency is zero, bandwidth is infinite, the network is secure, topology doesn't change, there is one administrator, transport cost is zero, and the network is homogeneous. [\[5\]](../sources/distributed-system-design-wikipedia-fallacies.md#the-fallacies) Van Steen and Tanenbaum list them as pitfalls. [\[6\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#35-pitfalls)
 
-**Why.** Full transparency is neither always achievable nor desirable: a dead process looks like a slow one. [\[25\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#322-degree-of-distribution-transparency)
+**Why.** Hiding distribution completely is not always a good idea: no system hides that a message across the world takes tens of milliseconds, and masking a server failure can slow everything. [\[25\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#322-degree-of-distribution-transparency)
 
 **Example.** Code assuming a reliable network may wait forever for a reply. [\[26\]](../sources/distributed-system-design-wikipedia-fallacies.md#the-effects-of-the-fallacies)
 
@@ -205,7 +205,7 @@ call_with_retries(request, max_attempts, base, cap):
 
 ### 5.12 Keep it simple
 
-**What.** Hamilton's second tenet: complexity breeds problems, [\[1\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-1) and only order-of-magnitude optimizations are worth theirs. [\[18\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-4)
+**What.** The second of Hamilton's three tenets (from Bill Hoffman): complexity breeds problems, [\[1\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-1) and only order-of-magnitude optimizations are worth theirs. [\[18\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-4)
 
 **Why.** In Google SRE's words, "the code path you never use is the code path that (often) doesn't work." [\[19\]](../sources/distributed-system-design-google-sre-cascading-failures.md#load-shedding-and-graceful-degradation)
 
@@ -215,7 +215,7 @@ call_with_retries(request, max_attempts, base, cap):
 
 ### 5.13 Automate, test failure, roll out in stages
 
-**What.** Hamilton's third tenet: automate everything. [\[1\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-1) AWS lists automatic recovery, change through automation, and testing recovery procedures. [\[8\]](../sources/distributed-system-design-aws-well-architected-reliability-principles.md#design-principles) Azure asks to design for operations: logging, tracing, metrics. [\[44\]](../sources/distributed-system-design-azure-design-principles.md#operational-principles)
+**What.** The third of those tenets: automate everything. [\[1\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-1) AWS lists automatic recovery, change through automation, and testing recovery procedures. [\[8\]](../sources/distributed-system-design-aws-well-architected-reliability-principles.md#design-principles) Azure asks to design for operations: logging, tracing, metrics. [\[44\]](../sources/distributed-system-design-azure-design-principles.md#operational-principles)
 
 **Why.** Operators under pressure make mistakes about 20% of the time. [\[18\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-4) Google SRE load-tests past failure. [\[45\]](../sources/distributed-system-design-google-sre-cascading-failures.md#test-until-failure-and-beyond)
 
@@ -335,12 +335,13 @@ Colors mark areas: red failure, blue data and time, yellow calls and load, green
 
 ## 10. Metadata
 
-- **Version:** 2.1
+- **Version:** 2.2
 - **Template:** survey
 - **Model:** claude-opus-5-5
 - **Created:** 2026-10-20
 - **Last modified:** 2026-10-21
 - **History:**
+  - 2.2 (2026-10-21): Lint: the three tenets credited to Bill Hoffman via Hamilton; fallacies attribution removed where its section didn't support it; the transparency claim reworded to match van Steen's section 3.2.2.
   - 2.1 (2026-10-21): Reworked under the current survey template and shared writing guide: a state diagram of Brewer's partition management, a colored flowchart of how the items relate, retry pseudocode, TeX for the 243-call sum and the 2f+1 majority; added Kleppmann on faults and fault tolerance; fixed a misattributed Hamilton quote; trimmed to the 2200-word budget.
   - 2.0 (2026-10-21): Sources searched again for what the survey can't miss; added CAP and consistency, consensus, logical time and the end-to-end argument, and Azure's official list; merged timeouts with retries, and automation with testing; now thirteen items.
   - 1.0 (2026-10-20): First version.

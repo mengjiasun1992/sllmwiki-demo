@@ -29,6 +29,7 @@ what-is-a-distributed-system:
       authority: B
   models:
     1.1: claude-opus-5-5
+    1.2: claude-opus-5-5
 
 what-are-the-common-design-tenets-and-principles-for-distributed-systems:
   template: survey
@@ -101,6 +102,7 @@ what-are-the-common-design-tenets-and-principles-for-distributed-systems:
   models:
     2.0: claude-opus-5-5
     2.1: claude-opus-5-5
+    2.2: claude-opus-5-5
 
 what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work:
   template: technical_brief_overview
@@ -163,6 +165,7 @@ what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work:
     1.1: claude-opus-5-5
     1.2: claude-opus-5-5
     1.3: claude-opus-5-5
+    1.4: claude-opus-5-5
 
 when-should-software-use-an-ewma-instead-of-other-moving-averages:
   template: comparison
@@ -229,3 +232,4 @@ when-should-software-use-an-ewma-instead-of-other-moving-averages:
   models:
     1.1: claude-opus-5-5
     1.2: claude-opus-5-5
+    1.3: claude-opus-5-5

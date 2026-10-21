@@ -48,9 +48,9 @@ flowchart LR
 
 ## 4. Why it matters
 
-Lamport gave the user's view in a 1987 email at DEC's research centre: "A distributed system is one in which the failure of a computer you didn't even know existed can render your own computer unusable." [\[4\]](../sources/distributed-systems-lamport-definition-email.md) He wrote it because workstations had grown dependent on programs running elsewhere, so a server outage left users waiting hours. [\[4\]](../sources/distributed-systems-lamport-definition-email.md)
+Lamport gave the user's view in a 1987 email at DEC's research centre: "A distributed system is one in which the failure of a computer you didn't even know existed can render your own computer unusable." [\[4\]](../sources/distributed-systems-lamport-definition-email.md) He wrote it because workstations had grown dependent on programs running elsewhere, so a server outage left users waiting an hour or two. [\[4\]](../sources/distributed-systems-lamport-definition-email.md)
 
-The web is an everyday example: a browser sends a request message to a web server, which replies with a message holding the page. [\[5\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#distributed-systems-and-computer-networking) It also shows the risk. In one AWS outage a catalog server with a full disk answered every request quickly and emptily, so the load balancer sent it ever more traffic, and one machine's fault took down amazon.com. [\[6\]](../sources/distributed-system-design-aws-challenges-distributed-systems.md#distributed-bugs-spread-epidemically)
+The web is an everyday example: a browser sends a request message to a web server, which replies with a message holding the page. [\[5\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#distributed-systems-and-computer-networking) It also shows the risk. In one Amazon outage a catalog server with a full disk answered every request quickly and emptily, so the load balancer sent it ever more traffic, and one machine's fault took down amazon.com. [\[6\]](../sources/distributed-system-design-aws-challenges-distributed-systems.md#distributed-bugs-spread-epidemically)
 
 ## 5. Key ideas
 
@@ -84,7 +84,7 @@ sequenceDiagram
 
 **Not computer networking.** Networking gets a message to its destination, which a distributed system sees only as a channel with some latency and bandwidth; distributed systems study how nodes coordinate, deciding what messages to send and how to handle them. [\[5\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#distributed-systems-and-computer-networking)
 
-**Not parallel computing.** In parallel computing, processors usually share memory; in distributed computing each has private memory and they exchange messages. The line between them is fuzzy. [\[15\]](../sources/distributed-systems-wikipedia-distributed-computing.md#parallel-and-distributed-computing)
+**Not parallel computing.** In parallel computing, processors may share memory; in distributed computing each has private memory and they exchange messages. The line between them is fuzzy. [\[15\]](../sources/distributed-systems-wikipedia-distributed-computing.md#parallel-and-distributed-computing)
 
 [sllmwiki_reasoning] Nor is every set of networked machines one: machines each doing their own job lack the shared task and single face to users that the definitions require.
 
@@ -127,12 +127,13 @@ sequenceDiagram
 
 ## 9. Metadata
 
-- **Version:** 1.1
+- **Version:** 1.2
 - **Template:** concept_brief_overview
 - **Model:** claude-opus-5-5
 - **Created:** 2026-10-20
 - **Last modified:** 2026-10-21
 - **History:**
+  - 1.2 (2026-10-21): Lint: the amazon.com outage is Amazon's, not AWS's; Lamport's 'an hour or two' wait; parallel computing processors 'may' share memory.
   - 1.1 (2026-10-21): Reworked under the current template and writing guide: added Kleppmann's course notes (plain definition, message passing, partial failure, why distribute, distributed systems versus networking), a flowchart of the definition and a sequence diagram of the unknown outcome, and new Terminology rows.
   - 1.0 (2026-10-20): First version.
 - **Reading plan:**

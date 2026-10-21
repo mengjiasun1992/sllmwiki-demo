@@ -64,7 +64,7 @@ s_t = \alpha x_t + (1 - \alpha) s_{t-1}
 $$
 
 4. **Update → read.** $s_t$ is the current estimate, the value compared with control limits, or the forecast for the next step. [\[9\]](../sources/ewma-fpp3-simple-exponential-smoothing.md#component-form)
-5. **Read → next sample.** Nothing else is kept: an EWMA stores only its latest value, where a $k$-point moving average stores $k$ points. [\[10\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average)
+5. **Read → next sample.** Nothing else is kept: an EWMA stores only its latest value, where an $N$-point moving average stores $N$ points. [\[10\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average)
 
 [sllmwiki_reasoning] In the latency example, with $\alpha = 1/8$ and $s_0$ the first sample, the average reads 100, 100, then $100 + (400 - 100)/8 = 137.5$ ms. The procedure below follows Finch's incremental form, [\[11\]](../sources/ewma-finch-incremental-weighted-mean-variance.md#page-7) seeding from the first sample as TCP does. [\[8\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm)
 
@@ -93,7 +93,7 @@ xychart-beta
     line "alpha = 0.2" [0.2, 0.16, 0.128, 0.102, 0.082, 0.066, 0.052, 0.042]
 ```
 
-**Variant: tracking the spread as well.** TCP needs the variation of the round-trip time, not just its mean: a timer of twice the mean adapts to loads of at most 30%, and above that retransmits packets that were only delayed. [\[2\]](../sources/ewma-jacobson-congestion-avoidance.md#conservation-at-equilibrium-round-trip-timing) Jacobson keeps a second EWMA, of the mean deviation $\lvert e_t \rvert$, because variance needs a multiply and a square root; the mean deviation is a slightly larger, more conservative estimate, about 1.25 times the standard deviation for normal errors. [\[6\]](../sources/ewma-jacobson-congestion-avoidance.md#theory) RFC 6298 makes this the standard, with $\alpha = 1/8$, $\beta = 1/4$, and RTO equal to SRTT plus the larger of the clock granularity and four times RTTVAR. [\[8\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm) In this narrative's notation, following the RFC:
+**Variant: tracking the spread as well.** TCP needs the variation of the round-trip time, not just its mean: a timer of twice the mean adapts to loads of at most 30%, and above that retransmits packets that were only delayed. [\[2\]](../sources/ewma-jacobson-congestion-avoidance.md#conservation-at-equilibrium-round-trip-timing) Jacobson keeps a second EWMA, of the mean deviation $\lvert e_t \rvert$, because variance needs a multiply and a square root, and argues that the mean deviation is a more conservative, larger estimate, putting the factor at about 1.25 for normal errors. [\[6\]](../sources/ewma-jacobson-congestion-avoidance.md#theory) [sllmwiki_reasoning] For normal errors the mean absolute deviation is in fact about 0.8 of the standard deviation ($\sqrt{2/\pi}$); the two are close either way. RFC 6298 makes this the standard, with $\alpha = 1/8$, $\beta = 1/4$, and RTO equal to SRTT plus the larger of the clock granularity and four times RTTVAR. [\[8\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm) In this narrative's notation, following the RFC:
 
 ```text
 on RTT measurement r:
@@ -130,7 +130,7 @@ read: return S >> p
 
 ## 6. Design decisions and trade-offs
 
-**Choosing $\alpha$.** Larger $\alpha$ means less smoothing; $\alpha = 1$ returns the raw series. [\[18\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing) Jacobson explains the trade-off: a large gain corrects a wrong estimate fast, a small one damps the noise, the estimate's own standard deviation is $\alpha$ times the samples', and it converges with a time constant of $1/\alpha$ samples. Because the correction happens whatever the gain, a gain too small is almost always better than one too large. [\[6\]](../sources/ewma-jacobson-congestion-avoidance.md#theory) Rules of thumb:
+**Choosing $\alpha$.** Larger $\alpha$ means less smoothing; $\alpha = 1$ returns the raw series. [\[18\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing) Jacobson explains the trade-off: a large gain corrects a wrong estimate fast, a small one damps the noise, he puts the estimate's own standard deviation at $\alpha$ times the samples', and it converges with a time constant of $1/\alpha$ samples. Because the correction happens whatever the gain, a gain too small is almost always better than one too large. [\[6\]](../sources/ewma-jacobson-congestion-avoidance.md#theory) [sllmwiki_reasoning] For independent samples NIST's variance in the FAQ gives the exact factor, $\sqrt{\alpha/(2-\alpha)}$, which is larger: about 0.33 for $\alpha = 0.2$. Rules of thumb:
 
 - typical gains: 0.1 to 0.2, after a long look at the raw data; [\[6\]](../sources/ewma-jacobson-congestion-avoidance.md#theory)
 - control charts: $\lambda$ "usually set between 0.2 and 0.3"; [\[3\]](../sources/ewma-nist-ewma-control-charts.md#6324-ewma-control-charts)
@@ -150,7 +150,7 @@ The filter view says the same: a single-pole low-pass filter with decay $1 - \al
 
 **Choosing $s_0$.** The starting value's weight $(1 - \alpha)^t$ fades slowly when $\alpha$ is small, so it matters more then; [\[7\]](../sources/ewma-nist-single-exponential-smoothing.md#6431-single-exponential-smoothing) starting from the first sample gives it a large effect on early values, and averaging the first few samples is one remedy. [\[24\]](../sources/ewma-wikipedia-exponential-smoothing.md#choosing-the-initial-smoothed-value)
 
-**Floating or fixed point.** Single-precision floating point suits simple recursive filters; integers are possible but harder, as round-off can degrade the response or make the filter unstable. [\[25\]](../sources/ewma-smith-dspguide-recursive-filters.md#page-14) Fixed point buys shift-only updates at the cost of $\alpha$ restricted to powers of two and at most 30 fractional bits. [\[15\]](../sources/ewma-linux-kernel-average-h-source.md#L10-L27) [\[16\]](../sources/ewma-linux-kernel-average-h-source.md#L54-L70)
+**Floating or fixed point.** Single-precision floating point suits simple recursive filters; integers are possible but harder, as round-off can degrade the response or make the filter unstable. [\[25\]](../sources/ewma-smith-dspguide-recursive-filters.md#page-14) Fixed point buys shift-and-add updates at the cost of $\alpha$ restricted to powers of two and at most 30 fractional bits. [\[15\]](../sources/ewma-linux-kernel-average-h-source.md#L10-L27) [\[16\]](../sources/ewma-linux-kernel-average-h-source.md#L54-L70)
 
 ## 7. Limitations and failure modes
 
@@ -221,12 +221,13 @@ The filter view says the same: a single-pole low-pass filter with decay $1 - \al
 
 ## 10. Metadata
 
-- **Version:** 1.3
+- **Version:** 1.4
 - **Template:** technical_brief_overview
 - **Model:** claude-opus-5-5
 - **Created:** 2026-10-20
 - **Last modified:** 2026-10-21
 - **History:**
+  - 1.4 (2026-10-21): Lint: Jacobson's figures for the estimate's standard deviation and for mean deviation against standard deviation are now given as his, with reasoning notes giving NIST's exact factor and the normal-error ratio; the window is written N, not k; the fixed-point update is called shift-and-add.
   - 1.3 (2026-10-21): Rework under the current template and writing guide: adds Jacobson's prediction-error reading of the update, the explicit weights (Finch), a weights chart, pseudocode for the basic update, mean deviation (RFC 6298), EWMA variance and fixed-point (Linux kernel) variants, the single-pole filter's time constant and cutoff, and phase and fixed-point limitations.
   - 1.2 (2026-10-21): Lint: TCP's timeout formula now includes the clock-granularity floor; the update's alpha range left to Terminology.
   - 1.1 (2026-10-21): The flowchart's labels are plain text, as not every renderer draws math in a diagram.
