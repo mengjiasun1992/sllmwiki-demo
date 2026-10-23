@@ -6,6 +6,10 @@ Consistent hashing and its alternatives: the hash ring, virtual nodes, rendezvou
 
 **Path:** [distributed-systems](distributed-systems.md) / [data-partitioning](data-partitioning.md) / consistent-hashing
 
+## Narratives
+
+- [What is consistent hashing?](../narratives/what-is-consistent-hashing.md)
+
 ## Sources
 
 - [consistent-hashing-wikipedia](../sources/consistent-hashing-wikipedia.md): Wikipedia article on consistent hashing: a hashing technique in which resizing a hash table remaps only n/m keys on average (n keys, m slots), whereas a modulo mapping remaps nearly…

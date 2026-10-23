@@ -253,3 +253,53 @@ when-should-software-use-an-ewma-instead-of-other-moving-averages:
       authority: A
   built_on:
     what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work: 3d99f2e9bab03ff36b619156f4ccbbe5
+
+what-is-consistent-hashing:
+  template: concept_brief_overview
+  tags:
+    primary: [consistent-hashing]
+    supporting: [data-partitioning]
+  read:
+    consistent-hashing-karger-stoc1997: 06187d2d350fb0b48bbdd590c217bd20
+    consistent-hashing-wikipedia: fb7927ad8f99a1e20933fd3f012331eb
+    consistent-hashing-wikipedia-rendezvous-hashing: 98599fcd05095c1cdae52080f7989227
+    consistent-hashing-lamping-veach-jump-hash: 5e1ad33a6a348c75ca01cb9bb8f6e3d1
+    consistent-hashing-stoica-chord: 9ae4c363a2688de2cb99b31b962206bc
+    data-partitioning-cassandra-dynamo-architecture: 372a121e1fb4f24eb477a26ffe854655
+    amazon-dynamo-decandia-dynamo-sosp2007: 34a497deb5925c24fad1cb1c33defde3
+  grades:
+    consistent-hashing-wikipedia:
+      relevance: high
+      authority: C
+    consistent-hashing-wikipedia-rendezvous-hashing:
+      relevance: medium
+      authority: C
+    consistent-hashing-lamping-veach-jump-hash:
+      relevance: medium
+      authority: A
+    consistent-hashing-mirrokni-bounded-loads:
+      relevance: low
+      authority: A
+    consistent-hashing-eisenbud-maglev:
+      relevance: low
+      authority: A
+    consistent-hashing-stoica-chord:
+      relevance: medium
+      authority: A
+    data-partitioning-cassandra-dynamo-architecture:
+      relevance: medium
+      authority: A
+    amazon-dynamo-decandia-dynamo-sosp2007:
+      relevance: medium
+      authority: A
+    consistent-hashing-karger-stoc1997:
+      relevance: high
+      authority: A
+    amazon-dynamo-elhemali-dynamodb-atc2022:
+      relevance: low
+      authority: A
+    amazon-dynamo-aws-dynamodb-partitions:
+      relevance: low
+      authority: A
+  models:
+    1.0: claude-opus-5-5

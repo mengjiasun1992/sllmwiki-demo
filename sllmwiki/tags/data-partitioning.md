@@ -10,6 +10,10 @@ Splitting a dataset across nodes by key: hash, range and directory partitioning,
 
 - [consistent-hashing](consistent-hashing.md): Consistent hashing and its alternatives: the hash ring, virtual nodes, rendezvous, jump and Maglev hashing, bounded loads
 
+## Narratives
+
+- [What is consistent hashing?](../narratives/what-is-consistent-hashing.md) (supporting)
+
 ## Sources
 
 - [consistent-hashing-stoica-chord](../sources/consistent-hashing-stoica-chord.md): Stoica, Morris, Karger, Kaashoek and Balakrishnan's SIGCOMM 2001 paper presents Chord, a distributed lookup protocol for peer-to-peer systems that supports a single operation: given a key, map it onto a…
