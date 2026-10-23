@@ -18,4 +18,4 @@ language = "en"             # narratives' language, such as "zh-Hans"; sources k
 # abstract_words = [150, 300]
 
 [structural-llm-wiki-addons]
-obsidian = false            # true: set the wiki up to open sllmwiki/ as an Obsidian vault (rerun /sllmwiki:init)
+obsidian = true             # true: set the wiki up to open sllmwiki/ as an Obsidian vault (rerun /sllmwiki:init)
