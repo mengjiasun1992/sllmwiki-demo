@@ -1,2 +1,22 @@
 # The tag tree: each tag's description, parent and SMEs (design doc §4.2).
 # Written by manifest.py; children, sources and narratives are derived.
+
+distributed-systems:
+  description: Systems of independent networked computers that coordinate by passing messages to appear as one system
+  parent: null
+
+distributed-system-design:
+  description: "Design tenets and principles for building distributed systems: failure, consistency, scalability, idempotency, backpressure"
+  parent: distributed-systems
+
+moving-averages:
+  description: Moving averages for smoothing a series of measurements over time
+  parent: null
+
+ewma:
+  description: "The exponentially weighted moving average: its recurrence, smoothing factor, and uses in software"
+  parent: moving-averages
+
+simple-moving-average:
+  description: Simple and weighted windowed moving averages, the alternatives to an EWMA
+  parent: moving-averages

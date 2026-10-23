@@ -1,1 +1,297 @@
 # Sources, keyed by slug (design doc §4.3). Written by fetch-source.py and manifest.py.
+
+distributed-systems-van-steen-tanenbaum-brief-intro:
+  file: sources/distributed-systems-van-steen-tanenbaum-brief-intro.md
+  kind: html
+  url: https://link.springer.com/article/10.1007/s00607-016-0508-7
+  published: "2016-09-01"
+  ingested: "2026-10-20"
+  license: CC-BY-4.0
+  tags: [distributed-systems, distributed-system-design]
+  abstract: "Open-access survey article by Maarten van Steen and Andrew S. Tanenbaum (Computing 98, 2016) giving a brief overview of distributed systems: what they are, their general design goals, and the most common types. It loosely characterises a distributed system as a collection of autonomous computing elements (nodes) that appears to its users as a single coherent system, and draws out the consequences: nodes collaborate by message passing, there is no global clock, group membership and overlay networks must be managed, and partial failures are inherent and hard to hide. It presents middleware as the 'operating system' of a distributed system (RPC, transactions, service composition, reliability). Four design goals are discussed in depth: supporting resource sharing; distribution transparency (access, location, relocation, migration, replication, concurrency and failure transparency, and the limits and costs of hiding distribution); openness (interfaces and IDLs, interoperability, portability, extensibility, separating policy from mechanism); and scalability along size, geographical and administrative dimensions, including a queuing-model analysis of centralised bottlenecks and the scaling techniques of hiding latency, partitioning and distribution, and replication and caching with their consistency trade-offs (CAP). It lists Peter Deutsch's false assumptions as pitfalls. It then surveys types of distributed systems: high-performance computing (cluster, grid, cloud), distributed information systems (transaction processing, enterprise application integration) and pervasive systems (ubiquitous, mobile, sensor networks), and closes with an outlook on dependability and Internet-scale scalability."
+
+distributed-systems-lamport-definition-email:
+  file: sources/distributed-systems-lamport-definition-email.md
+  kind: text
+  url: https://lamport.azurewebsites.net/pubs/distributed-system.txt
+  published: "1987-05-28"
+  ingested: "2026-10-20"
+  license: unknown
+  tags: [distributed-systems]
+  abstract: "A short internal email that Leslie Lamport sent to colleagues at DEC's Systems Research Center (SRC) on 28 May 1987, the origin of his much-quoted tongue-in-cheek definition: a distributed system is one in which the failure of a computer you didn't even know existed can render your own computer unusable. Lamport notes the long debate over what constitutes a distributed system and says this definition appears to have been adopted at SRC. Prompted by an electrical problem in the machine room, he observes that each new version of the system software makes users' workstations more dependent on programs running elsewhere, so that a server outage can leave a user's machine inoperative through no fault of its own, and that waiting hours for servers to be rebooted is far more annoying than waiting seconds for a program to be swapped in. He proposes a development project to make the system more robust, without prescribing an approach (stand-alone operation being one possibility), and volunteers to gather data, asking colleagues to report incidents of workstations becoming unusable because of failures elsewhere. The email is a concise statement of the dependency and partial-failure problem at the heart of distributed systems."
+
+distributed-systems-wikipedia-distributed-computing:
+  file: sources/distributed-systems-wikipedia-distributed-computing.md
+  kind: html
+  url: https://en.wikipedia.org/wiki/Distributed_computing
+  ingested: "2026-10-20"
+  license: CC-BY-SA-4.0
+  license_url: https://creativecommons.org/licenses/by-sa/4.0/
+  tags: [distributed-systems]
+  abstract: "Wikipedia's article on distributed computing, the field of computer science that studies distributed systems: computer systems whose inter-communicating components are located on different networked computers and that communicate and coordinate by passing messages to achieve a common goal. The lead names three challenges (concurrency of components, the lack of a global clock, and independent failure of components), notes that the failure of one component does not bring down the whole system, mentions the fallacies of distributed computing and the extra cost of distribution, and contrasts a well-designed distributed system with a monolithic application. The introduction gives the two commonly cited properties (autonomous nodes with local memory; communication by message passing) plus typical ones: tolerating failures of individual computers, unknown and changing structure, heterogeneity, and each computer having only a limited, incomplete view. Further sections cover architectural patterns, events versus messages and delivery guarantees, the distinction between parallel (shared memory) and distributed (private memory, message passing) computing, history, architectures (client-server, n-tier, peer-to-peer, shared-nothing, cell-based), reasons for distribution (inherent need, capacity, no single point of failure, cost), examples, reactive systems, and theoretical foundations: models of computation, a graph-colouring example, complexity measures (LOCAL and CONGEST models), consensus and fault-tolerance problems, logical clocks and clock synchronisation, leader election, and decidability of system properties."
+
+distributed-system-design-wikipedia-fallacies:
+  file: sources/distributed-system-design-wikipedia-fallacies.md
+  kind: html
+  url: https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing
+  ingested: "2026-10-20"
+  license: CC-BY-SA-4.0
+  license_url: https://creativecommons.org/licenses/by-sa/4.0/
+  tags: [distributed-system-design]
+  abstract: "The Wikipedia article on the fallacies of distributed computing: a set of false assumptions, set out by L. Peter Deutsch and others at Sun Microsystems, that programmers new to distributed applications invariably make. It lists the eight original fallacies: the network is reliable; latency is zero; bandwidth is infinite; the network is secure; topology doesn't change; there is one administrator; transport cost is zero; the network is homogeneous. For each it gives an effect of believing it, such as applications with little handling of network errors that stall, wait forever or never retry; unbounded traffic that increases dropped packets; bottlenecks; being blindsided by malicious users; conflicting policies of multiple administrators; and unbudgeted hidden network costs. Its history section says Deutsch first listed seven fallacies in 1994, incorporating four that Bill Joy and Dave Lyon had already identified in 'The Fallacies of Networked Computing', and that James Gosling added the eighth around 1997. It also records a ninth fallacy Deutsch later proposed on Software Engineering Radio (2021), that the party you are communicating with is trustworthy, and three further fallacies added by Mark Richards and Neal Ford in 2020: versioning is simple, compensating updates always work, and observability is optional. It links to the CAP theorem and PACELC as related topics."
+
+distributed-system-design-hamilton-internet-scale-services:
+  file: sources/distributed-system-design-hamilton-internet-scale-services.md
+  kind: pdf
+  url: https://www.usenix.org/legacy/event/lisa07/tech/full_papers/hamilton/hamilton.pdf
+  published: "2007-11-01"
+  ingested: "2026-10-20"
+  license: proprietary
+  tags: [distributed-system-design]
+  abstract: "James Hamilton's LISA 2007 paper (Windows Live Services Platform, Microsoft) summarises best practices, drawn from MSN, Windows Live, Exchange Hosted Services and other very large services, for designing and deploying operations-friendly internet-scale services: services that need little human intervention and detect and recover from all but the most obscure failures on their own. It notes that system-to-administrator ratios range from 2:1 to 2,500:1 and argues that the service design, more than auto-administration tooling, decides that ratio, since about 80% of operations issues originate in design and development. It opens with Bill Hoffman's three tenets: expect failures, keep things simple, automate everything. It then lists basic design tenets (design for failure, redundancy and fault recovery, a commodity hardware slice, single-version software, multi-tenancy) and more specific practices in ten areas: overall application design (zero trust of components, pod isolation, admission control at all levels, partitioning, avoiding single points of failure), automatic management and provisioning, dependency management (timeouts, idempotency, bounded restarts, fail fast, decoupling), release cycle and testing (testing in production, staged rollout, roll-back, frequent shipping), hardware standardisation, operations and capacity planning, auditing, monitoring and alerting, graceful degradation and admission control (a 'big red switch', metered admission, client jitter and backoff), customer and press communication, and customer self-provisioning. The text is converted from the PDF, page by page."
+
+distributed-system-design-aws-timeouts-retries-backoff:
+  file: sources/distributed-system-design-aws-timeouts-retries-backoff.md
+  kind: html
+  url: https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/
+  ingested: "2026-10-20"
+  license: proprietary
+  tags: [distributed-system-design]
+  abstract: "An Amazon Builders' Library article by Marc Brooker (December 2019) on how Amazon handles transient failures in calls between services without overwhelming struggling ones. It starts from the premise that failures in remote calls are inevitable and that systems must tolerate them without magnifying a small percentage of failures into a complete outage, using three tools: timeouts, retries and backoff, plus jitter. Timeouts: set one on every remote call and every cross-process call, covering connection and request; choose the value from the downstream service's latency percentile matching an acceptable false-timeout rate (for example p99.9 for 0.1%), with care for internet latency, tight latency bounds and timeouts that miss DNS or TLS work. Retries are described as 'selfish' and dangerous under overload; the article recommends capped exponential backoff, limiting the number of retries, retrying at a single point in the stack (independent retries in a five-layer stack can multiply database load 243 times), local retry limiting with a token bucket rather than circuit breakers, retrying only idempotent APIs, and distinguishing retryable from non-retryable errors. Jitter adds randomness to backoff so correlated retries do not collide, and should also be applied to timers and periodic jobs, preferably deterministically per host. It concludes that retries should happen only while the dependency is healthy."
+
+distributed-system-design-aws-challenges-distributed-systems:
+  file: sources/distributed-system-design-aws-challenges-distributed-systems.md
+  kind: html
+  url: https://aws.amazon.com/builders-library/challenges-with-distributed-systems/
+  ingested: "2026-10-20"
+  license: proprietary
+  tags: [distributed-systems, distributed-system-design]
+  abstract: "An Amazon Builders' Library article by Jacob Gabrielson (2019) explaining why distributed systems are harder and less intuitive than other computing, the background for AWS's design practices. It attributes the most impactful problems to independent failures and nondeterminism, and to the impossibility of always knowing whether something failed. It places distributed systems on a spectrum of difficulty: offline (batch) systems, soft real-time systems, and hard real-time request/reply services, which are the hardest and the article's focus. Using a networked Pac-Man example, it shows that any request/reply across a network involves eight unavoidable steps (post request, deliver request, validate request, update server state, post reply, deliver reply, validate reply, update client state), each of which can fail independently because client, server and network do not share fate; these are the 'eight failure modes of the apocalypse'. A timeout leaves the outcome UNKNOWN, which code must handle, and which is especially hard with side effects such as withdrawing money. The article shows how these outcomes multiply the testing matrix on both client and server, advises distrusting everything, and explains that the same failure modes recur recursively at every level of grouping (machines, groups, Availability Zones, Regions). It notes that distributed bugs are often latent and spread epidemically, illustrated by an amazon.com outage caused by one catalog server with a full disk, and closes with a summary of why distributed engineering is hard."
+
+distributed-system-design-google-sre-cascading-failures:
+  file: sources/distributed-system-design-google-sre-cascading-failures.md
+  kind: html
+  url: https://sre.google/sre-book/addressing-cascading-failures/
+  published: "2016-04-01"
+  ingested: "2026-10-20"
+  license: CC-BY-NC-ND-4.0
+  license_url: https://creativecommons.org/licenses/by-nc-nd/4.0/
+  tags: [distributed-system-design]
+  abstract: "Chapter 22 of Google's Site Reliability Engineering book (2017), 'Addressing Cascading Failures', written by Mike Ulrich, using the book's sample Shakespeare search service as its running example. A cascading failure is one that grows over time through positive feedback: part of a system fails and raises the chance that other parts fail, as when an overloaded replica crashes and pushes its load onto the rest. The chapter explains the causes: server overload (the most common), exhaustion of CPU, memory, threads and file descriptors and how these feed each other, and service unavailability through crash loops and health-check failures. It then sets out prevention in rough priority order: load test to and beyond failure, serve degraded results, reject requests early when overloaded, rate limit at higher layers, and plan capacity (for example N+2). Further sections cover queue management, load shedding and graceful degradation, retries (randomised exponential backoff, per-request limits, server-wide retry budgets, avoiding retries at several layers, clear retriable versus non-retriable response codes), deadlines and their propagation, cancellation propagation, bimodal latency and failing fast, slow startup and cold caches, and avoiding intra-layer communication. It lists triggering conditions (process death, updates, rollouts, organic growth, drains, resource limits), testing strategies, and immediate remedies such as adding resources, disabling health-check kills, restarting servers, dropping traffic, entering degraded modes and eliminating batch or bad traffic."
+
+distributed-system-design-aws-well-architected-reliability-principles:
+  file: sources/distributed-system-design-aws-well-architected-reliability-principles.md
+  kind: text
+  url: https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/design-principles.html
+  ingested: "2026-10-20"
+  license: CC-BY-SA-4.0
+  tags: [distributed-system-design]
+  abstract: "The design principles page of the Reliability Pillar of the AWS Well-Architected Framework, a short list of five principles that help increase the reliability of workloads in the cloud. Automatically recover from failure: monitor key performance indicators that measure business value rather than technical aspects, and run automation when a threshold is breached, so failures are notified, tracked and worked around or repaired automatically, and with more sophisticated automation anticipated before they occur. Test recovery procedures: rather than only proving a workload works in a scenario, test how it fails and validate recovery, using automation to simulate failures or recreate past ones so failure pathways are found and fixed before a real failure. Scale horizontally to increase aggregate workload availability: replace one large resource with multiple small ones and distribute requests across them so they do not share a common point of failure and a single failure has less impact. Stop guessing capacity: resource saturation is a common cause of failure on premises, while in the cloud demand and utilisation can be monitored and resources added or removed automatically, within service quotas. Manage change through automation: make infrastructure changes with automation, including changes to the automation itself, so that they can be tracked and reviewed. The page is brief and gives no examples beyond these statements."
+
+ewma-nist-ewma-control-charts:
+  file: sources/ewma-nist-ewma-control-charts.md
+  kind: html
+  url: https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc324.htm
+  ingested: "2026-10-20"
+  license: LicenseRef-US-Government-Public-Domain
+  tags: [ewma]
+  abstract: "Section 6.3.2.4 of the NIST/SEMATECH e-Handbook of Statistical Methods introduces the Exponentially Weighted Moving Average (EWMA) as a process-monitoring statistic that averages data while giving less and less weight to observations further back in time. It contrasts EWMA charts with Shewhart charts: a Shewhart decision depends only on the latest measurement, while the EWMA statistic is an exponentially weighted average of all prior data, so a suitable weighting factor makes it sensitive to small or gradual drifts. It defines the statistic with Roberts' (1959) recursion EWMA_t = lambda*Y_t + (1-lambda)*EWMA_{t-1}, where EWMA_0 is the historical mean (target) and 0 < lambda <= 1 sets the depth of memory; lambda = 1 reduces to a Shewhart chart, larger lambda weights recent data more, and lambda is usually set between 0.2 and 0.3 (Hunter, 1986), with Lucas and Saccucci (1990) tables as a guide. It gives the asymptotic variance of the statistic, (lambda/(2-lambda)) s^2, control limits EWMA_0 +/- k s_ewma with k usually 3, the assumptions of independent, normal, representative historical data, and a worked example with lambda = 0.3 on 20 sample points, whose plot shows an in-control process with a possible upward trend at the end."
+
+ewma-nist-single-exponential-smoothing:
+  file: sources/ewma-nist-single-exponential-smoothing.md
+  kind: html
+  url: https://www.itl.nist.gov/div898/handbook/pmc/section4/pmc431.htm
+  ingested: "2026-10-20"
+  license: LicenseRef-US-Government-Public-Domain
+  tags: [ewma]
+  abstract: "Section 6.4.3.1 of the NIST/SEMATECH e-Handbook of Statistical Methods explains single exponential smoothing, which forecasts by weighting past observations with exponentially decreasing weights. Following Hunter (1986), it starts the smoothed series with S_2 = y_1 and applies the basic equation S_t = alpha*y_{t-1} + (1-alpha)*S_{t-1}, 0 < alpha <= 1, where alpha is the smoothing constant; it notes Roberts' (1959) alternative that uses the current observation y_t, as in EWMA control charts. It discusses initialisation (the first observation, the process target, or an average of the first four or five observations) and warns that the smaller alpha is, the more the initial value matters. Expanding the recursion shows why the method is called exponential: the weights alpha(1-alpha)^t decrease geometrically and sum to 1-(1-alpha)^t, illustrated for alpha = 0.3. A table shows that dampening of older data is quick when alpha is near 1 and slow when it is near 0. The best alpha is the one minimising the mean squared error of one-step forecasts, found by trial-and-error grid search or a nonlinear optimiser such as Marquardt's procedure; a 12-point example compares alpha = 0.1 (MSE 19.0) with alpha = 0.5 (MSE 16.29)."
+
+moving-averages-nist-single-moving-average:
+  file: sources/moving-averages-nist-single-moving-average.md
+  kind: html
+  url: https://www.itl.nist.gov/div898/handbook/pmc/section4/pmc421.htm
+  ingested: "2026-10-20"
+  license: LicenseRef-US-Government-Public-Domain
+  tags: [simple-moving-average, ewma]
+  abstract: "Section 6.4.2.1 of the NIST/SEMATECH e-Handbook of Statistical Methods introduces the single moving average as a smoothing process: instead of summarising all past data at once, it takes the mean of successive smaller sets of past observations, advancing one period at a time and dropping the oldest number. Using the handbook's running example of dollar amounts from 12 randomly selected suppliers and a set size of three, it computes the first average (9 + 8 + 9)/3 = 8.667 and gives the general expression M_t = (X_t + X_{t-1} + ... + X_{t-N+1})/N, in which each of the last N observations has equal weight. A results table lists, for each supplier, the moving average, the error and the squared error, and reports a mean squared error of 2.42, compared with 3 for the averaging approach of the handbook's previous case. The page is short: it does not discuss the lag of the moving average, how to choose N, trends or seasonality, or how moving averages compare with exponential smoothing, topics the handbook treats in neighbouring sections."
+
+ewma-rfc6298-tcp-retransmission-timer:
+  file: sources/ewma-rfc6298-tcp-retransmission-timer.md
+  kind: text
+  url: https://www.rfc-editor.org/rfc/rfc6298.txt
+  published: "2011-06-01"
+  ingested: "2026-10-20"
+  license: LicenseRef-IETF-Trust-BSD
+  license_url: https://trustee.ietf.org/license-info
+  tags: [ewma]
+  abstract: "RFC 6298 (Paxson, Allman, Chu and Sargent, IETF Standards Track, June 2011) defines the standard algorithm that TCP senders are required to use to compute and manage their retransmission timer, codifying Jacobson's 1988 method, upgrading it from SHOULD to MUST, and obsoleting RFC 2988. A sender keeps two state variables, the smoothed round-trip time SRTT and the round-trip time variation RTTVAR. The first RTT measurement R sets SRTT <- R and RTTVAR <- R/2; each later measurement R' updates RTTVAR <- (1-beta)*RTTVAR + beta*|SRTT-R'| and then SRTT <- (1-alpha)*SRTT + alpha*R', which SHOULD use alpha = 1/8 and beta = 1/4, and the timeout is RTO <- SRTT + max(G, K*RTTVAR) with K = 4 and clock granularity G. The RTO is initially 1 second (previously 3), is rounded up to at least 1 second, and may be capped at no less than 60 seconds. RTT samples follow Karn's algorithm (no samples from retransmitted segments unless timestamps are used), at least one per RTT; the RFC notes that with many samples per RTT the alpha and beta values may keep an inadequate history, an open research question. It also specifies timer management with exponential back-off, allows clearing SRTT and RTTVAR after repeated back-offs, discusses security, and in Appendix A justifies lowering the initial RTO with measurement data."
+
+moving-averages-wikipedia-moving-average:
+  file: sources/moving-averages-wikipedia-moving-average.md
+  kind: html
+  url: https://en.wikipedia.org/wiki/Moving_average
+  ingested: "2026-10-20"
+  license: CC-BY-SA-4.0
+  license_url: https://creativecommons.org/licenses/by-sa/4.0/
+  tags: [simple-moving-average, ewma]
+  abstract: "The English Wikipedia article on the moving average (rolling, running or moving mean) describes it as a series of averages of different subsets of a data set, used with time series to smooth short-term fluctuations and highlight longer-term trends; mathematically it is a convolution, a low-pass finite impulse response (boxcar) filter. It covers the simple moving average (SMA): the unweighted mean of the previous k points, updated cheaply with a FIFO or circular buffer by adding the new value and dropping the oldest, lagging the latest datum by half the window when not centred, being disproportionately influenced by data entering or leaving the window, cancelling a periodic fluctuation of the window's period, and letting through much of the signal shorter than the window. It then describes the central and continuous moving averages, the cumulative average and its incremental update, and the weighted moving average, whose financial form uses arithmetically decreasing weights n, n-1, ..., 1 over a triangle-number denominator. It introduces the exponential moving average (EWMA) as a first-order infinite impulse response filter with exponentially decreasing weights that never reach zero, updatable in O(1) time, and briefly covers power-law moving averages, other weightings such as volume weighting and Spencer's 15-point average, the moving median as a more robust alternative under shocks, and the distinct moving-average regression model. The history section notes the Bank of England's 1833 use."
+
+ewma-wikipedia-exponential-smoothing:
+  file: sources/ewma-wikipedia-exponential-smoothing.md
+  kind: html
+  url: https://en.wikipedia.org/wiki/Exponential_smoothing
+  ingested: "2026-10-20"
+  license: CC-BY-SA-4.0
+  license_url: https://creativecommons.org/licenses/by-sa/4.0/
+  tags: [ewma]
+  abstract: "The English Wikipedia article on exponential smoothing, or the exponential moving average (EMA), describes it as a technique for smoothing time series with an exponential window function: where a simple moving average weights past observations equally, exponential smoothing assigns exponentially decreasing weights, acting as a low-pass filter. Basic (Brown's simple) exponential smoothing is s_0 = x_0 and s_t = alpha*x_t + (1-alpha)*s_{t-1}, with smoothing factor alpha between 0 and 1; larger alpha means less smoothing and more weight on recent changes. The article explains choosing alpha by judgement or least squares, that a constant signal takes about 3/alpha stages to reach 95% of its value, and that the method is also known as EWMA and equals an ARIMA(0,1,1) model. It relates alpha to a time constant, alpha = 1 - exp(-Delta T/tau), approximately Delta T/tau for small sampling intervals; discusses initialisation and its outsized effect on early values, especially for small alpha; derives the geometric weights that give the method its name; and compares it with the moving average: both lag the input, but exponential smoothing's asymmetric IIR kernel cannot be corrected by a fixed shift, both have similar forecast error when alpha = 2/(k+1), and exponential smoothing keeps only the latest value while a k-point moving average must keep the past k points. It then presents double (Holt linear and Brown) exponential smoothing for trends, triple (Holt-Winters) smoothing with additive or multiplicative seasonality, and implementations in statistics packages."
+
+ewma-linkerd-beyond-round-robin:
+  file: sources/ewma-linkerd-beyond-round-robin.md
+  kind: html
+  url: https://linkerd.io/2016/03/16/beyond-round-robin-load-balancing-for-latency/
+  published: "2016-03-16"
+  ingested: "2026-10-20"
+  license: proprietary
+  tags: [ewma, distributed-system-design]
+  abstract: "A March 2016 Linkerd (Buoyant) blog post by Steve Jenson and Ruben Oanta argues that load balancing should protect against latency as well as provide scalability and resilience, and compares three algorithms: round robin (each replica in turn), least loaded (fewest outstanding requests) and peak EWMA, which maintains a moving average of each replica's round-trip time, weighted by its number of outstanding requests, and sends traffic to the replica where that cost is smallest. A Finagle-based simulation used 11 backends replaying production latencies (median 167 ms), one client at 1000 requests per second for one minute, and one server slowed to 2 seconds for 30 seconds. Round robin degraded above the 95th percentile, least loaded above the 99th, and peak EWMA held until the 99.9th; with a 1-second timeout the success rates would be about 95%, 99% and 99.9%. The authors attribute the gap mostly to the information used: least loaded uses queue depth, peak EWMA uses both RPC latency and queue depth, available at Layer 5. They caveat that implementation, request types such as long polling, and asymmetric replica counts also matter, note that Twitter production experiments confirmed the results, and recommend these algorithms, available in Finagle and Linkerd, for RPC or HTTP load balancing. The post does not give the peak EWMA formula or its decay parameters."
+
+ewma-brendan-gregg-linux-load-averages:
+  file: sources/ewma-brendan-gregg-linux-load-averages.md
+  kind: html
+  url: https://www.brendangregg.com/blog/2017-08-08/linux-load-averages.html
+  published: "2017-08-08"
+  ingested: "2026-10-20"
+  license: proprietary
+  tags: [ewma]
+  abstract: "In this August 2017 blog post Brendan Gregg explains Linux load averages, the three 1, 5 and 15 minute numbers shown by uptime, top and /proc/loadavg, and solves the mystery of why Linux counts tasks in uninterruptible sleep. He traces load averages back to TENEX (RFC 546, 1973), whose scheduler kept exponential averages of active processes using a table of exp(-T/C) for T = 5 seconds and C = 1, 5 and 15 minutes; Linux hard-codes the same constants as fixed-point values (EXP_1, EXP_5, EXP_15). He stresses that the numbers are not really averages over 1, 5 and 15 minutes but exponentially-damped moving sums of a five-second average that reflect load well beyond those periods: after a single CPU-bound thread runs for 60 seconds on an idle system, the one-minute value only reaches about 0.62. He then finds the 1993 patch by Matthias Urlichs that added uninterruptible tasks so load reflects demand for disk and other resources, measures uninterruptible time with bcc/eBPF and off-CPU flame graphs, decomposes a load average using the 62%/38% split between the last minute and older data, explains interpreting load relative to CPU count and to the system's own history, and recommends clearer metrics such as per-CPU and per-process utilisation and run queue (scheduler) latency, while noting load averages remain useful in auto-scaling policies and as a quick historical clue."
+
+ewma-fpp3-simple-exponential-smoothing:
+  file: sources/ewma-fpp3-simple-exponential-smoothing.md
+  kind: html
+  url: https://otexts.com/fpp3/ses.html
+  ingested: "2026-10-20"
+  license: unknown
+  tags: [ewma, simple-moving-average]
+  abstract: "Chapter 8 of Hyndman and Athanasopoulos's Forecasting: Principles and Practice (3rd edition) presents exponential smoothing, proposed by Brown, Holt and Winters in the late 1950s, whose forecasts are weighted averages of past observations with weights decaying exponentially as observations get older. Section 8.1 introduces simple exponential smoothing (SES) for data with no clear trend or seasonal pattern, as a middle ground between the naive method (all weight on the last observation) and the average method (equal weights): the forecast alpha*y_T + alpha(1-alpha)*y_{T-1} + ... with smoothing parameter 0 <= alpha <= 1, a table of weights for alpha from 0.2 to 0.8, the equivalent weighted average and component (level) forms, the expansion showing the initial level's weight (1-alpha)^T fading, flat forecasts, and estimating alpha and the initial level l_0 by minimising the sum of squared one-step errors, illustrated on Algerian exports. Section 8.2 adds Holt's linear trend and damped trend methods, 8.3 the Holt-Winters additive, multiplicative and damped seasonal methods, and 8.4 a taxonomy of nine trend and seasonal combinations. Sections 8.5 to 8.7 develop the ETS innovations state space models, including SES's error-correction form l_t = l_{t-1} + alpha*e_t, estimation by maximum likelihood, model selection with AIC, AICc and BIC, and point forecasts and prediction intervals. The chapter ends with exercises and further reading."
+
+distributed-system-design-waldo-note-on-distributed-computing:
+  kind: link
+  url: https://scholar.harvard.edu/files/waldo/files/waldo-94.pdf
+  published: "1994-11-01"
+  ingested: "2026-10-20"
+  license: unknown
+  tags: [distributed-systems, distributed-system-design]
+  abstract: "Jim Waldo, Geoff Wyant, Ann Wollrath and Sam Kendall's 1994 Sun Microsystems Laboratories technical report (SMLI TR-94-29) arguing that objects that interact in a distributed system must be dealt with in ways intrinsically different from objects in a single address space. The authors contend that efforts to unify local and remote computing behind one programming model, hiding the network, are misguided, because distributed computing differs from local computing in four fundamental ways: latency, memory access (pointers do not span address spaces), partial failure, and concurrency. Partial failure, in which one component or the network fails while others continue and no common agent can determine what failed, is singled out as the defining difference. They conclude that interfaces must expose distribution so that programmers can design for latency and for partial failure, and that robustness cannot be added after the fact. The report is widely cited as the foundation for the principle that distribution should not be transparent at the interface. Kept as a link: the host refused automated fetches (HTTP 403)."
+
+distributed-system-design-azure-design-principles:
+  file: sources/distributed-system-design-azure-design-principles.md
+  kind: html
+  url: https://learn.microsoft.com/en-us/azure/architecture/guide/design-principles/
+  ingested: "2026-10-21"
+  license: CC-BY-4.0
+  license_url: https://github.com/MicrosoftDocs/architecture-center/blob/main/LICENSE
+  tags: [distributed-system-design]
+  abstract: "The index page of the Azure Architecture Center's design principles for Azure applications (Microsoft Learn), an official vendor list of principles for building cloud applications that withstand failures, scale with demand and evolve with business needs. It groups eleven principles. Core: design for self-healing (detect failures, respond gracefully, recover automatically, with retries, health endpoint monitoring, circuit breakers and bulkheads, because in distributed systems failures are inevitable); make all things redundant (load balancers, multiple instances, database replicas, multi-zone or multi-region deployment, sized to business risk); minimize coordination (decoupled, asynchronous components, eventual consistency where appropriate, domain events); design to scale out (horizontal scaling, no session stickiness, find bottlenecks, autoscale on live metrics); partition around limits (horizontal, vertical or functional partitioning, partition keys that avoid hotspots). Operational: design for operations (logging, distributed tracing, standard metrics, automated management); use managed services (PaaS over IaaS); use an identity service. Strategic: design for evolution (loose coupling, encapsulated domain knowledge, asynchronous messaging, versioned APIs); build for the needs of business (RTOs, SLAs, SLOs, domain models); perform failure mode analysis during design. A closing list says how they combine: start from business requirements, design for failure, plan for scale, use managed services, support operations, build for change. Each principle links to its own article, which this copy does not include."
+
+distributed-system-design-brewer-cap-twelve-years-later:
+  file: sources/distributed-system-design-brewer-cap-twelve-years-later.md
+  kind: html
+  url: https://www.infoq.com/articles/cap-twelve-years-later-how-the-rules-have-changed/
+  published: "2012-05-30"
+  ingested: "2026-10-21"
+  license: proprietary
+  tags: [distributed-system-design]
+  abstract: "Eric Brewer's 2012 retrospective on the CAP theorem (first published in IEEE Computer, republished by InfoQ), by the theorem's originator. CAP says a networked shared-data system can have at most two of consistency (C), availability (A) and partition tolerance (P); Brewer explains why the '2 of 3' formulation, meant to open a wider design space, is misleading: partitions are rare, so there is little reason to give up C or A when there is none; the choice between C and A can be made many times, per subsystem, operation, data item or user; and all three properties are continuous rather than binary. He relates ACID and BASE (basically available, soft state, eventually consistent), noting the C in CAP is only single-copy consistency. Operationally, the CAP choice happens during a timeout: cancel the operation (lose availability) or proceed (risk inconsistency); a partition is a time bound on communication, and retrying via Paxos or two-phase commit only delays the decision. He proposes managing partitions explicitly in three steps: detect a partition, enter a partition mode that limits some operations and records history, and on recovery restore consistency and compensate for mistakes. Tools include deciding per invariant which operations proceed, version vectors to track causal history, commutative operations and CRDTs for automatic convergence, and compensating transactions (sagas); an ATM sidebar shows a bounded stand-in mode. He concludes that designers should not blindly sacrifice C or A. The copy lacks the article's opening paragraphs and figures."
+
+distributed-system-design-ongaro-raft-consensus:
+  file: sources/distributed-system-design-ongaro-raft-consensus.md
+  kind: pdf
+  url: https://raft.github.io/raft.pdf
+  published: "2014-06-19"
+  ingested: "2026-10-21"
+  license: proprietary
+  tags: [distributed-system-design]
+  abstract: "Diego Ongaro and John Ousterhout's 'In Search of an Understandable Consensus Algorithm (Extended Version)' (Stanford, 2014; extended from the USENIX ATC 2014 paper), the paper that introduced Raft. Raft is a consensus algorithm for managing a replicated log, equivalent in result and efficiency to (multi-)Paxos but structured for understandability: it separates leader election, log replication and safety, and reduces the states to consider. The introduction says consensus lets a collection of machines work as a coherent group that survives the failures of some members, and so plays a key role in reliable large-scale systems. Section 2 frames consensus within replicated state machines: deterministic state machines on several servers apply the same log of commands in the same order and so compute the same state, appearing as one highly reliable machine; examples are Chubby and ZooKeeper. Practical consensus algorithms are safe under all non-Byzantine conditions (delays, partitions, loss, duplication, reordering), available while any majority of servers is up (five servers tolerate two failures), do not depend on timing for consistency, and complete a command once a majority responds. Section 3 explains why Paxos is hard to understand and to build on. Later sections give Raft's strong leader, randomized election timeouts, log replication, safety argument, joint-consensus membership changes, log compaction, client interaction, a user study (33 of 43 students did better on Raft), correctness and performance evaluation, and related work. The PDF copy has page-level anchors only."
+
+distributed-system-design-lamport-time-clocks:
+  file: sources/distributed-system-design-lamport-time-clocks.md
+  kind: pdf
+  url: https://lamport.azurewebsites.net/pubs/time-clocks.pdf
+  published: "1978-07-01"
+  ingested: "2026-10-21"
+  license: proprietary
+  tags: [distributed-system-design]
+  abstract: "Leslie Lamport's 'Time, Clocks, and the Ordering of Events in a Distributed System' (Communications of the ACM 21(7), 1978), saved from the author's own site. It examines the concept of one event happening before another in a distributed system, defined as a collection of spatially separated processes communicating by messages, where message delay is not negligible compared with the time between events. Because it is sometimes impossible to say which of two events happened first, the 'happened before' relation is only a partial ordering, defined without physical clocks; problems often arise when people are not aware of this. Lamport introduces logical clocks (counters assigning numbers to events) satisfying a clock condition, gives a distributed algorithm that extends the partial order to a consistent total order, and uses it to solve a mutual-exclusion synchronization problem without a central scheduler. He shows that the total order can disagree with what users perceive outside the system, producing anomalous behaviour, which properly synchronized physical clocks prevent; he gives a method for synchronizing physical clocks and a theorem bounding how far out of synchrony they can drift, proved in an appendix. The conclusion stresses that in a distributed system the order of events is only partial. The PDF copy has page-level anchors only, OCR-like artifacts in the formulas, and its last page also carries the start of an unrelated article (Baker, 'Shallow Binding in Lisp 1.5')."
+
+distributed-system-design-saltzer-end-to-end-arguments:
+  file: sources/distributed-system-design-saltzer-end-to-end-arguments.md
+  kind: html
+  url: https://deepplum.com/Papers/EndtoEnd.html
+  published: "1984-11-01"
+  ingested: "2026-10-21"
+  license: proprietary
+  tags: [distributed-system-design]
+  abstract: "Saltzer, Reed and Clark's 'End-to-End Arguments in System Design' (ACM Transactions on Computer Systems, 1984; revised from a 1981 conference paper), the classic paper stating a design principle for placing functions among the modules of a distributed system, saved from the copy on co-author David Reed's site. The end-to-end argument: a function can be completely and correctly implemented only with the knowledge and help of the application at the end points, so providing it inside the communication system is not possible; an incomplete low-level version is justified only as a performance enhancement. The case study is careful file transfer: whatever the network does, the application must still check the file end to end; a too-real MIT example tells of a gateway that swapped byte pairs in memory despite per-hop checksums. A performance section argues that the right amount of low-level reliability is an engineering trade-off, since low levels charge every application and know less. Further examples: delivery acknowledgements (what matters is whether the target application acted), encryption (keys, cleartext at the host, authenticity), duplicate message suppression (applications generate their own duplicates on retry, so they must suppress them anyway), FIFO delivery and transaction management. A history section traces the argument in other system areas. The conclusion calls end-to-end arguments a kind of Occam's razor for choosing a communication subsystem's functions and part of a set of rational principles for layered systems."
+
+ewma-jacobson-congestion-avoidance:
+  file: sources/ewma-jacobson-congestion-avoidance.md
+  kind: pdf
+  url: https://ee.lbl.gov/papers/congavoid.pdf
+  published: "1988-11-01"
+  ingested: "2026-10-21"
+  license: proprietary
+  tags: [ewma]
+  abstract: "Van Jacobson and Michael Karels, 'Congestion Avoidance and Control' (revised November 1988 from the SIGCOMM '88 paper), the copy on LBL's site. After the 1986 Internet congestion collapses, it derives TCP algorithms from a 'packet conservation' principle: slow-start, round-trip-time variance estimation, exponential retransmit backoff, and congestion avoidance with additive increase and multiplicative decrease. Its section on round-trip timing says a good RTT estimator is the most important part of a retransmit timer, that RFC 793's low-pass filter R <- aR + (1-a)M with a = 0.9 and rto = bR (b = 2) fails above about 30% load because it ignores variation, and that its variance estimate removes spurious retransmissions. Appendix A explains the RFC 793 estimator as a recursive prediction-error (stochastic gradient) algorithm, a <- a + g(m - a): the gain g trades a fast correction of estimation error against noise, a gain too small is usually better than too large, typical gains are 0.1-0.2, and a converges exponentially with time constant 1/g. It replaces variance with the mean deviation, an EWMA of |m - a| that avoids multiplies and square roots, chooses g = 1/2^n so integer shifts replace division, keeps the scaled estimates to limit round-off, gives the deviation a larger gain (1/4) than the mean (1/8), and sets rto = a + 4v, with C code. Useful for: the origin of the EWMA RTT estimator in TCP, the gain trade-off, and fixed-point implementation."
+
+ewma-finch-incremental-weighted-mean-variance:
+  file: sources/ewma-finch-incremental-weighted-mean-variance.md
+  kind: pdf
+  url: https://fanf2.user.srcf.net/hermes/doc/antiforgery/stats.pdf
+  published: "2009-02-01"
+  ingested: "2026-10-21"
+  license: unknown
+  tags: [ewma]
+  abstract: "Tony Finch, 'Incremental calculation of weighted mean and variance' (University of Cambridge Computing Service, February 2009). Its own abstract: it derives numerically stable formulae for the mean and standard deviation that suit incremental on-line calculation, generalises them to weighted means and standard deviations, works through the difficulties of normalised weights, and shows that the exponentially weighted moving average is a special case of the incremental normalised weighted mean, deriving a formula for the exponentially weighted moving standard deviation. The sections build up from the simple mean (mu_n = mu_{n-1} + (x_n - mu_{n-1})/n, which avoids large sums), Knuth's incremental variance, weighted mean and variance, variable weights with a consistency requirement, and an expectation-function notation. Section 9 sets w_{n,n}/W_n to a constant alpha, giving mu_n = mu_{n-1} + alpha(x_n - mu_{n-1}); expands it to show each sample's weight a^{n-i}(1-a) and the starting value's weight a^n, which always sum to one; and derives the exponentially weighted variance, ending with four lines of pseudocode: diff = x - mean, incr = alpha*diff, mean += incr, variance = (1-alpha)(variance + diff*incr). Useful for: the EWMA as a weighted mean, its explicit weights, and a one-pass EWMA variance and standard deviation."
+
+distributed-systems-kleppmann-cambridge-notes:
+  file: sources/distributed-systems-kleppmann-cambridge-notes.md
+  kind: pdf
+  url: https://www.cl.cam.ac.uk/teaching/2122/ConcDisSys/dist-sys-notes.pdf
+  published: "2021-10-01"
+  ingested: "2026-10-21"
+  license: CC-BY-SA-4.0
+  tags: [distributed-systems]
+  abstract: "Martin Kleppmann, lecture notes for the University of Cambridge Part IB course 'Concurrent and Distributed Systems', distributed half, 2021/22 (CC BY-SA). The introduction contrasts shared-memory concurrency on one computer with distributed systems, where each computer has its own address space and they communicate only by sending messages over a network; most practical distributed systems are message-passing. Each computer is a node, of any type of communicating device. Its slide definition: multiple computers communicating via a network, trying to achieve some task together, with Lamport's quip about a computer you didn't know existed. Reasons to distribute: inherent distribution, reliability, performance from nearby nodes, problems too big for one machine. The downsides: communication and processes fail, possibly unnoticed and nondeterministically; partial failure; fault tolerance is what makes distributed computing fundamentally different and harder. It separates distributed systems from computer networking: networking delivers messages, abstracted as latency and bandwidth, while distributed algorithms decide what messages to send and how to process them; the web and RPC are examples. Later chapters cover the two generals and Byzantine generals problems, system models of nodes, networks and timing, fault tolerance and availability, physical and logical clocks, broadcast, replication and quorums, consensus and Raft, two-phase commit, linearizability, eventual consistency, CRDTs, and Spanner. Useful for: a textbook-style definition, the message-passing model, and why distribution is hard."
+
+moving-averages-smith-dspguide-moving-average-filters:
+  file: sources/moving-averages-smith-dspguide-moving-average-filters.md
+  kind: pdf
+  url: https://www.dspguide.com/CH15.PDF
+  published: "1997-01-01"
+  ingested: "2026-10-21"
+  license: proprietary
+  license_url: https://www.dspguide.com/copyrite.htm
+  tags: [simple-moving-average]
+  abstract: "Steven W. Smith, The Scientist and Engineer's Guide to Digital Signal Processing, Chapter 15, 'Moving Average Filters' (1997-1998; free for personal use, copyright California Technical Publishing). It calls the moving average the most common DSP filter, defines it as the mean of M input points, one-sided or symmetric (the one-sided form shifts the output), and shows it is a convolution with a rectangular pulse. It argues the moving average is optimal for reducing random white noise while keeping the sharpest step response: noise falls with the square root of the number of points, and no linear filter gives less noise for a given edge sharpness. Its frequency response, sin(pi f M)/(M sin(pi f)), has very slow roll-off and 'ghastly' stopband attenuation, so it is an exceptionally good smoothing filter but an exceptionally bad low-pass filter. Relatives (multiple passes, Gaussian and Blackman kernels) have better stopband attenuation and taper their weights but cost more; Gaussian and Blackman need slow convolution. A recursive implementation, y[i] = y[i-1] + x[i+p] - x[i-q], needs one addition and one subtraction per point whatever the window, making it the fastest digital filter; it is finite impulse response, unlike typical recursive filters. Integers avoid the drift floating-point round-off causes, or a double-precision accumulator. Useful for: the SMA's noise, step response, frequency response and O(1) running-sum cost."
+
+ewma-smith-dspguide-recursive-filters:
+  file: sources/ewma-smith-dspguide-recursive-filters.md
+  kind: pdf
+  url: https://www.dspguide.com/CH19.PDF
+  published: "1997-01-01"
+  ingested: "2026-10-21"
+  license: proprietary
+  license_url: https://www.dspguide.com/copyrite.htm
+  tags: [ewma, simple-moving-average]
+  abstract: "Steven W. Smith, The Scientist and Engineer's Guide to Digital Signal Processing, Chapter 19, 'Recursive Filters' (1997-1998; free for personal use). Recursive (infinite impulse response, IIR) filters compute each output from input samples and previous outputs with a few recursion coefficients, giving a long impulse response of decaying exponentials without a long convolution; they run fast but have less performance and flexibility than other filters, and more than about a dozen coefficients makes them unstable. The single pole low-pass filter, y[n] = a0 x[n] + b1 y[n-1] with a0 = 1 - x and b1 = x, where x (0 to 1) is the decay between adjacent samples, is the digital analogue of an RC circuit; it is the same recurrence as an EWMA with smoothing factor 1 - x. x relates to the time constant d (samples to decay to 36.8%) by x = e^{-1/d}, and to the -3 dB cutoff frequency by x = e^{-2 pi f_c}; x above one is unstable. Further sections cover single-stage band-pass and notch filters, phase response (recursive filters have nonlinear phase, so rising and falling edges look different, unlike symmetric FIR filters), zero-phase bidirectional filtering, truncating the impulse response after 15-20 time constants, and the difficulty of integer arithmetic for recursive filters compared with the moving average, which 'loves integers'. Useful for: the EWMA as a single-pole IIR filter, its time constant and cutoff, and its phase."
+
+ewma-linux-kernel-average-h-source:
+  file: sources/ewma-linux-kernel-average-h-source.md
+  kind: code
+  url: https://raw.githubusercontent.com/torvalds/linux/master/include/linux/average.h
+  ingested: "2026-10-21"
+  license: GPL-2.0
+  license_url: https://github.com/torvalds/linux/blob/master/COPYING
+  tags: [ewma]
+  abstract: "The Linux kernel's include/linux/average.h (GPL-2.0), a fixed-precision exponentially weighted moving average implemented as the DECLARE_EWMA(name, precision, weight_rcp) macro. The macro generates a struct holding one unsigned long, internal, and three inline helpers: init sets it to zero; read returns internal shifted right by the precision, the number of fractional bits; add folds in a new value. The header comment says new values get weight 1/weight_rcp and the old state 1 - 1/weight_rcp, and that weight_rcp must be a power of two for efficiency. Both parameters must be compile-time constants, precision at most 30 bits, and weight_rcp a power of two, checked with BUILD_BUG_ON. The add helper computes ((internal << log2(weight_rcp)) - internal + (val << precision)) >> log2(weight_rcp), so the update needs only shifts, a subtraction and an addition; when internal is still zero it seeds the state with the first value instead (val << precision). It reads and writes the state with READ_ONCE and WRITE_ONCE. Useful for: an EWMA in production code with no multiplication or division, fixed-point state, power-of-two smoothing factors, and first-sample initialisation."

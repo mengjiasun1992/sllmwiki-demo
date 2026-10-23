@@ -1,1 +1,255 @@
 # Narratives, keyed by question slug (design doc §4.4). Written by finish-narrative.py.
+
+what-is-a-distributed-system:
+  template: concept_brief_overview
+  tags:
+    primary: [distributed-systems]
+    supporting: [distributed-system-design]
+  read:
+    distributed-systems-kleppmann-cambridge-notes: 7df7ddc48dcd93c6900e0e9b58b1daeb
+    distributed-systems-van-steen-tanenbaum-brief-intro: 32423ae1abbf816f8038d2dfaa2b0213
+    distributed-systems-lamport-definition-email: d68ff0c00ae6ff5b93b91a2e346c4028
+    distributed-systems-wikipedia-distributed-computing: 3045df631ae800107f767268b9cbd8e3
+    distributed-system-design-aws-challenges-distributed-systems: 67d0c00f5dc53a8978250dae977aab22
+  grades:
+    distributed-systems-van-steen-tanenbaum-brief-intro:
+      relevance: high
+      authority: A
+    distributed-systems-lamport-definition-email:
+      relevance: high
+      authority: A
+    distributed-systems-wikipedia-distributed-computing:
+      relevance: medium
+      authority: B
+    distributed-system-design-aws-challenges-distributed-systems:
+      relevance: medium
+      authority: A
+    distributed-systems-kleppmann-cambridge-notes:
+      relevance: high
+      authority: A
+    distributed-system-design-wikipedia-fallacies:
+      relevance: low
+      authority: B
+    distributed-system-design-hamilton-internet-scale-services:
+      relevance: low
+      authority: A
+    distributed-system-design-aws-timeouts-retries-backoff:
+      relevance: low
+      authority: A
+    distributed-system-design-google-sre-cascading-failures:
+      relevance: low
+      authority: A
+    distributed-system-design-aws-well-architected-reliability-principles:
+      relevance: low
+      authority: A
+    ewma-linkerd-beyond-round-robin:
+      relevance: low
+      authority: B
+    distributed-system-design-azure-design-principles:
+      relevance: low
+      authority: A
+    distributed-system-design-brewer-cap-twelve-years-later:
+      relevance: low
+      authority: A
+    distributed-system-design-ongaro-raft-consensus:
+      relevance: low
+      authority: A
+    distributed-system-design-lamport-time-clocks:
+      relevance: low
+      authority: A
+    distributed-system-design-saltzer-end-to-end-arguments:
+      relevance: low
+      authority: A
+
+what-are-the-common-design-tenets-and-principles-for-distributed-systems:
+  template: survey
+  tags:
+    primary: [distributed-system-design]
+    supporting: [distributed-systems]
+  read:
+    distributed-system-design-hamilton-internet-scale-services: e0fba39abfaea03337f0fa285c66bfe2
+    distributed-system-design-azure-design-principles: c94159586f29b96b12ac3a430aca409e
+    distributed-system-design-aws-well-architected-reliability-principles: 55a55ff8b937387083e5f6bcfd0dd72b
+    distributed-system-design-wikipedia-fallacies: c58295fbc71293f2053a509c7aac57b8
+    distributed-system-design-aws-timeouts-retries-backoff: 9acbbc4809808a878d33d38e48016a7a
+    distributed-system-design-aws-challenges-distributed-systems: 67d0c00f5dc53a8978250dae977aab22
+    distributed-system-design-google-sre-cascading-failures: 131211ca83149bc80cf30f298952790b
+    distributed-system-design-saltzer-end-to-end-arguments: 4028e3f2a32e4b42aa526ef4267104c9
+    distributed-system-design-brewer-cap-twelve-years-later: 6f4165216132a36601d4df1ae5f9de42
+    distributed-systems-van-steen-tanenbaum-brief-intro: 32423ae1abbf816f8038d2dfaa2b0213
+    distributed-systems-kleppmann-cambridge-notes: 7df7ddc48dcd93c6900e0e9b58b1daeb
+    distributed-system-design-ongaro-raft-consensus: 8f59cad47feb860272d008e32ed857a8
+    distributed-system-design-lamport-time-clocks: 1766a8116819e3fe4abe6d6efc398254
+  grades:
+    distributed-systems-van-steen-tanenbaum-brief-intro:
+      relevance: high
+      authority: A
+    distributed-system-design-wikipedia-fallacies:
+      relevance: high
+      authority: B
+    distributed-system-design-hamilton-internet-scale-services:
+      relevance: high
+      authority: A
+    distributed-system-design-aws-timeouts-retries-backoff:
+      relevance: high
+      authority: A
+    distributed-system-design-aws-challenges-distributed-systems:
+      relevance: high
+      authority: A
+    distributed-system-design-google-sre-cascading-failures:
+      relevance: high
+      authority: A
+    distributed-system-design-aws-well-architected-reliability-principles:
+      relevance: high
+      authority: A
+    ewma-linkerd-beyond-round-robin:
+      relevance: low
+      authority: B
+    distributed-system-design-azure-design-principles:
+      relevance: high
+      authority: A
+    distributed-system-design-brewer-cap-twelve-years-later:
+      relevance: high
+      authority: A
+    distributed-system-design-ongaro-raft-consensus:
+      relevance: medium
+      authority: A
+    distributed-system-design-lamport-time-clocks:
+      relevance: medium
+      authority: A
+    distributed-system-design-saltzer-end-to-end-arguments:
+      relevance: high
+      authority: A
+    distributed-systems-lamport-definition-email:
+      relevance: low
+      authority: A
+    distributed-systems-wikipedia-distributed-computing:
+      relevance: low
+      authority: B
+    distributed-systems-kleppmann-cambridge-notes:
+      relevance: medium
+      authority: A
+  built_on:
+    what-is-a-distributed-system: a94d171bfda7ac54f5bc2fd5783144ea
+
+what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work:
+  template: technical_brief_overview
+  tags:
+    primary: [ewma]
+    supporting: [simple-moving-average]
+  read:
+    ewma-wikipedia-exponential-smoothing: 0fcb850ab987581d8dad64506e6de66e
+    ewma-nist-ewma-control-charts: 751aecb3cd947c0702ab27a26dc314f1
+    ewma-nist-single-exponential-smoothing: ac60767f01c33040fdac1b713e229fa0
+    ewma-finch-incremental-weighted-mean-variance: 9b23fd57716bba726bd5d7acd20df2e1
+    ewma-jacobson-congestion-avoidance: ed22e00c5925ef31eae5dc0da1f1af23
+    ewma-rfc6298-tcp-retransmission-timer: c5cbe420c9cd68b1575fa80ae07324d9
+    ewma-linux-kernel-average-h-source: bd3b56afca59a2033a3f6bc97d2807f3
+    ewma-smith-dspguide-recursive-filters: 79c4813ab5bef686018e4f92c86f1541
+    ewma-fpp3-simple-exponential-smoothing: 964e95fa7e97eb3f0874401fea890a28
+    moving-averages-wikipedia-moving-average: fbc27d5b9aec0196d3eb9db9bfd09727
+  grades:
+    ewma-nist-ewma-control-charts:
+      relevance: high
+      authority: A
+    ewma-nist-single-exponential-smoothing:
+      relevance: high
+      authority: A
+    moving-averages-nist-single-moving-average:
+      relevance: low
+      authority: A
+    ewma-rfc6298-tcp-retransmission-timer:
+      relevance: medium
+      authority: A
+    moving-averages-wikipedia-moving-average:
+      relevance: medium
+      authority: B
+    ewma-wikipedia-exponential-smoothing:
+      relevance: high
+      authority: B
+    ewma-linkerd-beyond-round-robin:
+      relevance: low
+      authority: B
+    ewma-brendan-gregg-linux-load-averages:
+      relevance: low
+      authority: B
+    ewma-fpp3-simple-exponential-smoothing:
+      relevance: medium
+      authority: A
+    ewma-jacobson-congestion-avoidance:
+      relevance: medium
+      authority: A
+    ewma-finch-incremental-weighted-mean-variance:
+      relevance: high
+      authority: B
+    ewma-smith-dspguide-recursive-filters:
+      relevance: medium
+      authority: A
+    ewma-linux-kernel-average-h-source:
+      relevance: medium
+      authority: A
+    moving-averages-smith-dspguide-moving-average-filters:
+      relevance: low
+      authority: A
+
+when-should-software-use-an-ewma-instead-of-other-moving-averages:
+  template: comparison
+  tags:
+    primary: [ewma, simple-moving-average]
+    supporting: [moving-averages]
+  read:
+    moving-averages-wikipedia-moving-average: fbc27d5b9aec0196d3eb9db9bfd09727
+    ewma-wikipedia-exponential-smoothing: 0fcb850ab987581d8dad64506e6de66e
+    moving-averages-smith-dspguide-moving-average-filters: db872b37b363d25dfdfae1f6f6b6147e
+    ewma-smith-dspguide-recursive-filters: 79c4813ab5bef686018e4f92c86f1541
+    moving-averages-nist-single-moving-average: 15fd5bbea83b801d30a7e8e5d9859f78
+    ewma-nist-ewma-control-charts: 751aecb3cd947c0702ab27a26dc314f1
+    ewma-fpp3-simple-exponential-smoothing: 964e95fa7e97eb3f0874401fea890a28
+    ewma-jacobson-congestion-avoidance: ed22e00c5925ef31eae5dc0da1f1af23
+    ewma-linux-kernel-average-h-source: bd3b56afca59a2033a3f6bc97d2807f3
+    ewma-brendan-gregg-linux-load-averages: 510007f404a093e93f0a36186b2ae6a4
+  grades:
+    ewma-nist-ewma-control-charts:
+      relevance: medium
+      authority: A
+    ewma-nist-single-exponential-smoothing:
+      relevance: low
+      authority: A
+    moving-averages-nist-single-moving-average:
+      relevance: medium
+      authority: A
+    ewma-rfc6298-tcp-retransmission-timer:
+      relevance: low
+      authority: A
+    moving-averages-wikipedia-moving-average:
+      relevance: high
+      authority: B
+    ewma-wikipedia-exponential-smoothing:
+      relevance: high
+      authority: B
+    ewma-linkerd-beyond-round-robin:
+      relevance: low
+      authority: B
+    ewma-brendan-gregg-linux-load-averages:
+      relevance: medium
+      authority: B
+    ewma-fpp3-simple-exponential-smoothing:
+      relevance: medium
+      authority: A
+    ewma-jacobson-congestion-avoidance:
+      relevance: medium
+      authority: A
+    ewma-finch-incremental-weighted-mean-variance:
+      relevance: low
+      authority: A
+    ewma-smith-dspguide-recursive-filters:
+      relevance: medium
+      authority: A
+    ewma-linux-kernel-average-h-source:
+      relevance: medium
+      authority: A
+    moving-averages-smith-dspguide-moving-average-filters:
+      relevance: high
+      authority: A
+  built_on:
+    what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work: c90d976332f75f8c440bd334c720157f
