@@ -130,7 +130,7 @@ what-are-the-common-design-tenets-and-principles-for-distributed-systems:
       relevance: medium
       authority: A
   built_on:
-    what-is-a-distributed-system: a94d171bfda7ac54f5bc2fd5783144ea
+    what-is-a-distributed-system: b0965f2d471cc66d2c0516184111597f
 
 what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work:
   template: technical_brief_overview
@@ -252,4 +252,4 @@ when-should-software-use-an-ewma-instead-of-other-moving-averages:
       relevance: high
       authority: A
   built_on:
-    what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work: c90d976332f75f8c440bd334c720157f
+    what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work: 3d99f2e9bab03ff36b619156f4ccbbe5
