@@ -6,6 +6,10 @@ Amazon's Dynamo key-value store and Amazon DynamoDB: partitioning, replication a
 
 **Path:** [distributed-systems](distributed-systems.md) / amazon-dynamo
 
+## Narratives
+
+- [How did Amazon's Dynamo use consistent hashing, and what did DynamoDB keep of it?](../narratives/how-did-amazons-dynamo-use-consistent-hashing-and-what-did-dynamodb-keep-of-it.md)
+
 ## Sources
 
 - [amazon-dynamo-decandia-dynamo-sosp2007](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md): DeCandia et al.

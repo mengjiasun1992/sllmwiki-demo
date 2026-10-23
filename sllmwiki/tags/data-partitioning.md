@@ -14,6 +14,7 @@ Splitting a dataset across nodes by key: hash, range and directory partitioning,
 
 - [How do the ways of hashing keys to servers compare: modulo, ring, rendezvous, jump, Maglev and bounded loads?](../narratives/how-do-the-ways-of-hashing-keys-to-servers-compare.md)
 - [What is consistent hashing?](../narratives/what-is-consistent-hashing.md) (supporting)
+- [How did Amazon's Dynamo use consistent hashing, and what did DynamoDB keep of it?](../narratives/how-did-amazons-dynamo-use-consistent-hashing-and-what-did-dynamodb-keep-of-it.md) (supporting)
 
 ## Sources
 

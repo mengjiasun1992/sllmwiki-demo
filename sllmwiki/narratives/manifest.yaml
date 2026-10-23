@@ -440,3 +440,53 @@ how-does-a-consistent-hashing-ring-work-and-what-are-its-weaknesses-and-tuning-k
   built_on:
     what-is-consistent-hashing: 4d7311fea7577c2fb3de3170803f4d6a
     how-do-the-ways-of-hashing-keys-to-servers-compare: c6b31b973ee095154ec5be02a9c4dead
+
+how-did-amazons-dynamo-use-consistent-hashing-and-what-did-dynamodb-keep-of-it:
+  template: case_study
+  tags:
+    primary: [amazon-dynamo]
+    supporting: [consistent-hashing, data-partitioning]
+  read:
+    amazon-dynamo-decandia-dynamo-sosp2007: 34a497deb5925c24fad1cb1c33defde3
+    amazon-dynamo-elhemali-dynamodb-atc2022: 5a792a6e8aad619d80ff523a74bd9891
+    amazon-dynamo-aws-dynamodb-partitions: 378e7870ad16431f6f15d5ed2c88908f
+    data-partitioning-cassandra-dynamo-architecture: 372a121e1fb4f24eb477a26ffe854655
+  grades:
+    amazon-dynamo-decandia-dynamo-sosp2007:
+      relevance: high
+      authority: A
+    amazon-dynamo-elhemali-dynamodb-atc2022:
+      relevance: high
+      authority: A
+    amazon-dynamo-aws-dynamodb-partitions:
+      relevance: high
+      authority: A
+    consistent-hashing-wikipedia:
+      relevance: low
+      authority: C
+    consistent-hashing-wikipedia-rendezvous-hashing:
+      relevance: low
+      authority: C
+    consistent-hashing-lamping-veach-jump-hash:
+      relevance: low
+      authority: A
+    consistent-hashing-mirrokni-bounded-loads:
+      relevance: low
+      authority: A
+    consistent-hashing-eisenbud-maglev:
+      relevance: low
+      authority: A
+    consistent-hashing-stoica-chord:
+      relevance: low
+      authority: A
+    data-partitioning-cassandra-dynamo-architecture:
+      relevance: medium
+      authority: A
+    consistent-hashing-karger-stoc1997:
+      relevance: low
+      authority: A
+  models:
+    1.0: claude-opus-5-5
+  built_on:
+    what-is-consistent-hashing: 4d7311fea7577c2fb3de3170803f4d6a
+    how-does-a-consistent-hashing-ring-work-and-what-are-its-weaknesses-and-tuning-knobs: f0633f0a227206f26dfda9a2d7e4d4a1
