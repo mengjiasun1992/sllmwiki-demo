@@ -8,6 +8,10 @@ Systems of independent networked computers that coordinate by passing messages t
 
 - [distributed-system-design](distributed-system-design.md): Design tenets and principles for building distributed systems: failure, consistency, scalability, idempotency, backpressure
 
+## Narratives
+
+- [What is a distributed system?](../narratives/what-is-a-distributed-system.md)
+
 ## Sources
 
 - [distributed-systems-van-steen-tanenbaum-brief-intro](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md): Open-access survey article by Maarten van Steen and Andrew S.

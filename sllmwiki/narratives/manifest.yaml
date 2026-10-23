@@ -1,1 +1,62 @@
 # Narratives, keyed by question slug (design doc §4.4). Written by finish-narrative.py.
+
+what-is-a-distributed-system:
+  template: concept_brief_overview
+  tags:
+    primary: [distributed-systems]
+    supporting: [distributed-system-design]
+  read:
+    distributed-systems-kleppmann-cambridge-notes: 7df7ddc48dcd93c6900e0e9b58b1daeb
+    distributed-systems-van-steen-tanenbaum-brief-intro: 32423ae1abbf816f8038d2dfaa2b0213
+    distributed-systems-lamport-definition-email: d68ff0c00ae6ff5b93b91a2e346c4028
+    distributed-systems-wikipedia-distributed-computing: 3045df631ae800107f767268b9cbd8e3
+    distributed-system-design-aws-challenges-distributed-systems: 67d0c00f5dc53a8978250dae977aab22
+  grades:
+    distributed-systems-van-steen-tanenbaum-brief-intro:
+      relevance: high
+      authority: A
+    distributed-systems-lamport-definition-email:
+      relevance: high
+      authority: A
+    distributed-systems-wikipedia-distributed-computing:
+      relevance: medium
+      authority: B
+    distributed-system-design-aws-challenges-distributed-systems:
+      relevance: medium
+      authority: A
+    distributed-systems-kleppmann-cambridge-notes:
+      relevance: high
+      authority: A
+    distributed-system-design-wikipedia-fallacies:
+      relevance: low
+      authority: B
+    distributed-system-design-hamilton-internet-scale-services:
+      relevance: low
+      authority: A
+    distributed-system-design-aws-timeouts-retries-backoff:
+      relevance: low
+      authority: A
+    distributed-system-design-google-sre-cascading-failures:
+      relevance: low
+      authority: A
+    distributed-system-design-aws-well-architected-reliability-principles:
+      relevance: low
+      authority: A
+    ewma-linkerd-beyond-round-robin:
+      relevance: low
+      authority: B
+    distributed-system-design-azure-design-principles:
+      relevance: low
+      authority: A
+    distributed-system-design-brewer-cap-twelve-years-later:
+      relevance: low
+      authority: A
+    distributed-system-design-ongaro-raft-consensus:
+      relevance: low
+      authority: A
+    distributed-system-design-lamport-time-clocks:
+      relevance: low
+      authority: A
+    distributed-system-design-saltzer-end-to-end-arguments:
+      relevance: low
+      authority: A
