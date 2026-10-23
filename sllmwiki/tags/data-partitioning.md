@@ -12,6 +12,7 @@ Splitting a dataset across nodes by key: hash, range and directory partitioning,
 
 ## Narratives
 
+- [How do the ways of hashing keys to servers compare: modulo, ring, rendezvous, jump, Maglev and bounded loads?](../narratives/how-do-the-ways-of-hashing-keys-to-servers-compare.md)
 - [What is consistent hashing?](../narratives/what-is-consistent-hashing.md) (supporting)
 
 ## Sources

@@ -9,6 +9,7 @@ Consistent hashing and its alternatives: the hash ring, virtual nodes, rendezvou
 ## Narratives
 
 - [What is consistent hashing?](../narratives/what-is-consistent-hashing.md)
+- [How do the ways of hashing keys to servers compare: modulo, ring, rendezvous, jump, Maglev and bounded loads?](../narratives/how-do-the-ways-of-hashing-keys-to-servers-compare.md)
 
 ## Sources
 

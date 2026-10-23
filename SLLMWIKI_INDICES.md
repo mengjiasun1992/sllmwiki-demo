@@ -32,8 +32,8 @@ graph LR
 
 - [distributed-systems](sllmwiki/tags/distributed-systems.md): Systems of independent networked computers that coordinate by passing messages to appear as one system (2 narratives)
   - [distributed-system-design](sllmwiki/tags/distributed-system-design.md): Design tenets and principles for building distributed systems: failure, consistency, scalability, idempotency, backpressure (2 narratives)
-  - [data-partitioning](sllmwiki/tags/data-partitioning.md): Splitting a dataset across nodes by key: hash, range and directory partitioning, and rebalancing (1 narrative)
-    - [consistent-hashing](sllmwiki/tags/consistent-hashing.md): Consistent hashing and its alternatives: the hash ring, virtual nodes, rendezvous, jump and Maglev hashing, bounded loads (1 narrative)
+  - [data-partitioning](sllmwiki/tags/data-partitioning.md): Splitting a dataset across nodes by key: hash, range and directory partitioning, and rebalancing (2 narratives)
+    - [consistent-hashing](sllmwiki/tags/consistent-hashing.md): Consistent hashing and its alternatives: the hash ring, virtual nodes, rendezvous, jump and Maglev hashing, bounded loads (2 narratives)
   - [amazon-dynamo](sllmwiki/tags/amazon-dynamo.md): Amazon's Dynamo key-value store and Amazon DynamoDB: partitioning, replication and how the design evolved
 - [moving-averages](sllmwiki/tags/moving-averages.md): Moving averages for smoothing a series of measurements over time (1 narrative)
   - [ewma](sllmwiki/tags/ewma.md): The exponentially weighted moving average: its recurrence, smoothing factor, and uses in software (2 narratives)
