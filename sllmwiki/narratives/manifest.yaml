@@ -191,3 +191,65 @@ what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work:
     moving-averages-smith-dspguide-moving-average-filters:
       relevance: low
       authority: A
+
+when-should-software-use-an-ewma-instead-of-other-moving-averages:
+  template: comparison
+  tags:
+    primary: [ewma, simple-moving-average]
+    supporting: [moving-averages]
+  read:
+    moving-averages-wikipedia-moving-average: fbc27d5b9aec0196d3eb9db9bfd09727
+    ewma-wikipedia-exponential-smoothing: 0fcb850ab987581d8dad64506e6de66e
+    moving-averages-smith-dspguide-moving-average-filters: db872b37b363d25dfdfae1f6f6b6147e
+    ewma-smith-dspguide-recursive-filters: 79c4813ab5bef686018e4f92c86f1541
+    moving-averages-nist-single-moving-average: 15fd5bbea83b801d30a7e8e5d9859f78
+    ewma-nist-ewma-control-charts: 751aecb3cd947c0702ab27a26dc314f1
+    ewma-fpp3-simple-exponential-smoothing: 964e95fa7e97eb3f0874401fea890a28
+    ewma-jacobson-congestion-avoidance: ed22e00c5925ef31eae5dc0da1f1af23
+    ewma-linux-kernel-average-h-source: bd3b56afca59a2033a3f6bc97d2807f3
+    ewma-brendan-gregg-linux-load-averages: 510007f404a093e93f0a36186b2ae6a4
+  grades:
+    ewma-nist-ewma-control-charts:
+      relevance: medium
+      authority: A
+    ewma-nist-single-exponential-smoothing:
+      relevance: low
+      authority: A
+    moving-averages-nist-single-moving-average:
+      relevance: medium
+      authority: A
+    ewma-rfc6298-tcp-retransmission-timer:
+      relevance: low
+      authority: A
+    moving-averages-wikipedia-moving-average:
+      relevance: high
+      authority: B
+    ewma-wikipedia-exponential-smoothing:
+      relevance: high
+      authority: B
+    ewma-linkerd-beyond-round-robin:
+      relevance: low
+      authority: B
+    ewma-brendan-gregg-linux-load-averages:
+      relevance: medium
+      authority: B
+    ewma-fpp3-simple-exponential-smoothing:
+      relevance: medium
+      authority: A
+    ewma-jacobson-congestion-avoidance:
+      relevance: medium
+      authority: A
+    ewma-finch-incremental-weighted-mean-variance:
+      relevance: low
+      authority: A
+    ewma-smith-dspguide-recursive-filters:
+      relevance: medium
+      authority: A
+    ewma-linux-kernel-average-h-source:
+      relevance: medium
+      authority: A
+    moving-averages-smith-dspguide-moving-average-filters:
+      relevance: high
+      authority: A
+  built_on:
+    what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work: 1752f43be2d1c98fa8b026938ee46198

@@ -8,3 +8,7 @@ Moving averages for smoothing a series of measurements over time
 
 - [ewma](ewma.md): The exponentially weighted moving average: its recurrence, smoothing factor, and uses in software
 - [simple-moving-average](simple-moving-average.md): Simple and weighted windowed moving averages, the alternatives to an EWMA
+
+## Narratives
+
+- [When should software use an EWMA instead of other moving averages?](../narratives/when-should-software-use-an-ewma-instead-of-other-moving-averages.md) (supporting)
