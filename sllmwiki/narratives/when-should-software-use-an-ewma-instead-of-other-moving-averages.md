@@ -28,39 +28,39 @@ Software that smooths a noisy measurement stream, such as latencies or round-tri
 
 ## 3. The choices
 
-Software that acts on a measurement smooths it first, and the rule decides how fast it notices change, how much one bad sample sways it, and what each stream costs. [→] The candidates sit between two extremes, trusting only the latest sample or weighting all samples equally, and the EWMA lies between them. [\[1\]](../sources/ewma-fpp3-simple-exponential-smoothing.md#81-simple-exponential-smoothing)
+Software that acts on a measurement smooths it first, and the rule decides how fast it notices change, how much one bad sample sways it, and what each stream costs [→]. The candidates sit between two extremes, trusting only the latest sample or weighting all samples equally, and the EWMA lies between them [\[1\]](../sources/ewma-fpp3-simple-exponential-smoothing.md#81-simple-exponential-smoothing).
 
-**Base scenario.** A client library tracks the latency of each of thousands of backends, to route requests and to show a smoothed latency on a dashboard. Samples arrive around 100 ms, with a few milliseconds of jitter and the occasional 300 ms outlier. The library wants a value after every sample, little memory per backend, and to follow a real slowdown within about 15 samples. [→]
+**Base scenario.** A client library tracks the latency of each of thousands of backends, to route requests and to show a smoothed latency on a dashboard. Samples arrive around 100 ms, with a few milliseconds of jitter and the occasional 300 ms outlier. The library wants a value after every sample, little memory per backend, and to follow a real slowdown within about 15 samples [→].
 
 ### 3.1 Simple moving average (SMA)
 
-The SMA is the mean of the last $k$ samples, each weighted $1/k$. [\[2\]](../sources/moving-averages-wikipedia-moving-average.md#simple-moving-average) [\[3\]](../sources/moving-averages-nist-single-moving-average.md#6421-single-moving-average) It updates in constant time from a buffer of the last $k$ samples. Its subtle difference from the EWMA is the hard edge: a sample counts fully for $k$ steps, then not at all, so the output also moves when old data drops out. [\[2\]](../sources/moving-averages-wikipedia-moving-average.md#simple-moving-average)
+The SMA is the mean of the last $k$ samples, each weighted $1/k$ [\[2\]](../sources/moving-averages-wikipedia-moving-average.md#simple-moving-average), [\[3\]](../sources/moving-averages-nist-single-moving-average.md#6421-single-moving-average). It updates in constant time from a buffer of the last $k$ samples. Its subtle difference from the EWMA is the hard edge: a sample counts fully for $k$ steps, then not at all, so the output also moves when old data drops out [\[2\]](../sources/moving-averages-wikipedia-moving-average.md#simple-moving-average).
 
-**It wins when** the dashboard must show the mean of exactly the last $k$ requests, or the series is analysed offline: a centred SMA has no time shift, [\[2\]](../sources/moving-averages-wikipedia-moving-average.md#simple-moving-average) and among all linear filters the SMA gives the lowest noise for a given step sharpness. [\[4\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-3)
+**It wins when** the dashboard must show the mean of exactly the last $k$ requests, or the series is analysed offline: a centred SMA has no time shift, [\[2\]](../sources/moving-averages-wikipedia-moving-average.md#simple-moving-average) and among all linear filters the SMA gives the lowest noise for a given step sharpness [\[4\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-3).
 
 ### 3.2 Weighted moving average (WMA)
 
-The WMA tapers its weights linearly to zero across the window, and ignores everything outside the window. [\[5\]](../sources/moving-averages-wikipedia-moving-average.md#weighted-moving-average) It updates incrementally but still needs a buffer of the window. [\[5\]](../sources/moving-averages-wikipedia-moving-average.md#weighted-moving-average) Its difference from the EWMA: the weights reach zero at a finite age instead of shrinking forever. [\[6\]](../sources/moving-averages-wikipedia-moving-average.md#exponential-moving-average)
+The WMA tapers its weights linearly to zero across the window, and ignores everything outside the window [\[5\]](../sources/moving-averages-wikipedia-moving-average.md#weighted-moving-average). It updates incrementally but still needs a buffer of the window [\[5\]](../sources/moving-averages-wikipedia-moving-average.md#weighted-moving-average). Its difference from the EWMA: the weights reach zero at a finite age instead of shrinking forever [\[6\]](../sources/moving-averages-wikipedia-moving-average.md#exponential-moving-average).
 
-**It wins when** recent samples should dominate and the reader expects a strict horizon, as in financial charts. [\[5\]](../sources/moving-averages-wikipedia-moving-average.md#weighted-moving-average)
+**It wins when** recent samples should dominate and the reader expects a strict horizon, as in financial charts [\[5\]](../sources/moving-averages-wikipedia-moving-average.md#weighted-moving-average).
 
 ### 3.3 Exponentially weighted moving average (EWMA)
 
-Each sample moves the estimate a fraction α of the way toward itself, so a sample $j$ steps old carries weight $\alpha(1-\alpha)^j$; see [What is an EWMA, and how does it work?](what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work.md). It is a first-order IIR filter whose weights decay exponentially and never reach zero, [\[6\]](../sources/moving-averages-wikipedia-moving-average.md#exponential-moving-average) and it keeps only its latest value. [\[7\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average) Its difference from the SMA it most resembles: with $\alpha = 2/(k+1)$ the two have roughly the same forecast error, yet the EWMA still weights all past data. [\[7\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average)
+Each sample moves the estimate a fraction α of the way toward itself, so a sample $j$ steps old carries weight $\alpha(1-\alpha)^j$; see [What is an EWMA, and how does it work?](what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work.md). It is a first-order IIR filter whose weights decay exponentially and never reach zero, [\[6\]](../sources/moving-averages-wikipedia-moving-average.md#exponential-moving-average) and it keeps only its latest value [\[7\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average). Its difference from the SMA it most resembles: with $\alpha = 2/(k+1)$ the two have roughly the same forecast error, yet the EWMA still weights all past data [\[7\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average).
 
-**It wins in the base scenario:** thousands of streams at one number each, a value from the first sample on, [\[8\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing) and an outlier that fades rather than vanishing all at once. [→] A control chart built on an EWMA catches small, gradual drifts that a rule watching only the latest point misses. [\[9\]](../sources/ewma-nist-ewma-control-charts.md#6324-ewma-control-charts) TCP's smoothed round-trip time is one, [\[10\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm) the Linux kernel ships one, [\[11\]](../sources/ewma-linux-kernel-average-h-source.md#L10-L27) and Linux load averages are exponentially damped sums. [\[12\]](../sources/ewma-brendan-gregg-linux-load-averages.md#the-three-numbers)
+**It wins in the base scenario:** thousands of streams at one number each, a value from the first sample on, [\[8\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing) and an outlier that fades rather than vanishing all at once [→]. A control chart built on an EWMA catches small, gradual drifts that a rule watching only the latest point misses [\[9\]](../sources/ewma-nist-ewma-control-charts.md#6324-ewma-control-charts). TCP's smoothed round-trip time is one, [\[10\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm) the Linux kernel ships one, [\[11\]](../sources/ewma-linux-kernel-average-h-source.md#L10-L27) and Linux load averages are exponentially damped sums [\[12\]](../sources/ewma-brendan-gregg-linux-load-averages.md#the-three-numbers).
 
 ### 3.4 Cumulative average (CA)
 
-The CA is the mean of every sample so far, updated from the previous mean and a count; its difference from an EWMA is that its step size $1/(n+1)$ shrinks with each sample, while the EWMA's α stays fixed. [\[13\]](../sources/moving-averages-wikipedia-moving-average.md#cumulative-average) [\[8\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing)
+The CA is the mean of every sample so far, updated from the previous mean and a count; its difference from an EWMA is that its step size $1/(n+1)$ shrinks with each sample, while the EWMA's α stays fixed [\[13\]](../sources/moving-averages-wikipedia-moving-average.md#cumulative-average), [\[8\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing).
 
-**It wins when** the level doesn't drift and the long-run mean is wanted. [→]
+**It wins when** the level doesn't drift and the long-run mean is wanted [→].
 
 ### 3.5 Moving median
 
-The moving median takes the median of the last $k$ samples instead of their mean. [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#moving-median) Its difference: it is no average, so one huge sample barely drags it. [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#moving-median)
+The moving median takes the median of the last $k$ samples instead of their mean [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#moving-median). Its difference: it is no average, so one huge sample barely drags it [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#moving-median).
 
-**It wins when** the base scenario's outliers are frequent and must not move the value [→]: a mean is sensitive to shocks, the median robust to them. [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#moving-median) It costs a window plus an ordered index. [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#moving-median)
+**It wins when** the base scenario's outliers are frequent and must not move the value [→]: a mean is sensitive to shocks, the median robust to them [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#moving-median). It costs a window plus an ordered index [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#moving-median).
 
 Rarer averages are in the Appendix.
 
@@ -87,10 +87,10 @@ flowchart TD
 
 The rules: [→]
 
-- **Use an EWMA** online, over many streams, to follow a drifting level and forget gradually. Set α from the memory you want: about $1/\alpha$ samples to 63%, $3/\alpha$ to 95%. [\[15\]](../sources/ewma-wikipedia-exponential-smoothing.md#time-constant) [\[8\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing) Switch when readers expect a fixed window or outliers dominate.
+- **Use an EWMA** online, over many streams, to follow a drifting level and forget gradually. Set α from the memory you want: about $1/\alpha$ samples to 63%, $3/\alpha$ to 95% [\[15\]](../sources/ewma-wikipedia-exponential-smoothing.md#time-constant), [\[8\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing). Switch when readers expect a fixed window or outliers dominate.
 - **Use an SMA** when the last $k$ samples are the contract, when samples may be skipped, [\[8\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing) or offline, centred.
 - **Use a WMA** only when a strict horizon and recency weighting are both required.
-- **Use a cumulative average** when the level doesn't drift; once it drifts, switch to an EWMA, since the CA's weight on new samples keeps falling. [\[13\]](../sources/moving-averages-wikipedia-moving-average.md#cumulative-average)
+- **Use a cumulative average** when the level doesn't drift; once it drifts, switch to an EWMA, since the CA's weight on new samples keeps falling [\[13\]](../sources/moving-averages-wikipedia-moving-average.md#cumulative-average).
 - **Use a moving median** when single bad samples must not move the answer.
 
 ## 5. At a glance
@@ -108,32 +108,32 @@ The rules: [→]
 
 ### 6.1 Memory and cost per update
 
-The SMA beats other digital filters, one addition and one subtraction per point whatever $k$, [\[16\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-8) but it needs the last $k$ samples; the EWMA needs only its last value. [\[7\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average) With $k = 15$, that is 15 stored samples per backend against one, at about the same forecast error with $\alpha = 2/16 = 1/8$. [\[7\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average)
+The SMA beats other digital filters, one addition and one subtraction per point whatever $k$, [\[16\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-8) but it needs the last $k$ samples; the EWMA needs only its last value [\[7\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average). With $k = 15$, that is 15 stored samples per backend against one, at about the same forecast error with $\alpha = 2/16 = 1/8$ [\[7\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average).
 
 ### 6.2 How old data leaves
 
-Take one 300 ms outlier among 100 ms samples. A 15-sample SMA rises by $200/15 \approx 13.3$ ms, holds there for 15 samples, then drops 13.3 ms at once when the outlier leaves. [\[2\]](../sources/moving-averages-wikipedia-moving-average.md#simple-moving-average) An EWMA with α = 1/8 rises by 25 ms and loses one eighth of the excess with every sample after. [\[18\]](../sources/ewma-jacobson-congestion-avoidance.md#theory)
+Take one 300 ms outlier among 100 ms samples. A 15-sample SMA rises by $200/15 \approx 13.3$ ms, holds there for 15 samples, then drops 13.3 ms at once when the outlier leaves [\[2\]](../sources/moving-averages-wikipedia-moving-average.md#simple-moving-average). An EWMA with α = 1/8 rises by 25 ms and loses one eighth of the excess with every sample after [\[18\]](../sources/ewma-jacobson-congestion-avoidance.md#theory).
 
 ### 6.3 Lag and phase
 
-A trailing SMA lags by half its window, and centring removes that shift offline; [\[2\]](../sources/moving-averages-wikipedia-moving-average.md#simple-moving-average) the EWMA's kernel is asymmetric, so different frequencies are delayed differently and no shift corrects it. [\[7\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average) Recursive filters have nonlinear phase, so rising and falling edges look different, [\[19\]](../sources/ewma-smith-dspguide-recursive-filters.md#page-10) though offline a recursive filter run forward and backward has zero phase. [\[20\]](../sources/ewma-smith-dspguide-recursive-filters.md#page-13) Online, both lag; the choice is how much. [→]
+A trailing SMA lags by half its window, and centring removes that shift offline; [\[2\]](../sources/moving-averages-wikipedia-moving-average.md#simple-moving-average) the EWMA's kernel is asymmetric, so different frequencies are delayed differently and no shift corrects it [\[7\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average). Recursive filters have nonlinear phase, so rising and falling edges look different, [\[19\]](../sources/ewma-smith-dspguide-recursive-filters.md#page-10) though offline a recursive filter run forward and backward has zero phase [\[20\]](../sources/ewma-smith-dspguide-recursive-filters.md#page-13). Online, both lag; the choice is how much [→].
 
 ### 6.4 Noise against responsiveness
 
-The SMA reduces white noise by $\sqrt{k}$ and gives the sharpest step for that noise; [\[4\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-3) the single-pole filter an EWMA is also performs well in time and poorly in frequency. [\[21\]](../sources/ewma-smith-dspguide-recursive-filters.md#page-7) For the EWMA, a large α corrects quickly but passes noise, and a gain too small is almost always better than one too large. [\[18\]](../sources/ewma-jacobson-congestion-avoidance.md#theory) The EWMA suits series without trend; on trending data a trend method is needed. [\[1\]](../sources/ewma-fpp3-simple-exponential-smoothing.md#81-simple-exponential-smoothing)
+The SMA reduces white noise by $\sqrt{k}$ and gives the sharpest step for that noise; [\[4\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-3) the single-pole filter an EWMA is also performs well in time and poorly in frequency [\[21\]](../sources/ewma-smith-dspguide-recursive-filters.md#page-7). For the EWMA, a large α corrects quickly but passes noise, and a gain too small is almost always better than one too large [\[18\]](../sources/ewma-jacobson-congestion-avoidance.md#theory). The EWMA suits series without trend; on trending data a trend method is needed [\[1\]](../sources/ewma-fpp3-simple-exponential-smoothing.md#81-simple-exponential-smoothing).
 
 ### 6.5 Outliers
 
-Every mean here is pulled by a shock; the moving median less so, and it is optimal when deviations are heavy-tailed (Laplace) rather than normal. [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#moving-median)
+Every mean here is pulled by a shock; the moving median less so, and it is optimal when deviations are heavy-tailed (Laplace) rather than normal [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#moving-median).
 
 ### 6.6 Arithmetic
 
-The SMA works exactly in integers, while floating point accumulates drift unless the accumulator is double precision. [\[16\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-8) General recursive filters are harder in integers, so Smith advises trying the SMA first. [\[22\]](../sources/ewma-smith-dspguide-recursive-filters.md#page-14) An EWMA restricted to $\alpha = 1/2^n$ escapes that: the kernel's update is shifts, a subtraction and an addition. [\[17\]](../sources/ewma-linux-kernel-average-h-source.md#L54-L70) [\[23\]](../sources/ewma-jacobson-congestion-avoidance.md#practice)
+The SMA works exactly in integers, while floating point accumulates drift unless the accumulator is double precision [\[16\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-8). General recursive filters are harder in integers, so Smith advises trying the SMA first [\[22\]](../sources/ewma-smith-dspguide-recursive-filters.md#page-14). An EWMA restricted to $\alpha = 1/2^n$ escapes that: the kernel's update is shifts, a subtraction and an addition [\[17\]](../sources/ewma-linux-kernel-average-h-source.md#L54-L70), [\[23\]](../sources/ewma-jacobson-congestion-avoidance.md#practice).
 
 ## 7. Pitfalls
 
-- **Naming an EWMA by a window.** Linux's one-minute load average reaches only about 0.62 after a minute of constant load of 1, because it is an exponentially damped sum, not a one-minute mean. [\[12\]](../sources/ewma-brendan-gregg-linux-load-averages.md#the-three-numbers) Label an EWMA by its time constant. [→]
-- **α per sample, not per second.** Sampling faster shortens an EWMA's memory in time [→]; TCP notes its α may keep too little history with many samples per round trip. [\[24\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#3-taking-rtt-samples)
+- **Naming an EWMA by a window.** Linux's one-minute load average reaches only about 0.62 after a minute of constant load of 1, because it is an exponentially damped sum, not a one-minute mean [\[12\]](../sources/ewma-brendan-gregg-linux-load-averages.md#the-three-numbers). Label an EWMA by its time constant [→].
+- **α per sample, not per second.** Sampling faster shortens an EWMA's memory in time [→]; TCP notes its α may keep too little history with many samples per round trip [\[24\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#3-taking-rtt-samples).
 
 ## 8. Where to go next
 
@@ -144,7 +144,7 @@ The SMA works exactly in integers, while floating point accumulates drift unless
 
 ### 9.1 Rarer averages
 
-Gaussian and Blackman kernels and multiple-pass SMAs filter frequencies better than the SMA at higher cost; [\[25\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-6) a power-law average keeps distant samples comparably weighted but takes $O(n \log n)$ where the EWMA updates in $O(1)$. [\[26\]](../sources/moving-averages-wikipedia-moving-average.md#power-law-moving-average)
+Gaussian and Blackman kernels and multiple-pass SMAs filter frequencies better than the SMA at higher cost; [\[25\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-6) a power-law average keeps distant samples comparably weighted but takes $O(n \log n)$ where the EWMA updates in $O(1)$ [\[26\]](../sources/moving-averages-wikipedia-moving-average.md#power-law-moving-average).
 
 ## 10. References
 
