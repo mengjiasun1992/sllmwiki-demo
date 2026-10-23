@@ -354,3 +354,89 @@ how-do-the-ways-of-hashing-keys-to-servers-compare:
     1.0: claude-opus-5-5
   built_on:
     what-is-consistent-hashing: 4d7311fea7577c2fb3de3170803f4d6a
+
+how-does-a-consistent-hashing-ring-work-and-what-are-its-weaknesses-and-tuning-knobs:
+  template: technical_brief_overview
+  tags:
+    primary: [consistent-hashing]
+    supporting: [distributed-system-design]
+  read:
+    amazon-dynamo-decandia-dynamo-sosp2007: 34a497deb5925c24fad1cb1c33defde3
+    data-partitioning-cassandra-dynamo-architecture: 372a121e1fb4f24eb477a26ffe854655
+    consistent-hashing-stoica-chord: 9ae4c363a2688de2cb99b31b962206bc
+    consistent-hashing-karger-stoc1997: 06187d2d350fb0b48bbdd590c217bd20
+    consistent-hashing-wikipedia: fb7927ad8f99a1e20933fd3f012331eb
+    consistent-hashing-lamping-veach-jump-hash: 5e1ad33a6a348c75ca01cb9bb8f6e3d1
+    consistent-hashing-mirrokni-bounded-loads: 71c91d0b1fa1c3ccc8e5af1d0fdfeead
+  grades:
+    consistent-hashing-wikipedia:
+      relevance: medium
+      authority: C
+    consistent-hashing-wikipedia-rendezvous-hashing:
+      relevance: low
+      authority: C
+    consistent-hashing-lamping-veach-jump-hash:
+      relevance: medium
+      authority: A
+    consistent-hashing-mirrokni-bounded-loads:
+      relevance: medium
+      authority: A
+    consistent-hashing-eisenbud-maglev:
+      relevance: low
+      authority: A
+    consistent-hashing-stoica-chord:
+      relevance: high
+      authority: A
+    data-partitioning-cassandra-dynamo-architecture:
+      relevance: high
+      authority: A
+    amazon-dynamo-decandia-dynamo-sosp2007:
+      relevance: high
+      authority: A
+    consistent-hashing-karger-stoc1997:
+      relevance: high
+      authority: A
+    distributed-systems-van-steen-tanenbaum-brief-intro:
+      relevance: low
+      authority: A
+    distributed-system-design-wikipedia-fallacies:
+      relevance: low
+      authority: C
+    distributed-system-design-hamilton-internet-scale-services:
+      relevance: low
+      authority: A
+    distributed-system-design-aws-timeouts-retries-backoff:
+      relevance: low
+      authority: A
+    distributed-system-design-aws-challenges-distributed-systems:
+      relevance: low
+      authority: A
+    distributed-system-design-google-sre-cascading-failures:
+      relevance: low
+      authority: A
+    distributed-system-design-aws-well-architected-reliability-principles:
+      relevance: low
+      authority: A
+    ewma-linkerd-beyond-round-robin:
+      relevance: low
+      authority: A
+    distributed-system-design-azure-design-principles:
+      relevance: low
+      authority: A
+    distributed-system-design-brewer-cap-twelve-years-later:
+      relevance: low
+      authority: A
+    distributed-system-design-ongaro-raft-consensus:
+      relevance: low
+      authority: A
+    distributed-system-design-lamport-time-clocks:
+      relevance: low
+      authority: A
+    distributed-system-design-saltzer-end-to-end-arguments:
+      relevance: low
+      authority: A
+  models:
+    1.0: claude-opus-5-5
+  built_on:
+    what-is-consistent-hashing: 4d7311fea7577c2fb3de3170803f4d6a
+    how-do-the-ways-of-hashing-keys-to-servers-compare: c6b31b973ee095154ec5be02a9c4dead

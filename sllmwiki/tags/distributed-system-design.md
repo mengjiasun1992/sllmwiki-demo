@@ -10,6 +10,7 @@ Design tenets and principles for building distributed systems: failure, consiste
 
 - [What are the common design tenets and principles for distributed systems?](../narratives/what-are-the-common-design-tenets-and-principles-for-distributed-systems.md)
 - [What is a distributed system?](../narratives/what-is-a-distributed-system.md) (supporting)
+- [How does a consistent hashing ring work, and what are its weaknesses and tuning knobs?](../narratives/how-does-a-consistent-hashing-ring-work-and-what-are-its-weaknesses-and-tuning-knobs.md) (supporting)
 
 ## Sources
 
