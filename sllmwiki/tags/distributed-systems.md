@@ -7,6 +7,8 @@ Systems of independent networked computers that coordinate by passing messages t
 ## Subtopics
 
 - [distributed-system-design](distributed-system-design.md): Design tenets and principles for building distributed systems: failure, consistency, scalability, idempotency, backpressure
+- [data-partitioning](data-partitioning.md): Splitting a dataset across nodes by key: hash, range and directory partitioning, and rebalancing
+- [amazon-dynamo](amazon-dynamo.md): Amazon's Dynamo key-value store and Amazon DynamoDB: partitioning, replication and how the design evolved
 
 ## Narratives
 

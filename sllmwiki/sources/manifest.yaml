@@ -295,3 +295,125 @@ ewma-linux-kernel-average-h-source:
   license_url: https://github.com/torvalds/linux/blob/master/COPYING
   tags: [ewma]
   abstract: "The Linux kernel's include/linux/average.h (GPL-2.0), a fixed-precision exponentially weighted moving average implemented as the DECLARE_EWMA(name, precision, weight_rcp) macro. The macro generates a struct holding one unsigned long, internal, and three inline helpers: init sets it to zero; read returns internal shifted right by the precision, the number of fractional bits; add folds in a new value. The header comment says new values get weight 1/weight_rcp and the old state 1 - 1/weight_rcp, and that weight_rcp must be a power of two for efficiency. Both parameters must be compile-time constants, precision at most 30 bits, and weight_rcp a power of two, checked with BUILD_BUG_ON. The add helper computes ((internal << log2(weight_rcp)) - internal + (val << precision)) >> log2(weight_rcp), so the update needs only shifts, a subtraction and an addition; when internal is still zero it seeds the state with the first value instead (val << precision). It reads and writes the state with READ_ONCE and WRITE_ONCE. Useful for: an EWMA in production code with no multiplication or division, fixed-point state, power-of-two smoothing factors, and first-sample initialisation."
+
+consistent-hashing-wikipedia:
+  file: sources/consistent-hashing-wikipedia.md
+  kind: html
+  url: https://en.wikipedia.org/wiki/Consistent_hashing
+  ingested: "2026-10-23"
+  license: CC-BY-SA-4.0
+  license_url: https://creativecommons.org/licenses/by-sa/4.0/
+  tags: [consistent-hashing]
+  abstract: "Wikipedia article on consistent hashing: a hashing technique in which resizing a hash table remaps only n/m keys on average (n keys, m slots), whereas a modulo mapping remaps nearly all keys. It traces the history from Karger et al.'s 1997 STOC paper on distributed web caching (and the Akamai founders Lewin and Leighton) to its use in distributed hash tables such as Chord, notes Teradata's earlier use of the idea, and points to rendezvous (HRW) hashing, designed in 1996, as a simpler and more general alternative of which consistent hashing is a special case. The basic technique section contrasts modulo placement with mapping both objects and servers onto a circle, assigning each object to the next server clockwise, so that adding or removing a server moves only the objects of one arc (about 1/n of them); for caches the move is often just cache misses. An implementation section describes keeping server positions in a binary search tree and the successor-based insert and delete operations for objects and servers. Variance reduction uses virtual nodes, whose count is a server's weight. Practical extensions cover spreading a failed server's load via multiple points, replicating hot objects onto contiguous servers, and per-object hash functions. A complexity table compares a classic hash table with consistent hashing (node change O(K/N + log N), lookup O(log N)), and a list of systems using it includes Dynamo, Cassandra, Riak, Swift, Couchbase, Akamai and Discord."
+
+consistent-hashing-wikipedia-rendezvous-hashing:
+  file: sources/consistent-hashing-wikipedia-rendezvous-hashing.md
+  kind: html
+  url: https://en.wikipedia.org/wiki/Rendezvous_hashing
+  ingested: "2026-10-23"
+  license: CC-BY-SA-4.0
+  license_url: https://creativecommons.org/licenses/by-sa/4.0/
+  tags: [consistent-hashing]
+  abstract: "Wikipedia article on rendezvous or highest random weight (HRW) hashing, an algorithm by which clients independently agree on a set of k of n sites for an object: each site gets a score h(O, S) per object and the k highest-scoring sites win. Invented by Thaler and Ravishankar at the University of Michigan in 1996, a year before consistent hashing, it was used early for multicast rendezvous points and in Microsoft's Cache Array Routing Protocol, and is now used by the GitHub load balancer, Apache Ignite, Tahoe-LAFS, Apache Druid, Apache Kafka, IBM Cloud Object Store and others. The article states its properties: low overhead, uniform load, capacity handled by listing a site several times, high hit rate, minimal disruption when a site fails (only its objects move) and distributed k-agreement. Because basic HRW costs O(n) hashes per lookup, it describes a skeleton-based hierarchical variant with O(log n) running time, and how replication, failures and additions work within its leaf clusters. A comparison with consistent hashing explains tokens on a circle (100-200 per site), their storage and binary search, and why a removed site's objects spread only over as many sites as it has tokens; it argues HRW is simpler, needs no tokens, and generalises consistent hashing, which it shows is a special case of HRW. Weighted variants are covered: CARP load factors and their excess key movement, CRUSH as used by Ceph, and logarithmic weighted scores (Schindelhauer and Schomaker, 2005), with a Python implementation of weighted rendezvous hashing."
+
+consistent-hashing-lamping-veach-jump-hash:
+  file: sources/consistent-hashing-lamping-veach-jump-hash.md
+  kind: pdf
+  url: https://arxiv.org/pdf/1406.2294
+  published: "2014-06-09"
+  ingested: "2026-10-23"
+  license: proprietary
+  license_url: http://arxiv.org/licenses/nonexclusive-distrib/1.0/
+  tags: [consistent-hashing]
+  abstract: "John Lamping and Eric Veach of Google present jump consistent hash, a consistent hash function of about five lines of C++ that maps a 64-bit key and a number of buckets to a bucket in [0, num_buckets). It needs no stored state, runs in expected time below ln(n)+1 iterations, and splits keys among buckets almost perfectly; when a bucket is added, every existing bucket gives up an equal share of its keys. Its limit is that buckets must be numbered sequentially, so it cannot remove an arbitrary bucket or use server names, which suits sharded data storage better than distributed web caching. The note contrasts modulo hashing (going from 10 to 12 shards reshuffles nearly all keys, while consistent hashing moves only 1/6), describes Karger et al.'s ring with many points per bucket and Thaler and Ravishankar's rendezvous hashing, and argues that only balance and monotonicity matter for storage. It derives the algorithm from a linear-time version to the logarithmic jump formula j = floor((b+1)/r). Measurements against two Karger ring implementations cover key-distribution error by points per bucket, memory (up to gigabytes at 1000 points per bucket), lookup time with and without cache competition, and the time to build the ring."
+
+consistent-hashing-mirrokni-bounded-loads:
+  file: sources/consistent-hashing-mirrokni-bounded-loads.md
+  kind: pdf
+  url: https://arxiv.org/pdf/1608.01350
+  published: "2016-08-03"
+  ingested: "2026-10-23"
+  license: proprietary
+  license_url: http://arxiv.org/licenses/nonexclusive-distrib/1.0/
+  tags: [consistent-hashing]
+  abstract: "Vahab Mirrokni, Mikkel Thorup and Morteza Zadimoghaddam (Google Research and University of Copenhagen; arXiv 1608.01350, version of July 2017) study dynamic load balancing where clients (balls) and servers (bins) can both be added or removed in any order, and the goal is both a bounded maximum load and few moves. They note that consistent hashing and rendezvous hashing balance no better than random assignment, so with n balls and n bins many servers hold about log n / log log n clients, and that the plain ring's maximum load is about log n times the average. Their scheme keeps the ring but gives every bin a capacity of about ceil(c m / n) for a user-chosen balance parameter c = 1 + epsilon, and forwards a ball from a full bin clockwise to the next non-full bin, as in linear probing. They prove that, compared with the minimum, the expected number of moves per update grows by a factor O(1/epsilon^2) for c up to 2 and by 1 + O(log c / c) for larger c, with matching search costs, and they give high-probability bounds, an efficient implementation and simulations. The paper compares the approach with virtual nodes, power of multiple choices and cuckoo hashing, and reports its use in Google Cloud Pub/Sub and at Vimeo (c = 1.25, shipped in HAProxy 1.7.0)."
+
+consistent-hashing-eisenbud-maglev:
+  file: sources/consistent-hashing-eisenbud-maglev.md
+  kind: pdf
+  url: https://www.usenix.org/system/files/conference/nsdi16/nsdi16-paper-eisenbud.pdf
+  published: "2016-03-16"
+  ingested: "2026-10-23"
+  license: proprietary
+  license_url: https://www.usenix.org/conferences/author-resources/open-access
+  tags: [consistent-hashing]
+  abstract: "This NSDI 2016 paper by Daniel E. Eisenbud and colleagues at Google describes Maglev, Google's distributed software network load balancer, which runs on commodity Linux servers and has served most of Google's incoming traffic since 2008. Routers spread packets over Maglev machines with ECMP, and each machine matches packets to a service's virtual IP and forwards them to a service endpoint using GRE encapsulation and direct server return. A kernel-bypass forwarder reaches 10Gbps line rate with small packets. To keep every packet of a connection on the same backend, Maglev pairs a per-machine connection tracking table with a new consistent hashing scheme, Maglev hashing. Each backend gets a permutation of the positions in a prime-sized lookup table, and the backends take turns claiming their most preferred empty positions, so each one holds almost exactly the same share of the table. Unlike Karger's ring and rendezvous hashing, which put minimal disruption first, Maglev puts even balance first and accepts a little extra disruption when backends change. The paper covers the algorithm, how it evolved in operation, VIP matching, fragment handling and monitoring. Its evaluation covers load balance in production, single-machine throughput, and a comparison of Maglev hashing with Karger and rendezvous hashing on balance and resilience to backend changes."
+
+consistent-hashing-stoica-chord:
+  file: sources/consistent-hashing-stoica-chord.md
+  kind: pdf
+  url: https://pdos.csail.mit.edu/papers/chord:sigcomm01/chord_sigcomm.pdf
+  published: "2001-08-27"
+  ingested: "2026-10-23"
+  license: proprietary
+  tags: [consistent-hashing, data-partitioning]
+  abstract: "Stoica, Morris, Karger, Kaashoek and Balakrishnan's SIGCOMM 2001 paper presents Chord, a distributed lookup protocol for peer-to-peer systems that supports a single operation: given a key, map it onto a node. Chord builds on a variant of consistent hashing: nodes and keys get m-bit identifiers from SHA-1 (node IDs from hashing the IP address), identifiers are ordered on an identifier circle modulo 2^m, and each key is assigned to its successor, the first node whose identifier equals or follows the key. The paper restates the consistent hashing load-balance and minimal-movement theorem, discusses virtual nodes as a way to tighten balance, and explains why Chord omits them for simplicity. Its main contribution is scalability: each node keeps a finger table of O(log N) entries, so lookups take O(log N) messages, and joins and leaves need O(log^2 N) messages. It describes node joins, key transfer to a new node from its successor, a periodic stabilization protocol for concurrent joins, and successor lists for failure recovery, which also suggest replicating data at a key's successors. Simulations measure load balance with and without virtual nodes, path length (about half of log2 N), resilience to mass failures, and lookups during churn; a prototype on ten Internet sites measures lookup latency. It ends with future work on partitions, malicious nodes and latency."
+
+data-partitioning-cassandra-dynamo-architecture:
+  file: sources/data-partitioning-cassandra-dynamo-architecture.md
+  kind: html
+  url: https://cassandra.apache.org/doc/latest/cassandra/architecture/dynamo.html
+  ingested: "2026-10-23"
+  license: Apache-2.0
+  license_url: https://www.apache.org/licenses/LICENSE-2.0
+  tags: [data-partitioning, consistent-hashing]
+  abstract: "This page of the Apache Cassandra architecture documentation explains which techniques Cassandra takes from Amazon's Dynamo: dataset partitioning with consistent hashing, multi-master replication with versioned data and tunable consistency, gossip-based cluster membership and failure detection, and incremental scale-out on commodity hardware, while using an LSM-tree storage engine. It contrasts naive modulo hashing, where adding a node can invalidate almost every mapping, with a token ring where each node owns one or more tokens and a key's replicas are found by walking the ring clockwise until enough distinct nodes are found, as in Chord. It explains why Cassandra uses virtual nodes (multiple tokens per physical node), what they cost in availability, repair and range-scan performance, and why Cassandra 3.x replaced random token allocation (256 tokens by default in 2.x) with a deterministic allocator. It describes replication strategies (NetworkTopologyStrategy with rack awareness, SimpleStrategy, experimental transient replication), last-write-wins timestamp versioning in place of Dynamo's vector clocks, read repair, hinted handoff and Merkle-tree anti-entropy repair, and consistency levels as a version of Dynamo's R + W > N rule. It closes with gossip, the Phi Accrual failure detector, explicit operator-driven membership removal, and the simple query and wide-column data model."
+
+amazon-dynamo-decandia-dynamo-sosp2007:
+  file: sources/amazon-dynamo-decandia-dynamo-sosp2007.md
+  kind: pdf
+  url: https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf
+  published: "2007-10-14"
+  ingested: "2026-10-23"
+  license: proprietary
+  tags: [amazon-dynamo, consistent-hashing]
+  abstract: "DeCandia et al. (Amazon.com, SOSP 2007) present Dynamo, the highly available key-value store behind core Amazon services such as the shopping cart, which gives up consistency under some failures to stay always writeable. The paper describes how Dynamo combines well-known techniques: data is partitioned and replicated with consistent hashing on an MD5-based ring, using virtual nodes (tokens) to even out load and account for heterogeneous hardware; each key is stored on N nodes from its preference list; reads and writes use configurable R and W quorums with a sloppy quorum and hinted handoff for temporary failures; vector clocks with application-assisted reconciliation track versions; Merkle-tree anti-entropy repairs replicas; and a gossip protocol with seed nodes spreads membership and token placement so each node can route requests in zero hops. The experience section reports production results: the common (3,2,2) configuration, 99.9th-percentile latency SLAs, write buffering, the evolution from random tokens (Strategy 1) to Q equal-sized partitions with Q/S tokens per node (Strategy 3) and their measured load-balancing efficiency, divergent-version rates, client-driven coordination, admission control for background tasks, and the scaling limits of its full-membership model."
+
+amazon-dynamo-elhemali-dynamodb-atc2022:
+  file: sources/amazon-dynamo-elhemali-dynamodb-atc2022.md
+  kind: pdf
+  url: https://www.usenix.org/system/files/atc22-elhemali.pdf
+  published: "2022-07-11"
+  ingested: "2026-10-23"
+  license: proprietary
+  license_url: https://www.usenix.org/conferences/author-resources/open-access
+  tags: [amazon-dynamo, data-partitioning]
+  abstract: "Elhemali et al. (Amazon Web Services, USENIX ATC 2022) describe how Amazon DynamoDB, the fully managed multi-tenant NoSQL service launched in 2012, delivers predictable single-digit-millisecond performance at any scale, peaking at 89.2 million requests per second during Prime Day 2021. They explain its lineage: DynamoDB was motivated by Dynamo and SimpleDB, keeping Dynamo's incremental scalability and predictable performance but sharing little of its architecture. A table's partition key is hashed and each table is divided into partitions holding contiguous key ranges; each partition's replicas across Availability Zones form a Multi-Paxos replication group with a leased leader, and log replicas speed up healing. Request routers look up partition metadata, later served by an in-memory MemDS store, and route requests to storage nodes, while an autoadmin service manages health and scaling. The paper traces admission control from static per-partition throughput allocation, which caused hot partitions and throughput dilution, through bursting and adaptive capacity to global admission control, consumption-based balancing, splitting for consumption, and on-demand tables. It also covers durability (write-ahead logs archived to S3, checksums, scrubbing, TLA+ verification, backups), availability (gray-failure detection, deployments, static stability) and YCSB benchmarks."
+
+amazon-dynamo-aws-dynamodb-partitions:
+  file: sources/amazon-dynamo-aws-dynamodb-partitions.md
+  kind: text
+  url: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.Partitions.html
+  ingested: "2026-10-23"
+  license: proprietary
+  license_url: https://aws.amazon.com/terms/
+  tags: [amazon-dynamo, data-partitioning]
+  abstract: "This page of the Amazon DynamoDB Developer Guide (AWS documentation) explains how DynamoDB stores table data in partitions: allocations of SSD-backed storage that are automatically replicated across multiple Availability Zones within an AWS Region and managed entirely by the service. It says DynamoDB allocates enough partitions at table creation to meet provisioned throughput, and adds partitions when provisioned throughput is raised beyond what existing partitions support or when a partition fills up, transparently and without loss of availability. Global secondary indexes are also made of partitions. For a simple primary key, the partition key value is input to an internal hash function whose output determines the partition holding the item, so items are not stored in sorted order; the page recommends partition keys with many distinct values, since DynamoDB is optimized for uniform distribution. For a composite primary key, items sharing a partition key value form an item collection kept together in ascending sort-key order, which supports efficient range Query operations with optional sort-key conditions; without local secondary indexes, DynamoDB can split an item collection over as many partitions as needed. There is no upper limit on sort key values per partition key value."
+
+consistent-hashing-gryski-algorithmic-tradeoffs:
+  kind: link
+  url: https://dgryski.medium.com/consistent-hashing-algorithmic-tradeoffs-ef6b8e2fcae8
+  ingested: "2026-10-23"
+  license: unknown
+  tags: [consistent-hashing]
+  abstract: "Damian Gryski's 2018 practitioner survey of consistent hashing algorithms (ring with virtual nodes, rendezvous, jump, multi-probe, Maglev, bounded loads) and their trade-offs in memory, lookup speed and load balance. Kept as a link: the site returned 403 to automated fetches."
+
+consistent-hashing-karger-stoc1997:
+  file: sources/consistent-hashing-karger-stoc1997.md
+  kind: pdf
+  url: https://people.csail.mit.edu/karger/Papers/web.pdf
+  published: "1997-05-04"
+  ingested: "2026-10-23"
+  license: proprietary
+  tags: [consistent-hashing]
+  abstract: "The 1997 STOC paper by Karger, Lehman, Leighton, Levine, Lewin and Panigrahy (MIT) that introduced consistent hashing, 'Consistent Hashing and Random Trees: Distributed Caching Protocols for Relieving Hot Spots on the World Wide Web'. It addresses hot spots, where many clients request data from one server at once, and proposes caching protocols for very large networks that need only local control and no complete or consistent view of the network. The first tool, random trees, builds a different d-ary tree of caches per page, mapped onto caches by a hash function, so requests are coalesced without any cache being near the root for many pages; caches store a page only after q requests, and the paper bounds latency (tree depth), per-cache load and storage with high probability, including for hash functions of only logarithmic independence. The second tool, consistent hashing, is motivated by the failure of classical hashing (such as ax+b mod p) when the set of caches changes or clients see different sets: almost every item would move. It defines ranged hash functions and the properties of balance, monotonicity, spread and load, constructs a family by mapping items and several (order log C) copies of each bucket to the unit interval and assigning each item to the closest bucket point, and proves it monotone, balanced, and of logarithmic spread and load. It gives an implementation with O(1) expected lookup and O(log C) bucket addition or removal, relates monotone hashing to per-item bucket permutations, and then combines both tools, extending them to ultrametric latencies, faults and requests arriving over time."

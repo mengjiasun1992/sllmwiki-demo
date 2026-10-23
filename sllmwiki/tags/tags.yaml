@@ -20,3 +20,15 @@ ewma:
 simple-moving-average:
   description: Simple and weighted windowed moving averages, the alternatives to an EWMA
   parent: moving-averages
+
+data-partitioning:
+  description: "Splitting a dataset across nodes by key: hash, range and directory partitioning, and rebalancing"
+  parent: distributed-systems
+
+consistent-hashing:
+  description: "Consistent hashing and its alternatives: the hash ring, virtual nodes, rendezvous, jump and Maglev hashing, bounded loads"
+  parent: data-partitioning
+
+amazon-dynamo:
+  description: "Amazon's Dynamo key-value store and Amazon DynamoDB: partitioning, replication and how the design evolved"
+  parent: distributed-systems
