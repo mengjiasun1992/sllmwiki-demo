@@ -49,7 +49,7 @@ flowchart TD
 
 *Figure 5-1: The partitioning schemes Dynamo went through, the one it settled on (green), and DynamoDB's later design (orange).*
 
-1. **The ring.** Dynamo hashed each key with MD5 to a 128-bit position on a ring and stored it at the first node clockwise [\[6\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-5). The key's coordinator replicated it to the next `N−1` nodes clockwise, and the preference list skipped positions so that it held only distinct physical nodes [\[7\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-6). Most services ran with `(N, R, W) = (3, 2, 2)` [\[8\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-11).
+1. **The ring.** Dynamo hashed each key with MD5 to a 128-bit position on a ring and stored it at the first node clockwise [\[6\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-5). The key's coordinator replicated it to the next `N−1` nodes clockwise, and the preference list skipped positions so that it held only distinct physical nodes [\[7\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-6). The common configuration was `(N, R, W) = (3, 2, 2)` [\[8\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-11).
 2. **Virtual nodes.** Random single positions gave non-uniform data and load and ignored differences between machines, so each node got several tokens; a failed node's load then dispersed over the others, and capacity could set a node's token count [\[7\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-6).
 3. **Membership.** Tokens were chosen when a node first started, and the token map spread by gossip, so each node knew who owned every range [\[9\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-8), [\[10\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-9). Nodes were added and removed only by an explicit command, since most outages were transient [\[9\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-8).
 4. **Strategy 1 in production.** T random tokens per node, with ranges set by token values [\[11\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-12). A joining node had to "steal" its ranges from nodes that scanned their stores at low priority, which in busy season took almost a day; every join or leave changed many ranges and forced Merkle trees to be recomputed; and archiving the key space was hard [\[11\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-12).
@@ -82,7 +82,7 @@ Decide the units of data once, then map units to nodes separately. It explains t
 
 ## 8. Outcome
 
-Under Strategy 1, the share of nodes more than 15% off the average load was as high as 20% at low traffic and close to 10% at high traffic [\[8\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-11). Compared at equal metadata size, with 30 nodes and N = 3, Strategy 3 had the best load-balancing efficiency and Strategy 2 the worst [\[11\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-12), [\[12\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-13); Strategy 3 also shrank each node's membership data by three orders of magnitude [\[12\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-13). Dynamo answered 99.9995% of requests without timing out, with no data loss reported [\[21\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-14). Full membership at each node worked for a couple of hundred nodes, and the paper expected tens of thousands to need more [\[21\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-14).
+Over 24 hours of a live system, the share of nodes more than 15% off the average load was as high as 20% at low traffic and close to 10% at high traffic [\[8\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-11). Compared at equal metadata size, with 30 nodes and N = 3, Strategy 3 had the best load-balancing efficiency and Strategy 2 the worst [\[11\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-12), [\[12\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-13); Strategy 3 also shrank each node's membership data by three orders of magnitude [\[12\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-13). Dynamo answered 99.9995% of requests without timing out, with no data loss reported [\[21\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-14). Full membership at each node worked for a couple of hundred nodes, and the paper expected tens of thousands to need more [\[21\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-14).
 
 In DynamoDB, adaptive capacity eliminated over 99.99% of the throttling caused by skewed access [\[22\]](../sources/amazon-dynamo-elhemali-dynamodb-atc2022.md#adaptive-capacity), and its routers' metadata cache hit about 99.75% of lookups, though cold starts caused spikes in metadata traffic [\[15\]](../sources/amazon-dynamo-elhemali-dynamodb-atc2022.md#metadata-availability). DynamoDB "shared most of the name of the previous Dynamo system but little of its architecture" [\[19\]](../sources/amazon-dynamo-elhemali-dynamodb-atc2022.md#history).
 
@@ -135,12 +135,13 @@ In DynamoDB, adaptive capacity eliminated over 99.99% of the throttling caused b
 
 ## 12. Metadata
 
-- **Version:** 1.0
+- **Version:** 1.1
 - **Template:** case_study
 - **Model:** claude-opus-5-5
 - **Created:** 2026-10-23
 - **Last modified:** 2026-10-23
 - **History:**
+  - 1.1 (2026-10-23): Lint: the load-imbalance measurement is no longer attributed to Strategy 1; (3,2,2) is the common configuration, not most services'
   - 1.0 (2026-10-23): First version.
 - **Reading plan:**
   1. `how-do-the-ways-of-hashing-keys-to-servers-compare`, in full: existing narrative, background

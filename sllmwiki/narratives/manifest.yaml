@@ -303,6 +303,7 @@ what-is-consistent-hashing:
       authority: A
   models:
     1.0: claude-opus-5-5
+    1.1: claude-opus-5-5
 
 how-do-the-ways-of-hashing-keys-to-servers-compare:
   template: comparison
@@ -352,8 +353,9 @@ how-do-the-ways-of-hashing-keys-to-servers-compare:
       authority: A
   models:
     1.0: claude-opus-5-5
+    1.1: claude-opus-5-5
   built_on:
-    what-is-consistent-hashing: 4d7311fea7577c2fb3de3170803f4d6a
+    what-is-consistent-hashing: dc012eaf16e0f9843b878dda7b55a212
 
 how-does-a-consistent-hashing-ring-work-and-what-are-its-weaknesses-and-tuning-knobs:
   template: technical_brief_overview
@@ -437,9 +439,10 @@ how-does-a-consistent-hashing-ring-work-and-what-are-its-weaknesses-and-tuning-k
       authority: A
   models:
     1.0: claude-opus-5-5
+    1.1: claude-opus-5-5
   built_on:
-    what-is-consistent-hashing: 4d7311fea7577c2fb3de3170803f4d6a
-    how-do-the-ways-of-hashing-keys-to-servers-compare: c6b31b973ee095154ec5be02a9c4dead
+    what-is-consistent-hashing: dc012eaf16e0f9843b878dda7b55a212
+    how-do-the-ways-of-hashing-keys-to-servers-compare: f8ae751e00a30df432fdea4a041e5f88
 
 how-did-amazons-dynamo-use-consistent-hashing-and-what-did-dynamodb-keep-of-it:
   template: case_study
@@ -487,6 +490,7 @@ how-did-amazons-dynamo-use-consistent-hashing-and-what-did-dynamodb-keep-of-it:
       authority: A
   models:
     1.0: claude-opus-5-5
+    1.1: claude-opus-5-5
   built_on:
-    what-is-consistent-hashing: 4d7311fea7577c2fb3de3170803f4d6a
-    how-does-a-consistent-hashing-ring-work-and-what-are-its-weaknesses-and-tuning-knobs: f0633f0a227206f26dfda9a2d7e4d4a1
+    what-is-consistent-hashing: dc012eaf16e0f9843b878dda7b55a212
+    how-does-a-consistent-hashing-ring-work-and-what-are-its-weaknesses-and-tuning-knobs: becf1ab5e9b856d27f3b6fc097816970

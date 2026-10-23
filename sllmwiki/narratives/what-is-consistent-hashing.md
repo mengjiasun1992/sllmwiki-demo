@@ -25,9 +25,9 @@ Anyone who spreads keys over a changing set of servers (caches, storage shards, 
 
 ## 3. Overview
 
-Picture a photo-sharing site with four cache servers in front of its storage. Each photo's key is hashed to pick a cache, so every request for that photo hits the same server and finds it cached [→]. On a busy evening the team adds a fifth server. With the usual `hash(key) mod n`, changing `n` from 4 to 5 sends a key to a new server unless its hash happens to give the same remainder under both, which holds for only 4 of every 20 hash values: 80% of the photos change server at once, and almost every request misses [→]. This is the general failure of modular placement: a change in the number of slots remaps nearly all keys [\[1\]](../sources/consistent-hashing-wikipedia.md#consistent-hashing---wikipedia), [\[2\]](../sources/data-partitioning-cassandra-dynamo-architecture.md#consistent-hashing-using-a-token-ring), and for a cache it means that suddenly all cached data is useless [\[3\]](../sources/consistent-hashing-karger-stoc1997.md#page-6).
+Picture a photo-sharing site with four cache servers in front of its storage. Each photo's key is hashed to pick a cache, so every request for that photo hits the same server and finds it cached [→]. On a busy evening the team adds a fifth server. With the usual `hash(key) mod n`, changing `n` from 4 to 5 sends a key to a new server unless its hash happens to give the same remainder under both, which holds for only 4 of every 20 hash values: 80% of the photos change server at once, and almost every request misses [→]. Modular placement in general remaps nearly all keys when the number of slots changes [\[1\]](../sources/consistent-hashing-wikipedia.md#consistent-hashing---wikipedia), [\[2\]](../sources/data-partitioning-cassandra-dynamo-architecture.md#consistent-hashing-using-a-token-ring), and for a cache it means that suddenly all cached data is useless [\[3\]](../sources/consistent-hashing-karger-stoc1997.md#page-6).
 
-Consistent hashing was invented to remove that cliff. Karger and colleagues at MIT introduced it in 1997 to spread web requests among a changing population of caches and relieve hot spots [\[4\]](../sources/consistent-hashing-wikipedia.md#history), [\[5\]](../sources/consistent-hashing-karger-stoc1997.md#page-1). It is now the partitioning layer of many distributed stores and load balancers: Amazon's Dynamo, Cassandra, Riak, Couchbase, OpenStack Swift and Akamai's content delivery network among them [\[6\]](../sources/consistent-hashing-wikipedia.md#examples). It is one answer to a problem every [distributed system](what-is-a-distributed-system.md) with more than one storage node faces: nodes come and go independently of each other [→].
+Consistent hashing was invented to remove that cliff. Karger and colleagues at MIT introduced it in 1997 to spread web requests among a changing population of caches and relieve hot spots [\[4\]](../sources/consistent-hashing-wikipedia.md#history), [\[5\]](../sources/consistent-hashing-karger-stoc1997.md#page-1). It is now the partitioning layer of many distributed stores and load balancers: Amazon's Dynamo, Cassandra, Riak, Couchbase, OpenStack Swift and Akamai's content delivery network among them [\[6\]](../sources/consistent-hashing-wikipedia.md#examples). It answers a problem every [distributed system](what-is-a-distributed-system.md) with several storage nodes faces: nodes come and go [→].
 
 ## 4. Definition
 
@@ -61,9 +61,9 @@ Karger et al. define consistent hashing as a family of ranged hash functions, ea
 - **Spread:** across all clients' views, an item is assigned to only a few different buckets;
 - **Load:** across all views, a bucket is assigned only a few different items.
 
-Their construction maps buckets and items to random points of the unit interval and sends each item to the closest bucket; each bucket gets about `log C` points, `C` an upper bound on the number of buckets, which is the origin of virtual nodes [\[3\]](../sources/consistent-hashing-karger-stoc1997.md#page-6).
+Their construction maps buckets and items to random points of the unit interval and sends each item to the closest bucket; each bucket gets about `log C` points, `C` an upper bound on the number of buckets [\[3\]](../sources/consistent-hashing-karger-stoc1997.md#page-6), the scheme Dynamo cites for its virtual nodes [\[8\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-6).
 
-Three nuances matter beyond the short version:
+Three nuances:
 
 - **Monotonicity is the core; spread and load are about inconsistent views.** Spread and load exist because each web client may know a different subset of caches. In a storage system where every client sees the same shards, only balance and monotonicity matter [\[9\]](../sources/consistent-hashing-lamping-veach-jump-hash.md#page-3). A scheme can therefore be a consistent hash without a ring at all [→].
 - **Changes may come in any order.** Earlier schemes such as linear hashing let buckets be added only in sequence, while consistent hashing allows them to be added in an arbitrary order [\[10\]](../sources/consistent-hashing-karger-stoc1997.md#page-2), [\[4\]](../sources/consistent-hashing-wikipedia.md#history).
@@ -73,7 +73,7 @@ Three nuances matter beyond the short version:
 
 **Failure handling becomes a view change.** Once a client decides a server is down, it simply removes it from its view, and the hash function reassigns that server's work to the others [\[12\]](../sources/consistent-hashing-karger-stoc1997.md#page-9). When cache server C in the photo cache dies, only C's photos miss [→].
 
-**Virtual nodes turn balance from luck into a parameter.** Giving each server many points on the ring evens out the arcs, and the number of points a server gets acts as its weight [\[11\]](../sources/consistent-hashing-wikipedia.md#variance-reduction). Chord, the peer-to-peer lookup service built on consistent hashing, reports that running "virtual nodes" per physical node reduces the load imbalance to a small constant factor [\[13\]](../sources/consistent-hashing-stoica-chord.md#page-4). Virtual nodes also spread a failed server's keys over many survivors instead of doubling the load of one neighbor [\[14\]](../sources/consistent-hashing-wikipedia.md#practical-extensions).
+**Virtual nodes turn balance from luck into a parameter.** Giving each server many points on the ring evens out the arcs, and the number of points a server gets acts as its weight [\[11\]](../sources/consistent-hashing-wikipedia.md#variance-reduction). Chord, a peer-to-peer lookup service, reports that running "virtual nodes" per physical node reduces the load imbalance to a small constant factor [\[13\]](../sources/consistent-hashing-stoica-chord.md#page-4). Virtual nodes also spread a failed server's keys over many survivors instead of doubling the load of one neighbor [\[14\]](../sources/consistent-hashing-wikipedia.md#practical-extensions).
 
 **Lookups cost a search, not a division.** On the ring, finding a key's server is a binary search over the sorted server points, `O(log N)` instead of the `O(1)` of a modulo, and adding a server costs about `K/N` key moves instead of nearly all `K` [\[15\]](../sources/consistent-hashing-wikipedia.md#complexity).
 
@@ -81,16 +81,16 @@ Three nuances matter beyond the short version:
 
 ## 6. Boundaries
 
-- **Rendezvous (highest-random-weight) hashing is in.** Each key scores every server with a hash and picks the highest score. It meets the same minimal-disruption property without a ring, and the ring is in fact a special case of it [\[16\]](../sources/consistent-hashing-wikipedia-rendezvous-hashing.md#consistent-hashing-is-a-special-case-of-rendezvous-hashing). Karger et al. already describe this construction, random scores for the buckets independently for each item, as consistent but slow, since it computes a score for every bucket [\[17\]](../sources/consistent-hashing-karger-stoc1997.md#page-8).
+- **Rendezvous (highest-random-weight) hashing is in.** Each key scores every server with a hash and picks the highest score. It meets the same minimal-disruption property without a ring, and the ring is in fact a special case of it [\[16\]](../sources/consistent-hashing-wikipedia-rendezvous-hashing.md#consistent-hashing-is-a-special-case-of-rendezvous-hashing). Karger et al. already call this construction consistent but slow, since it scores every bucket [\[17\]](../sources/consistent-hashing-karger-stoc1997.md#page-8).
 - **Jump consistent hash is in, with a limit.** It is balanced and monotone with no stored state, but buckets must be numbered sequentially, so only the last one can be removed [\[18\]](../sources/consistent-hashing-lamping-veach-jump-hash.md#page-1). It suits storage shards better than the photo cache, where any server may fail [→].
 - **Modulo hashing is out.** It balances keys, but changing the number of servers rearranges nearly all of them [\[18\]](../sources/consistent-hashing-lamping-veach-jump-hash.md#page-1).
 - **A distributed hash table is a neighbor, not a synonym.** Chord uses consistent hashing to decide which node holds a key, and adds the routing that lets a node find that holder without knowing every other node [\[19\]](../sources/consistent-hashing-stoica-chord.md#page-1).
 
 ## 7. Where to go next
 
-- How do the ways of hashing keys to servers compare: modulo, ring, rendezvous, jump, Maglev and bounded loads?
-- How does a consistent hashing ring work, and what are its weaknesses and tuning knobs?
-- How did Amazon's Dynamo use consistent hashing, and what did DynamoDB keep of it?
+- [How do the ways of hashing keys to servers compare: modulo, ring, rendezvous, jump, Maglev and bounded loads?](how-do-the-ways-of-hashing-keys-to-servers-compare.md)
+- [How does a consistent hashing ring work, and what are its weaknesses and tuning knobs?](how-does-a-consistent-hashing-ring-work-and-what-are-its-weaknesses-and-tuning-knobs.md)
+- [How did Amazon's Dynamo use consistent hashing, and what did DynamoDB keep of it?](how-did-amazons-dynamo-use-consistent-hashing-and-what-did-dynamodb-keep-of-it.md)
 
 ## 8. References
 
@@ -129,12 +129,13 @@ Three nuances matter beyond the short version:
 
 ## 9. Metadata
 
-- **Version:** 1.0
+- **Version:** 1.1
 - **Template:** concept_brief_overview
 - **Model:** claude-opus-5-5
 - **Created:** 2026-10-23
 - **Last modified:** 2026-10-23
 - **History:**
+  - 1.1 (2026-10-23): Lint: virtual nodes' origin cited to Dynamo; Where to go next links the three narratives; body trimmed to its budget
   - 1.0 (2026-10-23): First version.
 - **Reading plan:**
   1. `consistent-hashing-wikipedia-rendezvous-hashing`, in full: medium relevance, authority C, undated

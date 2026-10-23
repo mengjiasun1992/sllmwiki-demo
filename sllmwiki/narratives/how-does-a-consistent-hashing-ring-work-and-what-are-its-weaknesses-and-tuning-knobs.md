@@ -91,7 +91,7 @@ replicas(key, RF):
 
 **Tokens per node.** The main knob. Karger et al. give each bucket about `log C` points, for `C` an upper bound on the number of buckets [\[15\]](../sources/consistent-hashing-karger-stoc1997.md#page-6). Chord's authors estimate that 32 virtual nodes per physical node would give good balance at internet scale [\[16\]](../sources/consistent-hashing-stoica-chord.md#page-4). Measured on random rings, 10 points per bucket leave 1% of buckets below 0.37 or above 1.98 times the average share, 100 points narrow that to 0.76-1.28, and 1000 points to 0.92-1.09 [\[17\]](../sources/consistent-hashing-lamping-veach-jump-hash.md#page-6). Cassandra 2.x needed 256 random tokens per node for balance; its later deterministic allocator balances the ring with far fewer [\[12\]](../sources/data-partitioning-cassandra-dynamo-architecture.md#multiple-tokens-per-physical-node-vnodes). Rule of thumb: start with the fewest tokens your token allocator needs to keep the most loaded node within your headroom; with random tokens that means hundreds [→]. Too few overloads some nodes; too many costs memory, repair time and availability (see Limitations).
 
-**How tokens are chosen.** Random tokens tie partitioning to placement: in Dynamo, every join had to scan other nodes to carve out its ranges, which took almost a day in the busy season, and Merkle trees over the ranges had to be recomputed [\[18\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-12). Dynamo's fix was to split the ring into fixed, equal-sized partitions and move whole partitions between nodes, which gave the best balance it measured and membership data three orders of magnitude smaller [\[18\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-12), [\[19\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-13). The price is coordination on every membership change [\[19\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-13).
+**How tokens are chosen.** Random tokens tie partitioning to placement: in Dynamo, the nodes handing ranges to a joining node had to scan their stores for them, which took almost a day in the busy season, and Merkle trees over the ranges had to be recomputed [\[18\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-12). Dynamo's fix was to split the ring into fixed, equal-sized partitions and move whole partitions between nodes, which gave the best balance it measured and membership data three orders of magnitude smaller [\[18\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-12), [\[19\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-13). The price is coordination on every membership change [\[19\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-13).
 
 **Who knows the ring.** A full map at every node routes in one hop, but each node gossips the full routing table, which works for a couple of hundred nodes and gets hard at tens of thousands [\[20\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-14). Chord keeps only a small finger table at each node and pays with lookups that take several hops [\[21\]](../sources/consistent-hashing-stoica-chord.md#page-1), [\[16\]](../sources/consistent-hashing-stoica-chord.md#page-4). For a store of tens of nodes like the running example, the full map is the simpler choice [→].
 
@@ -99,9 +99,9 @@ replicas(key, RF):
 
 **Uneven arcs.** Random token positions give non-uniform data and load, and the basic ring ignores differences between machines [\[6\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-6). Without virtual nodes, Chord's simulation had nodes storing no keys at all and one node holding 457 [\[22\]](../sources/consistent-hashing-stoica-chord.md#page-8); on a ring with one point per node, the most loaded node is about `Θ(log n)` times the average, and a typical key sits on a node with almost twice the average load [\[23\]](../sources/consistent-hashing-mirrokni-bounded-loads.md#11-background-consistent-hashing). Adding virtual nodes as an indirection layer improves this significantly, at the cost of routing state per virtual node [\[24\]](../sources/consistent-hashing-stoica-chord.md#page-9).
 
-**Hot keys.** The ring balances keys, not requests: a node that owns a hot key stays hot, and Dynamo's load balance held only as long as the key access distribution was not highly skewed [\[25\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-11). A new node does not necessarily relieve a hot node, because it takes data only from the neighbors of its tokens [\[26\]](../sources/consistent-hashing-lamping-veach-jump-hash.md#page-7). Remedies include placing a hot key on several consecutive nodes [\[27\]](../sources/consistent-hashing-wikipedia.md#practical-extensions) and bounded loads (see Variants).
+**Hot keys.** The ring balances keys, not requests: a node that owns a hot key stays hot, and Dynamo counted on even load only as long as the key access distribution was not highly skewed [\[25\]](../sources/amazon-dynamo-decandia-dynamo-sosp2007.md#page-11). A new node does not necessarily relieve a hot node, because it takes data only from the neighbors of its tokens [\[26\]](../sources/consistent-hashing-lamping-veach-jump-hash.md#page-7). Remedies include placing a hot key on several consecutive nodes [\[27\]](../sources/consistent-hashing-wikipedia.md#practical-extensions) and bounded loads (see Variants).
 
-**The cost of many tokens.** Every token adds up to `2 × (RF − 1)` ring neighbors, so more combinations of node failures make some range unavailable; repair runs once per range and slows down [\[12\]](../sources/data-partitioning-cassandra-dynamo-architecture.md#multiple-tokens-per-physical-node-vnodes). Token maps take memory at every client, 46 MB as a tree for 1000 nodes of 1000 points [\[28\]](../sources/consistent-hashing-lamping-veach-jump-hash.md#page-8).
+**The cost of many tokens.** Every token adds up to `2 × (RF − 1)` ring neighbors, so more combinations of node failures make some range unavailable, and the number of discrete repair operations grows [\[12\]](../sources/data-partitioning-cassandra-dynamo-architecture.md#multiple-tokens-per-physical-node-vnodes). Token maps take memory at every client, 46 MB as a tree for 1000 nodes of 1000 points [\[28\]](../sources/consistent-hashing-lamping-veach-jump-hash.md#page-8).
 
 ## 9. Misconceptions
 
@@ -111,7 +111,7 @@ replicas(key, RF):
 
 ## 10. Where to go next
 
-- How did Amazon's Dynamo use consistent hashing, and what did DynamoDB keep of it?
+- [How did Amazon's Dynamo use consistent hashing, and what did DynamoDB keep of it?](how-did-amazons-dynamo-use-consistent-hashing-and-what-did-dynamodb-keep-of-it.md)
 - How does Chord route a lookup without a full ring map at each node?
 
 ## 11. References
@@ -161,12 +161,13 @@ replicas(key, RF):
 
 ## 12. Metadata
 
-- **Version:** 1.0
+- **Version:** 1.1
 - **Template:** technical_brief_overview
 - **Model:** claude-opus-5-5
 - **Created:** 2026-10-23
 - **Last modified:** 2026-10-23
 - **History:**
+  - 1.1 (2026-10-23): Lint: Dynamo's bootstrap scans and skew assumption and Cassandra's repair cost restated as their sources say; Where to go next links the Dynamo case study
   - 1.0 (2026-10-23): First version.
 - **Reading plan:**
   1. `what-are-the-common-design-tenets-and-principles-for-distributed-systems`, in full: existing narrative, background

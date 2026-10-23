@@ -24,7 +24,7 @@ Anyone who spreads keys over servers must pick a hashing scheme, which decides h
 
 ## 3. The choices
 
-The choice comes up whenever a cache tier, a store or a load balancer sends each key or connection to one of a changing set of servers; it decides how much moves on a change, how even the load is, and what each lookup costs [→]. [What is consistent hashing?](what-is-consistent-hashing.md) defines the property most candidates share: a change moves only the keys it must.
+The choice comes up whenever a cache tier, a store or a load balancer sends each key or connection to one of a changing set of servers [→]. [What is consistent hashing?](what-is-consistent-hashing.md) defines the property most candidates share: a change moves only the keys it must.
 
 **The base scenario [→].** A team runs a session cache on 10 servers with arbitrary host names. Clients compute each session's server themselves. Servers fail now and then, any one of them, and the team will soon grow to 12.
 
@@ -34,7 +34,7 @@ The server is `hash(key) mod n`. It is balanced and costs one division, but it i
 
 ### 3.2 Ring with virtual nodes
 
-Each server is hashed to many points on a circle, and a key goes to the first point clockwise; this is the scheme of Karger et al. [\[2\]](../sources/consistent-hashing-lamping-veach-jump-hash.md#page-2). Unlike modulo hashing, it moves only the keys in the arcs a new server takes over, or that a leaving server gives up, about `K/N` of `K` keys [\[3\]](../sources/consistent-hashing-wikipedia.md#complexity). Its subtle difference from rendezvous hashing: a removed server's keys go only to the servers whose points follow its points, as many as it has points [\[4\]](../sources/consistent-hashing-wikipedia-rendezvous-hashing.md#comparison-with-consistent-hashing). **It wins** in the base scenario as stated: servers have names, any of them can fail, and lookups are a binary search over stored points [→]. How a consistent hashing ring works is a question of its own.
+Each server is hashed to many points on a circle, and a key goes to the first point clockwise; this is the scheme of Karger et al. [\[2\]](../sources/consistent-hashing-lamping-veach-jump-hash.md#page-2). Unlike modulo hashing, it moves only the keys in the arcs a new server takes over, or that a leaving server gives up, about `K/N` of `K` keys [\[3\]](../sources/consistent-hashing-wikipedia.md#complexity). Its subtle difference from rendezvous hashing: a removed server's keys go only to the servers whose points follow its points, as many as it has points [\[4\]](../sources/consistent-hashing-wikipedia-rendezvous-hashing.md#comparison-with-consistent-hashing). **It wins** in the base scenario as stated: servers have names, any of them can fail, and lookups are a binary search over stored points [→]. [How does a consistent hashing ring work?](how-does-a-consistent-hashing-ring-work-and-what-are-its-weaknesses-and-tuning-knobs.md) covers its mechanism.
 
 ### 3.3 Rendezvous (HRW) hashing
 
@@ -99,11 +99,11 @@ In a cache every moved key is a miss, in a store a copy [→]. The ring moves ab
 
 ### 6.2 Balance
 
-The most loaded server sets the capacity everyone pays for [→]. The ring's balance depends on its points per server: at 10 points, 1% of servers get under 0.37 or over 1.98 times the average, and even at 1000 points, 1% are at least 8% off [\[17\]](../sources/consistent-hashing-lamping-veach-jump-hash.md#page-6), [\[15\]](../sources/consistent-hashing-lamping-veach-jump-hash.md#page-7). In Maglev's tests with 1000 backends, the ring and rendezvous needed 29.7% and 49.5% overprovisioning with a 65537-entry table, while Maglev's balance was almost perfect [\[16\]](../sources/consistent-hashing-eisenbud-maglev.md#page-12). All of these balance keys; with skewed requests only bounded loads limits what a server actually receives [\[13\]](../sources/consistent-hashing-mirrokni-bounded-loads.md#1-introduction).
+The most loaded server sets the capacity everyone pays for [→]. The ring's balance depends on its points per server: at 10 points, 1% of servers get under 0.37 or over 1.98 times the average, and even at 1000 points, 1% are at least 8% off [\[17\]](../sources/consistent-hashing-lamping-veach-jump-hash.md#page-6), [\[15\]](../sources/consistent-hashing-lamping-veach-jump-hash.md#page-7). In Maglev's tests with 1000 backends, the ring and rendezvous needed 29.7% and 49.5% overprovisioning with a 65537-entry table, while Maglev's balance was almost perfect [\[16\]](../sources/consistent-hashing-eisenbud-maglev.md#page-12). All of these balance keys; bounded loads alone caps each server [\[13\]](../sources/consistent-hashing-mirrokni-bounded-loads.md#1-introduction), which limits live load under skew when the balls are requests [→].
 
 ### 6.3 Memory
 
-The ring stores every point, and clients must hold it locally or pay extra network hops: 1000 points for each of 1000 servers take 46 MB as a balanced tree, 7.6 MB as a sorted array [\[19\]](../sources/consistent-hashing-lamping-veach-jump-hash.md#page-8). Jump and rendezvous store nothing per lookup beyond the server list [\[2\]](../sources/consistent-hashing-lamping-veach-jump-hash.md#page-2), [\[6\]](../sources/consistent-hashing-wikipedia-rendezvous-hashing.md#advantages-of-rendezvous-hashing-over-consistent-hashing). Maglev's table of 65537 entries takes 1.8 ms to build [\[16\]](../sources/consistent-hashing-eisenbud-maglev.md#page-12).
+The ring stores every point, and clients must hold it locally or pay extra network hops: 1000 points for each of 1000 servers take 46 MB as a balanced tree, 7.6 MB as a sorted array [\[19\]](../sources/consistent-hashing-lamping-veach-jump-hash.md#page-8). Jump and rendezvous store nothing per lookup beyond the server list [\[2\]](../sources/consistent-hashing-lamping-veach-jump-hash.md#page-2), [\[6\]](../sources/consistent-hashing-wikipedia-rendezvous-hashing.md#advantages-of-rendezvous-hashing-over-consistent-hashing). Maglev keeps a table of over 100 × N entries [\[10\]](../sources/consistent-hashing-eisenbud-maglev.md#page-7), built in 1.8 ms at 65537 entries [\[16\]](../sources/consistent-hashing-eisenbud-maglev.md#page-12).
 
 ### 6.4 Lookup cost
 
@@ -115,12 +115,12 @@ A cache tier loses arbitrary servers; a replicated store can keep its shard numb
 
 ### 6.6 Weights
 
-Mixed hardware needs shares proportional to capacity [→]. The ring and rendezvous express weight with more points or copies, which cannot express a non-integer weight without many virtual nodes; [\[22\]](../sources/consistent-hashing-wikipedia-rendezvous-hashing.md#weighted-variations), and a weighted rendezvous score fixes it [\[24\]](../sources/consistent-hashing-wikipedia-rendezvous-hashing.md#weighted-rendezvous-hash).
+Mixed hardware needs shares proportional to capacity [→]. The ring and rendezvous express weight with more points or copies, which cannot express a non-integer weight without many virtual nodes [\[22\]](../sources/consistent-hashing-wikipedia-rendezvous-hashing.md#weighted-variations); a weighted rendezvous score fixes it [\[24\]](../sources/consistent-hashing-wikipedia-rendezvous-hashing.md#weighted-rendezvous-hash).
 
 ## 7. Where to go next
 
-- How does a consistent hashing ring work, and what are its weaknesses and tuning knobs?
-- How did Amazon's Dynamo use consistent hashing, and what did DynamoDB keep of it?
+- [How does a consistent hashing ring work, and what are its weaknesses and tuning knobs?](how-does-a-consistent-hashing-ring-work-and-what-are-its-weaknesses-and-tuning-knobs.md)
+- [How did Amazon's Dynamo use consistent hashing, and what did DynamoDB keep of it?](how-did-amazons-dynamo-use-consistent-hashing-and-what-did-dynamodb-keep-of-it.md)
 
 ## 8. References
 
@@ -163,12 +163,13 @@ Mixed hardware needs shares proportional to capacity [→]. The ring and rendezv
 
 ## 9. Metadata
 
-- **Version:** 1.0
+- **Version:** 1.1
 - **Template:** comparison
 - **Model:** claude-opus-5-5
 - **Created:** 2026-10-23
 - **Last modified:** 2026-10-23
 - **History:**
+  - 1.1 (2026-10-23): Lint: the bounded-loads balance claim narrowed and marked; weights sentence repaired; Maglev's memory stated in Memory; ring and Dynamo narratives linked
   - 1.0 (2026-10-23): First version.
 - **Reading plan:**
   1. `consistent-hashing-wikipedia`, in full: medium relevance, authority C, undated
