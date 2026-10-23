@@ -1,3 +1,6 @@
 # Obsidian: each person's settings are their own
 sllmwiki/.obsidian/*
 .DS_Store
+
+# with the Obsidian add-on, the graph's settings are shared
+!sllmwiki/.obsidian/graph.json
