@@ -28,7 +28,7 @@ Engineers designing a service that spans many machines need a short list of prin
 
 ## 3. Overview
 
-Any service with more than one machine behind it has parts that fail independently, and a caller often cannot tell what failed; [What is a distributed system?](what-is-a-distributed-system.md) explains why. This narrative covers the principles used to build such services anyway. Ignoring them gives designs whose bugs surface long after deployment and spread across the whole system. [\[1\]](../sources/distributed-system-design-aws-challenges-distributed-systems.md#summary-of-problems-in-distributed-systems)
+Any service with more than one machine behind it has parts that fail independently, and a caller often cannot tell what failed; [What is a distributed system?](what-is-a-distributed-system.md) explains why. This narrative covers the principles used to build such services anyway. Distributed bugs often surface long after deployment and can spread across the whole system. [\[1\]](../sources/distributed-system-design-aws-challenges-distributed-systems.md#summary-of-problems-in-distributed-systems)
 
 **The running example.** An online shop's checkout service calls a payment service to charge a card. Without these principles, a slow payment service ties up checkout, a retried charge bills the customer twice, and one overloaded server takes the shop down. [→]
 
@@ -81,7 +81,7 @@ Past 10,000 servers and 50,000 disks, failures happen several times a day, so th
 
 #### 5.1.2 Distrust the network
 
-The fallacies list what newcomers wrongly assume: a reliable, secure, homogeneous network with zero latency, infinite bandwidth, fixed topology, one administrator and free transport. [\[6\]](../sources/distributed-system-design-wikipedia-fallacies.md#the-fallacies) Believing the first gives software that waits forever on a network error. [\[11\]](../sources/distributed-system-design-wikipedia-fallacies.md#the-effects-of-the-fallacies) AWS says to distrust everything that might touch the network, [\[12\]](../sources/distributed-system-design-aws-challenges-distributed-systems.md#handling-unknown-unknowns) since any remote call can end UNKNOWN. [\[1\]](../sources/distributed-system-design-aws-challenges-distributed-systems.md#summary-of-problems-in-distributed-systems) A timed-out charge may or may not have taken the money. [→]
+The fallacies [of distributed computing](what-is-a-distributed-system.md) list what newcomers wrongly assume: a reliable, secure, homogeneous network with zero latency, infinite bandwidth, fixed topology, one administrator and free transport. [\[6\]](../sources/distributed-system-design-wikipedia-fallacies.md#the-fallacies) Believing the first gives software that waits forever on a network error. [\[11\]](../sources/distributed-system-design-wikipedia-fallacies.md#the-effects-of-the-fallacies) AWS says to distrust everything that might touch the network, [\[12\]](../sources/distributed-system-design-aws-challenges-distributed-systems.md#handling-unknown-unknowns) since any remote call can end UNKNOWN. [\[1\]](../sources/distributed-system-design-aws-challenges-distributed-systems.md#summary-of-problems-in-distributed-systems) A timed-out charge may or may not have taken the money. [→]
 
 #### 5.1.3 Test the failure path
 
@@ -93,11 +93,11 @@ These items act on each remote call and each server, so one slow or failed part 
 
 #### 5.2.1 Bound every wait
 
-Set a timeout on every remote call, chosen from the callee's latency, such as its 99.9th percentile for a 0.1% false-timeout rate. [\[16\]](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#timeouts) Without one, waiting clients hold resources until the server runs out. [\[17\]](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#failures-happen) With deadline propagation, every call below the first inherits what is left of one deadline, so no server works on an abandoned request. [\[18\]](../sources/distributed-system-design-google-sre-cascading-failures.md#deadline-propagation) Checkout's call to payment gets what remains of the customer's deadline. [→]
+Set a timeout on every remote call, chosen from the callee's latency, such as its 99.9th percentile for a 0.1% false-timeout rate. [\[16\]](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#timeouts) Without one, waiting clients hold resources until the server runs out. [\[17\]](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#failures-happen) With deadline propagation, every call below the first inherits what is left of one deadline, so a server can drop an abandoned request. [\[18\]](../sources/distributed-system-design-google-sre-cascading-failures.md#deadline-propagation) Checkout's call to payment gets what remains of the customer's deadline. [→]
 
 #### 5.2.2 Retry with care
 
-Retries mask transient failures but are "selfish": they spend the server's time to raise one client's chances, and under overload they make things worse. [\[19\]](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#retries-and-backoff) So back off exponentially with a cap, add jitter so retries do not arrive together, [\[20\]](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#jitter) limit retries per request, keep a retry budget, retry at one layer only, and do not retry errors that cannot succeed. [\[21\]](../sources/distributed-system-design-google-sre-cascading-failures.md#retries) Retrying at every layer multiplies: three layers of four attempts make 64 database calls per user action. [\[21\]](../sources/distributed-system-design-google-sre-cascading-failures.md#retries)
+Retries mask transient failures but are "selfish": they spend the server's time to raise one client's chances, and under overload they make things worse. [\[19\]](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#retries-and-backoff) So back off exponentially with a cap, [\[19\]](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#retries-and-backoff) add jitter so retries do not arrive together, [\[20\]](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#jitter) limit retries per request, keep a retry budget, retry at few layers, and do not retry errors that cannot succeed. [\[21\]](../sources/distributed-system-design-google-sre-cascading-failures.md#retries) Retrying at every layer multiplies: three layers of four attempts make 64 database calls per user action. [\[21\]](../sources/distributed-system-design-google-sre-cascading-failures.md#retries)
 
 #### 5.2.3 Make operations idempotent
 
@@ -109,7 +109,7 @@ When a dependency fails, mark it down and stop calling it rather than tie up thr
 
 #### 5.2.5 Shed load and degrade gracefully
 
-Overload is the most common cause of cascading failures: one cluster fails, its traffic moves to the next, which fails in turn. [\[24\]](../sources/distributed-system-design-google-sre-cascading-failures.md#server-overload) The defence is to admit only the work the system can do: admission control at every major boundary, [\[25\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-4) rejecting requests early and cheaply, keeping queues short, and serving cheaper results when overloaded. [\[26\]](../sources/distributed-system-design-google-sre-cascading-failures.md#load-shedding-and-graceful-degradation) Hamilton adds a tested, reversible "big red switch" that sheds non-critical work, and a knob to let users back in slowly after an outage. [\[27\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-11) The shop could turn off recommendations to keep checkout alive. [→]
+Overload is the most common cause of cascading failures: one cluster fails, its traffic moves to the next, which fails in turn. [\[24\]](../sources/distributed-system-design-google-sre-cascading-failures.md#server-overload) The defence is to admit only the work the system can do: admission control at every major boundary, [\[25\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-4) rejecting requests past a limit, keeping queues short, and serving cheaper results when overloaded. [\[26\]](../sources/distributed-system-design-google-sre-cascading-failures.md#load-shedding-and-graceful-degradation) Hamilton adds a tested, reversible "big red switch" that sheds non-critical work, and a knob to let users back in slowly after an outage. [\[27\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-11) The shop could turn off recommendations to keep checkout alive. [→]
 
 ### 5.3 Spread out
 
@@ -157,7 +157,7 @@ These items treat people as part of the system: designs that are simple, automat
 
 #### 5.5.3 Change in small, reversible steps
 
-Expect versions n and n+1 to run side by side during a rollout. [\[25\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-4) Roll out in stages, one server, one data center, then all, with a tested roll-back: big-bang deployments are very dangerous. [\[23\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-6) Azure's design for evolution asks for loose coupling and versioned APIs, [\[15\]](../sources/distributed-system-design-azure-design-principles.md#strategic-principles) and Richards and Ford add "versioning is simple" to the fallacies. [\[40\]](../sources/distributed-system-design-wikipedia-fallacies.md#history)
+Expect versions n and n+1 to run side by side during a rollout. [\[25\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-4) Roll out in stages, one system, then each data center, then global, with a tested roll-back: big-bang deployments are very dangerous. [\[23\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-6) Azure's design for evolution asks for loose coupling and versioned APIs, [\[15\]](../sources/distributed-system-design-azure-design-principles.md#strategic-principles) and Richards and Ford add "versioning is simple" to the fallacies. [\[40\]](../sources/distributed-system-design-wikipedia-fallacies.md#history)
 
 ## 6. Tensions and trade-offs
 
@@ -167,7 +167,7 @@ Expect versions n and n+1 to run side by side during a rollout. [\[25\]](../sour
 
 **Automation versus speed.** Synchronous replication costs latency and throughput, but makes failover a simple decision a script can take. [\[13\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-5)
 
-**Availability versus cost.** Beyond some point, more nines cost more than occasional downtime, so the target comes from the business: [\[10\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability) Azure starts from RTOs, SLAs and SLOs. [\[15\]](../sources/distributed-system-design-azure-design-principles.md#strategic-principles)
+**Availability versus cost.** Beyond some point, more nines cost more than occasional downtime, so the target comes from the business. [\[10\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability) Azure starts from recovery-time objectives, SLAs and SLOs. [\[15\]](../sources/distributed-system-design-azure-design-principles.md#strategic-principles)
 
 **Flexibility versus simplicity.** Separating policy from mechanism makes a system adaptable, but leads to hundreds of configuration parameters. [\[44\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#332-separating-policy-from-mechanism)
 

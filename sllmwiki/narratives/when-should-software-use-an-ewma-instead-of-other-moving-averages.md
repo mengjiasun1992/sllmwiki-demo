@@ -58,9 +58,9 @@ The CA is the mean of every sample so far, updated from the previous mean and a 
 
 ### 3.5 Moving median
 
-The moving median takes the median of the last $k$ samples instead of their mean. [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#moving-median) Its difference: it is no average, so one huge sample cannot drag it. [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#moving-median)
+The moving median takes the median of the last $k$ samples instead of their mean. [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#moving-median) Its difference: it is no average, so one huge sample barely drags it. [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#moving-median)
 
-**It wins when** the base scenario's outliers are frequent and must not move the value: a mean is sensitive to shocks, the median robust to them. [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#moving-median) It costs a window plus an ordered index. [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#moving-median)
+**It wins when** the base scenario's outliers are frequent and must not move the value [→]: a mean is sensitive to shocks, the median robust to them. [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#moving-median) It costs a window plus an ordered index. [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#moving-median)
 
 Rarer averages are in the Appendix.
 
@@ -101,14 +101,14 @@ The rules: [→]
 | How old data leaves | all at once after $k$ steps [\[2\]](../sources/moving-averages-wikipedia-moving-average.md#simple-moving-average) | fades to zero at $k$ [\[5\]](../sources/moving-averages-wikipedia-moving-average.md#weighted-moving-average) | fades, never zero [\[6\]](../sources/moving-averages-wikipedia-moving-average.md#exponential-moving-average) | never [\[13\]](../sources/moving-averages-wikipedia-moving-average.md#cumulative-average) | after $k$ steps [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#moving-median) |
 | First output | after filling, or as a CA meanwhile [\[2\]](../sources/moving-averages-wikipedia-moving-average.md#simple-moving-average) | after filling [→] | first sample [\[8\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing) | first sample [\[13\]](../sources/moving-averages-wikipedia-moving-average.md#cumulative-average) | after filling [→] |
 | Lag and phase | about $k/2$ samples, removable by centring [\[2\]](../sources/moving-averages-wikipedia-moving-average.md#simple-moving-average) | not given in the sources [?] | frequency-dependent, not removable by a shift [\[7\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average) | grows with $n$ [→] | not given in the sources [?] |
-| Outliers | spread over $k$ samples [→] | spread, weighted by age [→] | spread with decaying weight [→] | diluted by $n$ [→] | ignored [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#moving-median) |
+| Outliers | spread over $k$ samples [→] | spread, weighted by age [→] | spread with decaying weight [→] | diluted by $n$ [→] | resisted [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#moving-median) |
 | Integer arithmetic | exact, no drift [\[16\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-8) | possible [→] | shifts if $\alpha = 1/2^n$ [\[17\]](../sources/ewma-linux-kernel-average-h-source.md#L54-L70) | divide per update [\[13\]](../sources/moving-averages-wikipedia-moving-average.md#cumulative-average) | comparisons only [→] |
 
 ## 6. Dimensions to think through
 
 ### 6.1 Memory and cost per update
 
-The SMA is the fastest digital filter, one addition and one subtraction per point whatever $k$, [\[16\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-8) but it needs the last $k$ samples; the EWMA needs only its last value. [\[7\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average) With $k = 15$, that is 15 stored samples per backend against one, at about the same forecast error with $\alpha = 2/16 = 1/8$. [\[7\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average)
+The SMA beats other digital filters, one addition and one subtraction per point whatever $k$, [\[16\]](../sources/moving-averages-smith-dspguide-moving-average-filters.md#page-8) but it needs the last $k$ samples; the EWMA needs only its last value. [\[7\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average) With $k = 15$, that is 15 stored samples per backend against one, at about the same forecast error with $\alpha = 2/16 = 1/8$. [\[7\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average)
 
 ### 6.2 How old data leaves
 
@@ -124,7 +124,7 @@ The SMA reduces white noise by $\sqrt{k}$ and gives the sharpest step for that n
 
 ### 6.5 Outliers
 
-Every mean here is pulled by a shock; the moving median is not, and it is optimal when deviations are heavy-tailed (Laplace) rather than normal. [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#moving-median)
+Every mean here is pulled by a shock; the moving median less so, and it is optimal when deviations are heavy-tailed (Laplace) rather than normal. [\[14\]](../sources/moving-averages-wikipedia-moving-average.md#moving-median)
 
 ### 6.6 Arithmetic
 
@@ -133,7 +133,7 @@ The SMA works exactly in integers, while floating point accumulates drift unless
 ## 7. Pitfalls
 
 - **Naming an EWMA by a window.** Linux's one-minute load average reaches only about 0.62 after a minute of constant load of 1, because it is an exponentially damped sum, not a one-minute mean. [\[12\]](../sources/ewma-brendan-gregg-linux-load-averages.md#the-three-numbers) Label an EWMA by its time constant. [→]
-- **α per sample, not per second.** Sampling faster shortens an EWMA's memory in time; TCP notes its α may keep too little history with many samples per round trip. [\[24\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#3-taking-rtt-samples)
+- **α per sample, not per second.** Sampling faster shortens an EWMA's memory in time [→]; TCP notes its α may keep too little history with many samples per round trip. [\[24\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#3-taking-rtt-samples)
 
 ## 8. Where to go next
 
