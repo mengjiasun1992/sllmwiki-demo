@@ -253,3 +253,17 @@ when-should-software-use-an-ewma-instead-of-other-moving-averages:
       authority: A
   built_on:
     what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work: 3d99f2e9bab03ff36b619156f4ccbbe5
+
+what-does-keeping-calm-argue-and-is-it-worth-reading-in-full:
+  template: skim_read
+  tags:
+    primary: [calm-theorem]
+    supporting: []
+  read:
+    calm-theorem-keeping-calm: 27d0702ab60f35c10b2fd0807110c73f
+  grades:
+    calm-theorem-keeping-calm:
+      relevance: high
+      authority: A
+  models:
+    1.0: claude-opus-5-5
