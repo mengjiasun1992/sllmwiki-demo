@@ -23,6 +23,23 @@ This wiki is the sllmwiki skill's example, on distributed systems and moving ave
 - **A run's pull request:** [PR #6](https://github.com/mengjiasun1992/sllmwiki-demo/pull/6) wrote four of the narratives in one unattended run: its checklist, the decisions it left, its sources and what it took.
 - **The book:** each [release](https://github.com/mengjiasun1992/sllmwiki-demo/releases/latest) attaches the whole wiki as a PDF, an EPUB and one HTML file.
 
+## Sources in a public wiki
+
+This demo is meant to be public, so it follows the skill's source policy for a public wiki ([Licenses, sources and your responsibility](https://github.com/mengjiasun1992/structural-llm-wiki#licenses-sources-and-your-responsibility)):
+
+- **A copy only of an openly licensed source.** A source is saved verbatim in `sllmwiki/sources/` only when its license lets anyone share it: CC0 and public-domain marks, CC BY and CC BY-SA, MIT, Apache 2.0, BSD, ISC, MPL 2.0 and the Unlicense.
+- **A link for everything else.** Any other source is recorded as a link: its URL, license, tags and abstract, with no copy. A narrative can't cite a link by section, so every claim cites a saved, openly licensed source.
+- **Checked on every pull request.** `wiki-check`, in the wiki's CI, fails on a copy a public wiki may not hold.
+
+Today the wiki keeps **23 copies** (12 under CC BY-SA 4.0, 8 under CC BY 4.0 and 3 under Apache 2.0) and **22 links**:
+
+- 12 proprietary sources, such as Hamilton's internet-scale services paper, the AWS Builders' Library, Brewer, Raft, Lamport, Saltzer and the DSP Guide;
+- 4 with no stated license;
+- the Google SRE book chapter, under CC BY-NC-ND;
+- 5 whose terms may allow copies but that aren't on the policy's open list: three NIST pages (US-government public domain), RFC 6298 (IETF Trust) and the Linux kernel's `average.h` (GPL-2.0).
+
+A private wiki may keep reference copies of most sources. This one started that way and was moved to openly licensed sources in [PR #16](https://github.com/mengjiasun1992/sllmwiki-demo/pull/16) and [PR #17](https://github.com/mengjiasun1992/sllmwiki-demo/pull/17), which also re-answered its narratives from them.
+
 ## What's here
 
 | Folder | What it holds |
