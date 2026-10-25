@@ -40,38 +40,34 @@ distributed-system-design-aws-well-architected-reliability-principles:
   abstract: "The design principles page of the Reliability Pillar of the AWS Well-Architected Framework, a short list of five principles that help increase the reliability of workloads in the cloud. Automatically recover from failure: monitor key performance indicators that measure business value rather than technical aspects, and run automation when a threshold is breached, so failures are notified, tracked and worked around or repaired automatically, and with more sophisticated automation anticipated before they occur. Test recovery procedures: rather than only proving a workload works in a scenario, test how it fails and validate recovery, using automation to simulate failures or recreate past ones so failure pathways are found and fixed before a real failure. Scale horizontally to increase aggregate workload availability: replace one large resource with multiple small ones and distribute requests across them so they do not share a common point of failure and a single failure has less impact. Stop guessing capacity: resource saturation is a common cause of failure on premises, while in the cloud demand and utilisation can be monitored and resources added or removed automatically, within service quotas. Manage change through automation: make infrastructure changes with automation, including changes to the automation itself, so that they can be tracked and reviewed. The page is brief and gives no examples beyond these statements."
 
 ewma-nist-ewma-control-charts:
-  file: sources/ewma-nist-ewma-control-charts.md
-  kind: html
+  kind: link
   url: https://www.itl.nist.gov/div898/handbook/pmc/section3/pmc324.htm
-  ingested: "2026-10-20"
+  ingested: "2026-10-25"
   license: LicenseRef-US-Government-Public-Domain
   tags: [ewma]
   abstract: "Section 6.3.2.4 of the NIST/SEMATECH e-Handbook of Statistical Methods introduces the Exponentially Weighted Moving Average (EWMA) as a process-monitoring statistic that averages data while giving less and less weight to observations further back in time. It contrasts EWMA charts with Shewhart charts: a Shewhart decision depends only on the latest measurement, while the EWMA statistic is an exponentially weighted average of all prior data, so a suitable weighting factor makes it sensitive to small or gradual drifts. It defines the statistic with Roberts' (1959) recursion EWMA_t = lambda*Y_t + (1-lambda)*EWMA_{t-1}, where EWMA_0 is the historical mean (target) and 0 < lambda <= 1 sets the depth of memory; lambda = 1 reduces to a Shewhart chart, larger lambda weights recent data more, and lambda is usually set between 0.2 and 0.3 (Hunter, 1986), with Lucas and Saccucci (1990) tables as a guide. It gives the asymptotic variance of the statistic, (lambda/(2-lambda)) s^2, control limits EWMA_0 +/- k s_ewma with k usually 3, the assumptions of independent, normal, representative historical data, and a worked example with lambda = 0.3 on 20 sample points, whose plot shows an in-control process with a possible upward trend at the end."
 
 ewma-nist-single-exponential-smoothing:
-  file: sources/ewma-nist-single-exponential-smoothing.md
-  kind: html
+  kind: link
   url: https://www.itl.nist.gov/div898/handbook/pmc/section4/pmc431.htm
-  ingested: "2026-10-20"
+  ingested: "2026-10-25"
   license: LicenseRef-US-Government-Public-Domain
   tags: [ewma]
   abstract: "Section 6.4.3.1 of the NIST/SEMATECH e-Handbook of Statistical Methods explains single exponential smoothing, which forecasts by weighting past observations with exponentially decreasing weights. Following Hunter (1986), it starts the smoothed series with S_2 = y_1 and applies the basic equation S_t = alpha*y_{t-1} + (1-alpha)*S_{t-1}, 0 < alpha <= 1, where alpha is the smoothing constant; it notes Roberts' (1959) alternative that uses the current observation y_t, as in EWMA control charts. It discusses initialisation (the first observation, the process target, or an average of the first four or five observations) and warns that the smaller alpha is, the more the initial value matters. Expanding the recursion shows why the method is called exponential: the weights alpha(1-alpha)^t decrease geometrically and sum to 1-(1-alpha)^t, illustrated for alpha = 0.3. A table shows that dampening of older data is quick when alpha is near 1 and slow when it is near 0. The best alpha is the one minimising the mean squared error of one-step forecasts, found by trial-and-error grid search or a nonlinear optimiser such as Marquardt's procedure; a 12-point example compares alpha = 0.1 (MSE 19.0) with alpha = 0.5 (MSE 16.29)."
 
 moving-averages-nist-single-moving-average:
-  file: sources/moving-averages-nist-single-moving-average.md
-  kind: html
+  kind: link
   url: https://www.itl.nist.gov/div898/handbook/pmc/section4/pmc421.htm
-  ingested: "2026-10-20"
+  ingested: "2026-10-25"
   license: LicenseRef-US-Government-Public-Domain
   tags: [simple-moving-average, ewma]
   abstract: "Section 6.4.2.1 of the NIST/SEMATECH e-Handbook of Statistical Methods introduces the single moving average as a smoothing process: instead of summarising all past data at once, it takes the mean of successive smaller sets of past observations, advancing one period at a time and dropping the oldest number. Using the handbook's running example of dollar amounts from 12 randomly selected suppliers and a set size of three, it computes the first average (9 + 8 + 9)/3 = 8.667 and gives the general expression M_t = (X_t + X_{t-1} + ... + X_{t-N+1})/N, in which each of the last N observations has equal weight. A results table lists, for each supplier, the moving average, the error and the squared error, and reports a mean squared error of 2.42, compared with 3 for the averaging approach of the handbook's previous case. The page is short: it does not discuss the lag of the moving average, how to choose N, trends or seasonality, or how moving averages compare with exponential smoothing, topics the handbook treats in neighbouring sections."
 
 ewma-rfc6298-tcp-retransmission-timer:
-  file: sources/ewma-rfc6298-tcp-retransmission-timer.md
-  kind: text
+  kind: link
   url: https://www.rfc-editor.org/rfc/rfc6298.txt
   published: "2011-06-01"
-  ingested: "2026-10-20"
+  ingested: "2026-10-25"
   license: LicenseRef-IETF-Trust-BSD
   license_url: https://trustee.ietf.org/license-info
   tags: [ewma]
@@ -98,30 +94,27 @@ ewma-wikipedia-exponential-smoothing:
   abstract: "The English Wikipedia article on exponential smoothing, or the exponential moving average (EMA), describes it as a technique for smoothing time series with an exponential window function: where a simple moving average weights past observations equally, exponential smoothing assigns exponentially decreasing weights, acting as a low-pass filter. Basic (Brown's simple) exponential smoothing is s_0 = x_0 and s_t = alpha*x_t + (1-alpha)*s_{t-1}, with smoothing factor alpha between 0 and 1; larger alpha means less smoothing and more weight on recent changes. The article explains choosing alpha by judgement or least squares, that a constant signal takes about 3/alpha stages to reach 95% of its value, and that the method is also known as EWMA and equals an ARIMA(0,1,1) model. It relates alpha to a time constant, alpha = 1 - exp(-Delta T/tau), approximately Delta T/tau for small sampling intervals; discusses initialisation and its outsized effect on early values, especially for small alpha; derives the geometric weights that give the method its name; and compares it with the moving average: both lag the input, but exponential smoothing's asymmetric IIR kernel cannot be corrected by a fixed shift, both have similar forecast error when alpha = 2/(k+1), and exponential smoothing keeps only the latest value while a k-point moving average must keep the past k points. It then presents double (Holt linear and Brown) exponential smoothing for trends, triple (Holt-Winters) smoothing with additive or multiplicative seasonality, and implementations in statistics packages."
 
 ewma-linkerd-beyond-round-robin:
-  file: sources/ewma-linkerd-beyond-round-robin.md
-  kind: html
+  kind: link
   url: https://linkerd.io/2016/03/16/beyond-round-robin-load-balancing-for-latency/
   published: "2016-03-16"
-  ingested: "2026-10-20"
+  ingested: "2026-10-25"
   license: proprietary
   tags: [ewma, distributed-system-design]
   abstract: "A March 2016 Linkerd (Buoyant) blog post by Steve Jenson and Ruben Oanta argues that load balancing should protect against latency as well as provide scalability and resilience, and compares three algorithms: round robin (each replica in turn), least loaded (fewest outstanding requests) and peak EWMA, which maintains a moving average of each replica's round-trip time, weighted by its number of outstanding requests, and sends traffic to the replica where that cost is smallest. A Finagle-based simulation used 11 backends replaying production latencies (median 167 ms), one client at 1000 requests per second for one minute, and one server slowed to 2 seconds for 30 seconds. Round robin degraded above the 95th percentile, least loaded above the 99th, and peak EWMA held until the 99.9th; with a 1-second timeout the success rates would be about 95%, 99% and 99.9%. The authors attribute the gap mostly to the information used: least loaded uses queue depth, peak EWMA uses both RPC latency and queue depth, available at Layer 5. They caveat that implementation, request types such as long polling, and asymmetric replica counts also matter, note that Twitter production experiments confirmed the results, and recommend these algorithms, available in Finagle and Linkerd, for RPC or HTTP load balancing. The post does not give the peak EWMA formula or its decay parameters."
 
 ewma-brendan-gregg-linux-load-averages:
-  file: sources/ewma-brendan-gregg-linux-load-averages.md
-  kind: html
+  kind: link
   url: https://www.brendangregg.com/blog/2017-08-08/linux-load-averages.html
   published: "2017-08-08"
-  ingested: "2026-10-20"
+  ingested: "2026-10-25"
   license: proprietary
   tags: [ewma]
   abstract: "In this August 2017 blog post Brendan Gregg explains Linux load averages, the three 1, 5 and 15 minute numbers shown by uptime, top and /proc/loadavg, and solves the mystery of why Linux counts tasks in uninterruptible sleep. He traces load averages back to TENEX (RFC 546, 1973), whose scheduler kept exponential averages of active processes using a table of exp(-T/C) for T = 5 seconds and C = 1, 5 and 15 minutes; Linux hard-codes the same constants as fixed-point values (EXP_1, EXP_5, EXP_15). He stresses that the numbers are not really averages over 1, 5 and 15 minutes but exponentially-damped moving sums of a five-second average that reflect load well beyond those periods: after a single CPU-bound thread runs for 60 seconds on an idle system, the one-minute value only reaches about 0.62. He then finds the 1993 patch by Matthias Urlichs that added uninterruptible tasks so load reflects demand for disk and other resources, measures uninterruptible time with bcc/eBPF and off-CPU flame graphs, decomposes a load average using the 62%/38% split between the last minute and older data, explains interpreting load relative to CPU count and to the system's own history, and recommends clearer metrics such as per-CPU and per-process utilisation and run queue (scheduler) latency, while noting load averages remain useful in auto-scaling policies and as a quick historical clue."
 
 ewma-fpp3-simple-exponential-smoothing:
-  file: sources/ewma-fpp3-simple-exponential-smoothing.md
-  kind: html
+  kind: link
   url: https://otexts.com/fpp3/ses.html
-  ingested: "2026-10-20"
+  ingested: "2026-10-25"
   license: unknown
   tags: [ewma, simple-moving-average]
   abstract: "Chapter 8 of Hyndman and Athanasopoulos's Forecasting: Principles and Practice (3rd edition) presents exponential smoothing, proposed by Brown, Holt and Winters in the late 1950s, whose forecasts are weighted averages of past observations with weights decaying exponentially as observations get older. Section 8.1 introduces simple exponential smoothing (SES) for data with no clear trend or seasonal pattern, as a middle ground between the naive method (all weight on the last observation) and the average method (equal weights): the forecast alpha*y_T + alpha(1-alpha)*y_{T-1} + ... with smoothing parameter 0 <= alpha <= 1, a table of weights for alpha from 0.2 to 0.8, the equivalent weighted average and component (level) forms, the expansion showing the initial level's weight (1-alpha)^T fading, flat forecasts, and estimating alpha and the initial level l_0 by minimising the sum of squared one-step errors, illustrated on Algerian exports. Section 8.2 adds Holt's linear trend and damped trend methods, 8.3 the Holt-Winters additive, multiplicative and damped seasonal methods, and 8.4 a taxonomy of nine trend and seasonal combinations. Sections 8.5 to 8.7 develop the ETS innovations state space models, including SES's error-correction form l_t = l_{t-1} + alpha*e_t, estimation by maximum likelihood, model selection with AIC, AICc and BIC, and point forecasts and prediction intervals. The chapter ends with exercises and further reading."
@@ -146,21 +139,19 @@ distributed-system-design-azure-design-principles:
   abstract: "The index page of the Azure Architecture Center's design principles for Azure applications (Microsoft Learn), an official vendor list of principles for building cloud applications that withstand failures, scale with demand and evolve with business needs. It groups eleven principles. Core: design for self-healing (detect failures, respond gracefully, recover automatically, with retries, health endpoint monitoring, circuit breakers and bulkheads, because in distributed systems failures are inevitable); make all things redundant (load balancers, multiple instances, database replicas, multi-zone or multi-region deployment, sized to business risk); minimize coordination (decoupled, asynchronous components, eventual consistency where appropriate, domain events); design to scale out (horizontal scaling, no session stickiness, find bottlenecks, autoscale on live metrics); partition around limits (horizontal, vertical or functional partitioning, partition keys that avoid hotspots). Operational: design for operations (logging, distributed tracing, standard metrics, automated management); use managed services (PaaS over IaaS); use an identity service. Strategic: design for evolution (loose coupling, encapsulated domain knowledge, asynchronous messaging, versioned APIs); build for the needs of business (RTOs, SLAs, SLOs, domain models); perform failure mode analysis during design. A closing list says how they combine: start from business requirements, design for failure, plan for scale, use managed services, support operations, build for change. Each principle links to its own article, which this copy does not include."
 
 ewma-jacobson-congestion-avoidance:
-  file: sources/ewma-jacobson-congestion-avoidance.md
-  kind: pdf
+  kind: link
   url: https://ee.lbl.gov/papers/congavoid.pdf
   published: "1988-11-01"
-  ingested: "2026-10-21"
+  ingested: "2026-10-25"
   license: proprietary
   tags: [ewma]
   abstract: "Van Jacobson and Michael Karels, 'Congestion Avoidance and Control' (revised November 1988 from the SIGCOMM '88 paper), the copy on LBL's site. After the 1986 Internet congestion collapses, it derives TCP algorithms from a 'packet conservation' principle: slow-start, round-trip-time variance estimation, exponential retransmit backoff, and congestion avoidance with additive increase and multiplicative decrease. Its section on round-trip timing says a good RTT estimator is the most important part of a retransmit timer, that RFC 793's low-pass filter R <- aR + (1-a)M with a = 0.9 and rto = bR (b = 2) fails above about 30% load because it ignores variation, and that its variance estimate removes spurious retransmissions. Appendix A explains the RFC 793 estimator as a recursive prediction-error (stochastic gradient) algorithm, a <- a + g(m - a): the gain g trades a fast correction of estimation error against noise, a gain too small is usually better than too large, typical gains are 0.1-0.2, and a converges exponentially with time constant 1/g. It replaces variance with the mean deviation, an EWMA of |m - a| that avoids multiplies and square roots, chooses g = 1/2^n so integer shifts replace division, keeps the scaled estimates to limit round-off, gives the deviation a larger gain (1/4) than the mean (1/8), and sets rto = a + 4v, with C code. Useful for: the origin of the EWMA RTT estimator in TCP, the gain trade-off, and fixed-point implementation."
 
 ewma-finch-incremental-weighted-mean-variance:
-  file: sources/ewma-finch-incremental-weighted-mean-variance.md
-  kind: pdf
+  kind: link
   url: https://fanf2.user.srcf.net/hermes/doc/antiforgery/stats.pdf
   published: "2009-02-01"
-  ingested: "2026-10-21"
+  ingested: "2026-10-25"
   license: unknown
   tags: [ewma]
   abstract: "Tony Finch, 'Incremental calculation of weighted mean and variance' (University of Cambridge Computing Service, February 2009). Its own abstract: it derives numerically stable formulae for the mean and standard deviation that suit incremental on-line calculation, generalises them to weighted means and standard deviations, works through the difficulties of normalised weights, and shows that the exponentially weighted moving average is a special case of the incremental normalised weighted mean, deriving a formula for the exponentially weighted moving standard deviation. The sections build up from the simple mean (mu_n = mu_{n-1} + (x_n - mu_{n-1})/n, which avoids large sums), Knuth's incremental variance, weighted mean and variance, variable weights with a consistency requirement, and an expectation-function notation. Section 9 sets w_{n,n}/W_n to a constant alpha, giving mu_n = mu_{n-1} + alpha(x_n - mu_{n-1}); expands it to show each sample's weight a^{n-i}(1-a) and the starting value's weight a^n, which always sum to one; and derives the exponentially weighted variance, ending with four lines of pseudocode: diff = x - mean, incr = alpha*diff, mean += incr, variance = (1-alpha)(variance + diff*incr). Useful for: the EWMA as a weighted mean, its explicit weights, and a one-pass EWMA variance and standard deviation."
@@ -176,32 +167,29 @@ distributed-systems-kleppmann-cambridge-notes:
   abstract: "Martin Kleppmann, lecture notes for the University of Cambridge Part IB course 'Concurrent and Distributed Systems', distributed half, 2021/22 (CC BY-SA). The introduction contrasts shared-memory concurrency on one computer with distributed systems, where each computer has its own address space and they communicate only by sending messages over a network; most practical distributed systems are message-passing. Each computer is a node, of any type of communicating device. Its slide definition: multiple computers communicating via a network, trying to achieve some task together, with Lamport's quip about a computer you didn't know existed. Reasons to distribute: inherent distribution, reliability, performance from nearby nodes, problems too big for one machine. The downsides: communication and processes fail, possibly unnoticed and nondeterministically; partial failure; fault tolerance is what makes distributed computing fundamentally different and harder. It separates distributed systems from computer networking: networking delivers messages, abstracted as latency and bandwidth, while distributed algorithms decide what messages to send and how to process them; the web and RPC are examples. Later chapters cover the two generals and Byzantine generals problems, system models of nodes, networks and timing, fault tolerance and availability, physical and logical clocks, broadcast, replication and quorums, consensus and Raft, two-phase commit, linearizability, eventual consistency, CRDTs, and Spanner. Useful for: a textbook-style definition, the message-passing model, and why distribution is hard."
 
 moving-averages-smith-dspguide-moving-average-filters:
-  file: sources/moving-averages-smith-dspguide-moving-average-filters.md
-  kind: pdf
+  kind: link
   url: https://www.dspguide.com/CH15.PDF
   published: "1997-01-01"
-  ingested: "2026-10-21"
+  ingested: "2026-10-25"
   license: proprietary
   license_url: https://www.dspguide.com/copyrite.htm
   tags: [simple-moving-average]
   abstract: "Steven W. Smith, The Scientist and Engineer's Guide to Digital Signal Processing, Chapter 15, 'Moving Average Filters' (1997-1998; free for personal use, copyright California Technical Publishing). It calls the moving average the most common DSP filter, defines it as the mean of M input points, one-sided or symmetric (the one-sided form shifts the output), and shows it is a convolution with a rectangular pulse. It argues the moving average is optimal for reducing random white noise while keeping the sharpest step response: noise falls with the square root of the number of points, and no linear filter gives less noise for a given edge sharpness. Its frequency response, sin(pi f M)/(M sin(pi f)), has very slow roll-off and 'ghastly' stopband attenuation, so it is an exceptionally good smoothing filter but an exceptionally bad low-pass filter. Relatives (multiple passes, Gaussian and Blackman kernels) have better stopband attenuation and taper their weights but cost more; Gaussian and Blackman need slow convolution. A recursive implementation, y[i] = y[i-1] + x[i+p] - x[i-q], needs one addition and one subtraction per point whatever the window, making it the fastest digital filter; it is finite impulse response, unlike typical recursive filters. Integers avoid the drift floating-point round-off causes, or a double-precision accumulator. Useful for: the SMA's noise, step response, frequency response and O(1) running-sum cost."
 
 ewma-smith-dspguide-recursive-filters:
-  file: sources/ewma-smith-dspguide-recursive-filters.md
-  kind: pdf
+  kind: link
   url: https://www.dspguide.com/CH19.PDF
   published: "1997-01-01"
-  ingested: "2026-10-21"
+  ingested: "2026-10-25"
   license: proprietary
   license_url: https://www.dspguide.com/copyrite.htm
   tags: [ewma, simple-moving-average]
   abstract: "Steven W. Smith, The Scientist and Engineer's Guide to Digital Signal Processing, Chapter 19, 'Recursive Filters' (1997-1998; free for personal use). Recursive (infinite impulse response, IIR) filters compute each output from input samples and previous outputs with a few recursion coefficients, giving a long impulse response of decaying exponentials without a long convolution; they run fast but have less performance and flexibility than other filters, and more than about a dozen coefficients makes them unstable. The single pole low-pass filter, y[n] = a0 x[n] + b1 y[n-1] with a0 = 1 - x and b1 = x, where x (0 to 1) is the decay between adjacent samples, is the digital analogue of an RC circuit; it is the same recurrence as an EWMA with smoothing factor 1 - x. x relates to the time constant d (samples to decay to 36.8%) by x = e^{-1/d}, and to the -3 dB cutoff frequency by x = e^{-2 pi f_c}; x above one is unstable. Further sections cover single-stage band-pass and notch filters, phase response (recursive filters have nonlinear phase, so rising and falling edges look different, unlike symmetric FIR filters), zero-phase bidirectional filtering, truncating the impulse response after 15-20 time constants, and the difficulty of integer arithmetic for recursive filters compared with the moving average, which 'loves integers'. Useful for: the EWMA as a single-pole IIR filter, its time constant and cutoff, and its phase."
 
 ewma-linux-kernel-average-h-source:
-  file: sources/ewma-linux-kernel-average-h-source.md
-  kind: code
+  kind: link
   url: https://raw.githubusercontent.com/torvalds/linux/master/include/linux/average.h
-  ingested: "2026-10-21"
+  ingested: "2026-10-25"
   license: GPL-2.0
   license_url: https://github.com/torvalds/linux/blob/master/COPYING
   tags: [ewma]
@@ -377,3 +365,63 @@ distributed-system-design-saltzer-end-to-end-arguments:
   license: proprietary
   tags: [distributed-system-design]
   abstract: "Saltzer, Reed and Clark's 'End-to-End Arguments in System Design' (ACM Transactions on Computer Systems, 1984; revised from a 1981 conference paper), the classic paper stating a design principle for placing functions among the modules of a distributed system, saved from the copy on co-author David Reed's site. The end-to-end argument: a function can be completely and correctly implemented only with the knowledge and help of the application at the end points, so providing it inside the communication system is not possible; an incomplete low-level version is justified only as a performance enhancement. The case study is careful file transfer: whatever the network does, the application must still check the file end to end; a too-real MIT example tells of a gateway that swapped byte pairs in memory despite per-hop checksums. A performance section argues that the right amount of low-level reliability is an engineering trade-off, since low levels charge every application and know less. Further examples: delivery acknowledgements (what matters is whether the target application acted), encryption (keys, cleartext at the host, authenticity), duplicate message suppression (applications generate their own duplicates on retry, so they must suppress them anyway), FIFO delivery and transaction management. A history section traces the argument in other system areas. The conclusion calls end-to-end arguments a kind of Occam's razor for choosing a communication subsystem's functions and part of a set of rational principles for layered systems."
+
+ewma-finagle-ema-source:
+  file: sources/ewma-finagle-ema-source.md
+  kind: code
+  url: https://raw.githubusercontent.com/twitter/finagle/ca472deb355c7d3b8d7eb077223991e8c8f4ad8b/finagle-core/src/main/scala/com/twitter/finagle/util/Ema.scala
+  ingested: "2026-10-25"
+  license: Apache-2.0
+  license_url: https://github.com/twitter/finagle/blob/ca472deb355c7d3b8d7eb077223991e8c8f4ad8b/LICENSE
+  tags: [ewma]
+  abstract: "Ema.scala from Twitter's Finagle library (Apache-2.0, pinned to one commit): a small class that maintains an exponential moving average of Double values over a given window on a user-defined clock. The window is the mean lifetime of observations. Its update takes a timestamp and a value: the first observation seeds the average; after that, it computes the time since the previous observation, the weight w = exp(-td / window) kept by the old average, and sets the new average to x * (1 - w) + ema * w, so observations at irregular intervals are weighted by elapsed time rather than by count. Timestamps must be monotonic, and the class is not thread safe: callers synchronize the timestamp and the update together. It offers last, which reads the current average without synchronization, and reset, which erases all observations so the next one seeds the average again. A companion object provides Monotime, a monotonically increasing clock based on System.nanoTime for elapsed-time measurements."
+
+ewma-finagle-peak-ewma-source:
+  file: sources/ewma-finagle-peak-ewma-source.md
+  kind: code
+  url: https://raw.githubusercontent.com/twitter/finagle/ca472deb355c7d3b8d7eb077223991e8c8f4ad8b/finagle-core/src/main/scala/com/twitter/finagle/loadbalancer/PeakEwma.scala
+  ingested: "2026-10-25"
+  license: Apache-2.0
+  license_url: https://github.com/twitter/finagle/blob/ca472deb355c7d3b8d7eb077223991e8c8f4ad8b/LICENSE
+  tags: [ewma]
+  abstract: "PeakEwma.scala from Twitter's Finagle library (Apache-2.0, pinned to one commit): the load metric behind Finagle's peak EWMA load balancers. Its documentation describes a node hyper-sensitive to latent endpoints: it converges quickly on slow endpoints, reacts quickly to latency spikes and recovers only cautiously, penalizing slow behaviour relative to a supplied decayTime, the window over which latency is observed. Each node keeps an Ema of round-trip time whose mean lifetime is decayTime (half-life decayTime * ln 2), a count of pending requests, and the time of its last observation. A comment explains that, because observations form an unevenly spaced time series, the weight considers the time between observations. Observing an RTT larger than the current average resets the average, so the next update jumps to the new peak. Reading the load first decays the average to the present, then reports the average times one more than the pending requests; a node with no latency history but pending requests is reported with a large penalty. Starting a request increments the pending count, and ending one decrements it and observes its RTT."
+
+ewma-wikipedia-load-computing:
+  file: sources/ewma-wikipedia-load-computing.md
+  kind: html
+  url: https://en.wikipedia.org/wiki/Load_(computing)
+  ingested: "2026-10-25"
+  license: CC-BY-SA-4.0
+  license_url: https://creativecommons.org/licenses/by-sa/4.0/
+  tags: [ewma]
+  abstract: "Wikipedia's article on load in UNIX computing. Load is the number of processes running or ready to run, plus, on Linux, those in uninterruptible sleep; it is compared with CPU utilization. The load average, shown by uptime, w and top, is an exponentially damped moving average of the load number over one, five and fifteen minutes: all three average the load since boot but decay by e after 1, 5 and 15 minutes, so the one-minute figure is about 63% load from the last minute and 37% from before. An interpretation section reads the example 1.73 0.60 7.98 on one CPU as 73% overloaded in the last minute, 40% idle over five minutes and 698% overloaded over fifteen, and divides by the CPU count on multiprocessors. A Linux section shows the kernel computing the averages every 5 seconds (LOAD_FREQ) in fixed point with 11 fractional bits (FSHIFT), using the decay constants EXP_1 = 1884, EXP_5 = 2014 and EXP_15 = 2037, and discusses sampling and precision and calculation from user space. It closes with other performance commands: atop, iostat, mpstat and vmstat."
+
+ewma-wikipedia-ewma-chart:
+  file: sources/ewma-wikipedia-ewma-chart.md
+  kind: html
+  url: https://en.wikipedia.org/wiki/EWMA_chart
+  ingested: "2026-10-25"
+  license: CC-BY-SA-4.0
+  license_url: https://creativecommons.org/licenses/by-sa/4.0/
+  tags: [ewma]
+  abstract: "Wikipedia's article on the EWMA chart, a control chart in statistical quality control that monitors variables or attribute data using the whole history of a process's output, each earlier subgroup mean weighted less than the one after it. It needs two parameters set up front: lambda, the weight on the most recent subgroup mean, with 0 < lambda <= 1 and a textbook recommendation of 0.05 to 0.25, and L, the multiple of the standard deviation for the control limits, typically 3, reduced slightly for small lambda. The plotted statistic is z_i = lambda * xbar_i + (1 - lambda) * z_(i-1) with the target value T as the centre line, and the control limits T +/- L * S / sqrt(n) * sqrt(lambda / (2 - lambda) * [1 - (1 - lambda)^(2i)]) widen to a steady state. The chart is fairly robust to non-normal data, and is sensitive to small shifts in the process mean (up to about 1.5 sigma) but does not match Shewhart-style charts at detecting larger shifts."
+
+ewma-wikipedia-low-pass-filter:
+  file: sources/ewma-wikipedia-low-pass-filter.md
+  kind: html
+  url: https://en.wikipedia.org/wiki/Low-pass_filter
+  ingested: "2026-10-25"
+  license: CC-BY-SA-4.0
+  license_url: https://creativecommons.org/licenses/by-sa/4.0/
+  tags: [ewma]
+  abstract: "Wikipedia's article on low-pass filters, which pass signals below a cutoff frequency and attenuate higher ones, with examples in acoustics, electronics, optics and radio. It covers ideal and real filters, the time response (a step input's exponential approach), the frequency response, and the difference equation obtained by sampling. Its discrete-time realization section derives a simple infinite impulse response filter from an RC circuit: discretized with sampling period Delta_T, the RC filter becomes y_i = alpha * x_i + (1 - alpha) * y_(i-1), the exponentially weighted moving average, with smoothing factor alpha = Delta_T / (RC + Delta_T); alpha = 0.5 makes RC equal to the sampling period, and for small alpha Delta_T is about alpha * RC. It gives an algorithm for the filter and notes that the change between outputs is proportional to the difference between the previous output and the next input, matching exponential decay. It also covers finite impulse response and Fourier-transform filters, continuous-time realizations with Laplace notation, and electronic filters: first-order RC and RL, second-order RLC, higher-order and active filters."
+
+ewma-finagle-clients-docs:
+  file: sources/ewma-finagle-clients-docs.md
+  kind: html
+  url: https://twitter.github.io/finagle/guide/Clients.html
+  ingested: "2026-10-25"
+  license: Apache-2.0
+  license_url: https://github.com/twitter/finagle/blob/develop/LICENSE
+  tags: [ewma]
+  abstract: "The Clients page of Twitter's Finagle user guide (Apache-2.0), describing how a Finagle client is built from a protocol implementation, a transport (with TLS, HTTP and SOCKS5 proxies) and a stack of client modules: observability, retries, timeouts and expiration, request draining, load balancing, circuit breaking and pooling, followed by admission control, response classification, MethodBuilder and partition-aware clients. Its load-balancing section explains that a balancer splits into a load metric each endpoint maintains and a distributor that uses it to choose an endpoint, among interchangeable endpoints of a replica set. Configurations: a heap of least-loaded endpoints by outstanding requests; power of two choices (P2C), the default, which picks two endpoints at random and selects the less loaded; P2C with peak EWMA, a moving average of round-trip time highly sensitive to peaks, weighted by outstanding requests, which reacts to slow endpoints faster than least loaded but assumes a loaded endpoint takes time to recover, an assumption long-polling clients break (decayTime defaults to 10 seconds, with a 100-second example); and aperture balancers. A footnote marks several configurations experimental, with APIs that may change."
