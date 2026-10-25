@@ -8,78 +8,76 @@ what-is-a-distributed-system:
   read:
     distributed-systems-kleppmann-cambridge-notes: 7df7ddc48dcd93c6900e0e9b58b1daeb
     distributed-systems-van-steen-tanenbaum-brief-intro: 32423ae1abbf816f8038d2dfaa2b0213
-    distributed-systems-lamport-definition-email: d68ff0c00ae6ff5b93b91a2e346c4028
     distributed-systems-wikipedia-distributed-computing: 3045df631ae800107f767268b9cbd8e3
-    distributed-system-design-aws-challenges-distributed-systems: 67d0c00f5dc53a8978250dae977aab22
   grades:
     distributed-systems-van-steen-tanenbaum-brief-intro:
-      relevance: high
-      authority: A
-    distributed-systems-lamport-definition-email:
       relevance: high
       authority: A
     distributed-systems-wikipedia-distributed-computing:
       relevance: medium
       authority: B
-    distributed-system-design-aws-challenges-distributed-systems:
-      relevance: medium
-      authority: A
     distributed-systems-kleppmann-cambridge-notes:
       relevance: high
       authority: A
     distributed-system-design-wikipedia-fallacies:
       relevance: low
       authority: B
-    distributed-system-design-hamilton-internet-scale-services:
-      relevance: low
-      authority: A
-    distributed-system-design-aws-timeouts-retries-backoff:
-      relevance: low
-      authority: A
-    distributed-system-design-google-sre-cascading-failures:
-      relevance: low
-      authority: A
     distributed-system-design-aws-well-architected-reliability-principles:
       relevance: low
       authority: A
     ewma-linkerd-beyond-round-robin:
       relevance: low
-      authority: B
+      authority: C
     distributed-system-design-azure-design-principles:
       relevance: low
       authority: A
-    distributed-system-design-brewer-cap-twelve-years-later:
+    distributed-system-design-azure-retry-pattern:
       relevance: low
       authority: A
-    distributed-system-design-ongaro-raft-consensus:
+    distributed-system-design-azure-circuit-breaker-pattern:
       relevance: low
       authority: A
-    distributed-system-design-lamport-time-clocks:
+    distributed-system-design-azure-bulkhead-pattern:
       relevance: low
       authority: A
-    distributed-system-design-saltzer-end-to-end-arguments:
+    distributed-system-design-azure-throttling-pattern:
       relevance: low
       authority: A
+    distributed-system-design-azure-transient-fault-handling:
+      relevance: low
+      authority: A
+    distributed-system-design-wikipedia-cap-theorem:
+      relevance: low
+      authority: B
+    distributed-system-design-wikipedia-end-to-end-principle:
+      relevance: low
+      authority: B
+    distributed-system-design-wikipedia-cascading-failure:
+      relevance: low
+      authority: B
+  models:
+    1.1: claude-opus-5-5
 
 what-are-the-common-design-tenets-and-principles-for-distributed-systems:
   template: survey
   tags:
     primary: [distributed-system-design]
-    supporting: [distributed-systems]
+    supporting: [distributed-systems, calm-theorem]
   read:
-    distributed-system-design-hamilton-internet-scale-services: e0fba39abfaea03337f0fa285c66bfe2
     distributed-system-design-azure-design-principles: c94159586f29b96b12ac3a430aca409e
     distributed-system-design-aws-well-architected-reliability-principles: 55a55ff8b937387083e5f6bcfd0dd72b
+    distributed-system-design-azure-retry-pattern: 5b80094a3a1a73c3b38d3b122b794eca
+    distributed-system-design-azure-circuit-breaker-pattern: c1f36d8b1d47d98354582a7ae83d0594
+    distributed-system-design-azure-bulkhead-pattern: ad11e72c87f657162d99d4dcc21d8fed
+    distributed-system-design-azure-throttling-pattern: 63dc3dbad9f9184bbd28e5456d5a1759
+    distributed-system-design-azure-transient-fault-handling: f0331e72be439dc53e2646ec274c9abd
     distributed-system-design-wikipedia-fallacies: c58295fbc71293f2053a509c7aac57b8
-    distributed-system-design-aws-timeouts-retries-backoff: 9acbbc4809808a878d33d38e48016a7a
-    distributed-system-design-aws-challenges-distributed-systems: 67d0c00f5dc53a8978250dae977aab22
-    distributed-system-design-google-sre-cascading-failures: 131211ca83149bc80cf30f298952790b
-    distributed-system-design-saltzer-end-to-end-arguments: 4028e3f2a32e4b42aa526ef4267104c9
-    distributed-system-design-brewer-cap-twelve-years-later: 6f4165216132a36601d4df1ae5f9de42
+    distributed-system-design-wikipedia-cap-theorem: b937d6aa3678db4b207b8adf763974fb
+    distributed-system-design-wikipedia-end-to-end-principle: c22c9f49945f94cf9a7cb4c07685ca82
+    distributed-system-design-wikipedia-cascading-failure: 58f9cd08501bd53cbe6ceeaecd3cbc90
     distributed-systems-van-steen-tanenbaum-brief-intro: 32423ae1abbf816f8038d2dfaa2b0213
     distributed-systems-kleppmann-cambridge-notes: 7df7ddc48dcd93c6900e0e9b58b1daeb
-    distributed-system-design-ongaro-raft-consensus: 8f59cad47feb860272d008e32ed857a8
-    distributed-system-design-lamport-time-clocks: 1766a8116819e3fe4abe6d6efc398254
+    calm-theorem-keeping-calm: 27d0702ab60f35c10b2fd0807110c73f
   grades:
     distributed-systems-van-steen-tanenbaum-brief-intro:
       relevance: high
@@ -87,50 +85,52 @@ what-are-the-common-design-tenets-and-principles-for-distributed-systems:
     distributed-system-design-wikipedia-fallacies:
       relevance: high
       authority: B
-    distributed-system-design-hamilton-internet-scale-services:
-      relevance: high
-      authority: A
-    distributed-system-design-aws-timeouts-retries-backoff:
-      relevance: high
-      authority: A
-    distributed-system-design-aws-challenges-distributed-systems:
-      relevance: high
-      authority: A
-    distributed-system-design-google-sre-cascading-failures:
-      relevance: high
-      authority: A
     distributed-system-design-aws-well-architected-reliability-principles:
       relevance: high
       authority: A
     ewma-linkerd-beyond-round-robin:
       relevance: low
-      authority: B
+      authority: C
     distributed-system-design-azure-design-principles:
       relevance: high
       authority: A
-    distributed-system-design-brewer-cap-twelve-years-later:
+    distributed-system-design-azure-retry-pattern:
       relevance: high
       authority: A
-    distributed-system-design-ongaro-raft-consensus:
-      relevance: medium
-      authority: A
-    distributed-system-design-lamport-time-clocks:
-      relevance: medium
-      authority: A
-    distributed-system-design-saltzer-end-to-end-arguments:
+    distributed-system-design-azure-circuit-breaker-pattern:
       relevance: high
       authority: A
-    distributed-systems-lamport-definition-email:
-      relevance: low
+    distributed-system-design-azure-bulkhead-pattern:
+      relevance: high
       authority: A
+    distributed-system-design-azure-throttling-pattern:
+      relevance: high
+      authority: A
+    distributed-system-design-azure-transient-fault-handling:
+      relevance: high
+      authority: A
+    distributed-system-design-wikipedia-cap-theorem:
+      relevance: high
+      authority: B
+    distributed-system-design-wikipedia-end-to-end-principle:
+      relevance: high
+      authority: B
+    distributed-system-design-wikipedia-cascading-failure:
+      relevance: high
+      authority: B
     distributed-systems-wikipedia-distributed-computing:
       relevance: low
       authority: B
     distributed-systems-kleppmann-cambridge-notes:
+      relevance: high
+      authority: A
+    calm-theorem-keeping-calm:
       relevance: medium
       authority: A
+  models:
+    2.0: claude-opus-5-5
   built_on:
-    what-is-a-distributed-system: b0965f2d471cc66d2c0516184111597f
+    what-is-a-distributed-system: e5bfa41e0d6c4583394ac43eff1687a7
 
 what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work:
   template: technical_brief_overview
