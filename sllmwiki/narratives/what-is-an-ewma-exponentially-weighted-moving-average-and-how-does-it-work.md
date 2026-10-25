@@ -92,7 +92,7 @@ The table follows from the update [\[10\]](../sources/ewma-finagle-ema-source.md
 
 ## 7. Design decisions and trade-offs
 
-**The time constant or smoothing factor.** A larger τ, or smaller α, is smoother but slower to follow a real change; a smaller one follows quickly but passes noise through [→]. Finagle defaults to a 10 s `decayTime` and its docs show 100 s [\[12\]](../sources/ewma-finagle-clients-docs.md#power-of-two-choices-p2c--peak-ewma-2). Control charts use λ between 0.05 and 0.25 [\[3\]](../sources/ewma-wikipedia-ewma-chart.md#ewma-chart---wikipedia). With history, estimate α by minimizing the sum of squared one-step forecast errors [\[21\]](../sources/ewma-wikipedia-exponential-smoothing.md#optimization).
+**The time constant or smoothing factor.** A larger τ, or smaller α, is smoother but slower to follow a real change; a smaller one follows quickly but passes noise through [→]. Finagle defaults to a 10 s `decayTime` and its docs show 100 s [\[12\]](../sources/ewma-finagle-clients-docs.md#power-of-two-choices-p2c--peak-ewma-2). For EWMA control charts, one textbook recommends λ between 0.05 and 0.25 [\[3\]](../sources/ewma-wikipedia-ewma-chart.md#ewma-chart---wikipedia). With history, estimate α by minimizing the sum of squared one-step forecast errors [\[21\]](../sources/ewma-wikipedia-exponential-smoothing.md#optimization).
 
 **Time-based or per-sample weights.** Finagle derives each weight from the time since the last sample, because observations of a server arrive unevenly [\[22\]](../sources/ewma-finagle-peak-ewma-source.md#L47-L53). A fixed α counts memory in samples, so a server that answers more often would forget faster [→].
 
@@ -154,14 +154,15 @@ The table follows from the update [\[10\]](../sources/ewma-finagle-ema-source.md
 
 ## 11. Metadata
 
-- **Version:** 2.0
+- **Version:** 2.1
 - **Template:** technical_brief_overview
 - **Language:** en
 - **Model:** claude-opus-5-5
 - **Created:** 2026-10-23
 - **Last modified:** 2026-10-25
-- **Words:** 1,508 (about 7 min)
+- **Words:** 1,512 (about 7 min)
 - **History:**
+  - 2.1 (2026-10-25): Lint: the control-chart range of λ is one textbook's recommendation, not a rule
   - 2.0 (2026-10-25): Rebuilt on openly licensed sources only, for a public demo: the running example is now a load balancer smoothing each backend's latency (Finagle's time-decayed EWMA, from its Apache-2.0 code), with peak EWMA as the variant; TCP's estimator, Jacobson, the Linux kernel helper, NIST, FPP3, Finch and the DSP Guide (now links) replaced by Finagle's code and docs and Wikipedia on exponential smoothing, low-pass filters, load averages and EWMA charts
   - 1.0 (2026-10-23): First version.
 - **Reading plan:**
