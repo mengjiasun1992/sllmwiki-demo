@@ -270,8 +270,10 @@ Learn the groups in the map's order. Then ask of a design:
 
 - **Version:** 1.0
 - **Template:** survey
+- **Language:** en
 - **Created:** 2026-10-23
-- **Last modified:** 2026-10-23
+- **Last modified:** 2026-10-25
+- **Words:** 2,389 (about 10 min)
 - **History:**
   - 1.0 (2026-10-23): First version.
 - **Reading plan:**
