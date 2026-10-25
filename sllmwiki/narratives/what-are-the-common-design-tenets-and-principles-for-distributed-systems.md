@@ -2,7 +2,7 @@
 
 ## 1. Abstract
 
-Engineers designing a service that spans many machines need a short list of principles that keeps it working when parts of it fail. The sources agree on one starting point: expect failure, because it is certain. From there, contain each failure at the call where it happens, spread work and data so no single part matters, decide on purpose what to give up when the network splits, and keep the system simple and automated enough to operate.
+Engineers designing a service that spans many machines need a short list of principles that keeps it working when parts of it fail. The sources agree on one starting point: expect failure, because it is certain. From there, contain each failure at the call where it happens, spread work and data so no single part matters, decide on purpose what to give up when the network splits, and automate and observe the system so people can operate and change it safely.
 
 **Key takeaways:**
 
@@ -10,7 +10,7 @@ Engineers designing a service that spans many machines need a short list of prin
 - Bound every remote call: timeouts, careful retries, idempotent operations.
 - Shed load and degrade gracefully instead of collapsing.
 - Choose consistency or availability per operation, not once.
-- Simplicity and automation are reliability principles too.
+- Automation, observability and small changes are reliability principles too.
 
 ## 2. Terminology
 
@@ -24,17 +24,17 @@ Engineers designing a service that spans many machines need a short list of prin
 | **SLO, SLA** | Service-level objective, a target such as a share of requests answered in time; service-level agreement, a contract around an SLO. |
 | **CAP** | Consistency, availability, partition tolerance: during a partition a system must trade the first two. |
 | **[→]** | Our own reasoning, after a statement or on a section's heading: a conclusion, comparison or example no cited source states. |
-| **[?]** | A gap: something the question needs that the sources don't answer. |
+| **[?]** | A gap, after a statement or on a heading: something the question needs that the sources don't answer. |
 
 ## 3. Overview
 
-Any service with more than one machine behind it has parts that fail independently, and a caller often cannot tell what failed; [What is a distributed system?](what-is-a-distributed-system.md) explains why. This narrative covers the principles used to build such services anyway. Distributed bugs often surface long after deployment and can spread across the whole system [\[1\]](../sources/distributed-system-design-aws-challenges-distributed-systems.md#summary-of-problems-in-distributed-systems).
+Any service with more than one machine behind it has parts that fail independently, and a caller often cannot tell what failed; [What is a distributed system?](what-is-a-distributed-system.md) explains why. This narrative covers the principles used to build such services anyway. In a large cloud, failures are not rare events: commodity hardware is recycled and replaced automatically, so brief faults are part of normal operation [\[1\]](../sources/distributed-system-design-azure-transient-fault-handling.md#why-do-transient-faults-occur-in-the-cloud).
 
 **The running example.** An online shop's checkout service calls a payment service to charge a card. Without these principles, a slow payment service ties up checkout, a retried charge bills the customer twice, and one overloaded server takes the shop down [→].
 
-**How the items were chosen.** They were checked against five lists: Hoffman's tenets and Hamilton's practices for internet-scale services, [\[2\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-1) Azure's design principles, [\[3\]](../sources/distributed-system-design-azure-design-principles.md#core-principles) AWS's reliability principles, [\[4\]](../sources/distributed-system-design-aws-well-architected-reliability-principles.md#design-principles) van Steen and Tanenbaum's design goals, [\[5\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#3-design-goals) and the fallacies of distributed computing [\[6\]](../sources/distributed-system-design-wikipedia-fallacies.md#the-fallacies). An item is in when several lists state it, or a classic paper makes it its subject (Saltzer, Brewer, Lamport) [→].
+**How the items were chosen.** They were checked against four lists: Azure's design principles, [\[2\]](../sources/distributed-system-design-azure-design-principles.md#core-principles) AWS's reliability principles, [\[3\]](../sources/distributed-system-design-aws-well-architected-reliability-principles.md#design-principles) van Steen and Tanenbaum's design goals, [\[4\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#3-design-goals) and the fallacies of distributed computing [\[5\]](../sources/distributed-system-design-wikipedia-fallacies.md#the-fallacies); and against the patterns and textbook treatments behind them: Microsoft's retry, circuit-breaker, bulkhead and throttling patterns, Kleppmann's lecture notes, and the CAP theorem, the end-to-end principle and the CALM theorem. An item is in when several lists state it, or a classic idea makes it its subject [→].
 
-**Left out.** Cost and platform choices: commodity hardware, single-version software, multi-tenancy, [\[7\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-3) managed services and identity services [\[8\]](../sources/distributed-system-design-azure-design-principles.md#operational-principles). Resource sharing and openness say what a system offers, not how it survives failure [→]. Security, a fallacy of its own, is not covered: no source read gives principles for it [?].
+**Left out.** Platform choices: managed services and identity services [\[6\]](../sources/distributed-system-design-azure-design-principles.md#operational-principles). Resource sharing and openness say what a system offers, not how it survives failure [→]. Security, a fallacy of its own, is not covered: no source read gives principles for it [?]. Simplicity, often named as a principle, is not stated by any source this wiki may keep [?].
 
 ## 4. The map
 
@@ -62,7 +62,6 @@ mindmap
       Order events without a global clock
       Put functions at the end points
     Keep it operable
-      Keep it simple
       Automate and observe
       Change in small, reversible steps
 ```
@@ -77,15 +76,15 @@ These items set the stance the others rest on: failure is the normal case, so de
 
 #### 5.1.1 Design for failure
 
-Past 10,000 servers and 50,000 disks, failures happen several times a day, so the service must survive them without a human [\[9\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-2). "Expect failures" is Hoffman's first tenet; [\[2\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-1) Azure's first principle is to detect failures and recover automatically [\[3\]](../sources/distributed-system-design-azure-design-principles.md#core-principles). Since faults can never be made impossible, distributed systems aim for fault tolerance: working despite up to some number of faults [\[10\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability). A crashed payment server must not stop checkout [→].
+Azure's first principle is to design for self-healing: detect failures, respond gracefully and recover automatically, because in a distributed system failures are inevitable [\[2\]](../sources/distributed-system-design-azure-design-principles.md#core-principles). AWS's first is to recover from failure automatically [\[3\]](../sources/distributed-system-design-aws-well-architected-reliability-principles.md#design-principles). Since faults can never be made impossible, distributed systems aim for fault tolerance: working despite up to some number of faults [\[7\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability). A crashed payment server must not stop checkout [→].
 
 #### 5.1.2 Distrust the network
 
-The fallacies [of distributed computing](what-is-a-distributed-system.md) list what newcomers wrongly assume: a reliable, secure, homogeneous network with zero latency, infinite bandwidth, fixed topology, one administrator and free transport [\[6\]](../sources/distributed-system-design-wikipedia-fallacies.md#the-fallacies). Believing the first gives software that waits forever on a network error [\[11\]](../sources/distributed-system-design-wikipedia-fallacies.md#the-effects-of-the-fallacies). AWS says to distrust everything that might touch the network, [\[12\]](../sources/distributed-system-design-aws-challenges-distributed-systems.md#handling-unknown-unknowns) since any remote call can end UNKNOWN [\[1\]](../sources/distributed-system-design-aws-challenges-distributed-systems.md#summary-of-problems-in-distributed-systems). A timed-out charge may or may not have taken the money [→].
+The fallacies [of distributed computing](what-is-a-distributed-system.md) list what newcomers wrongly assume: a reliable, secure, homogeneous network with zero latency, infinite bandwidth, fixed topology, one administrator and free transport [\[5\]](../sources/distributed-system-design-wikipedia-fallacies.md#the-fallacies). Believing the first gives software that waits forever on a network error [\[8\]](../sources/distributed-system-design-wikipedia-fallacies.md#the-effects-of-the-fallacies). Any remote call can end with no answer, and then the caller cannot know whether the server processed the request [\[9\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#example-remote-procedure-calls-rpc). A timed-out charge may or may not have taken the money [→].
 
 #### 5.1.3 Test the failure path
 
-Failure paths that are rarely used don't work when needed, so hard-fail services rather than shut them down cleanly [\[9\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-2). Take down servers, racks and data centers on purpose, [\[13\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-5) simulate failures to test recovery, [\[4\]](../sources/distributed-system-design-aws-well-architected-reliability-principles.md#design-principles) and load test each component until it breaks [\[14\]](../sources/distributed-system-design-google-sre-cascading-failures.md#test-until-failure-and-beyond). Azure adds failure mode analysis at design time [\[15\]](../sources/distributed-system-design-azure-design-principles.md#strategic-principles).
+Test how the system recovers by simulating failures, rather than waiting for real ones [\[3\]](../sources/distributed-system-design-aws-well-architected-reliability-principles.md#design-principles), and analyze failure modes while designing, before they happen [\[10\]](../sources/distributed-system-design-azure-design-principles.md#strategic-principles).
 
 ### 5.2 Contain each failure
 
@@ -93,23 +92,23 @@ These items act on each remote call and each server, so one slow or failed part 
 
 #### 5.2.1 Bound every wait
 
-Set a timeout on every remote call, chosen from the callee's latency, such as its 99.9th percentile for a 0.1% false-timeout rate [\[16\]](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#timeouts). Without one, waiting clients hold resources until the server runs out [\[17\]](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#failures-happen). With deadline propagation, every call below the first inherits what is left of one deadline, so a server can drop an abandoned request [\[18\]](../sources/distributed-system-design-google-sre-cascading-failures.md#deadline-propagation). Checkout's call to payment gets what remains of the customer's deadline [→].
+Set a timeout on every outbound call before adding retries: too long, and threads and connections pile up during an outage; too short, and calls that would succeed fail early [\[11\]](../sources/distributed-system-design-azure-transient-fault-handling.md#determine-an-appropriate-retry-count-and-interval). The whole retried operation, timeouts and delays included, must still meet its latency objective [\[11\]](../sources/distributed-system-design-azure-transient-fault-handling.md#determine-an-appropriate-retry-count-and-interval). A request blocked on a slow service holds memory, threads and connections, and running out of them can fail unrelated parts of the system [\[12\]](../sources/distributed-system-design-azure-circuit-breaker-pattern.md#context-and-problem). Checkout's call to payment gets a timeout well inside the customer's patience [→].
 
 #### 5.2.2 Retry with care
 
-Retries mask transient failures but are "selfish": they spend the server's time to raise one client's chances, and under overload they make things worse [\[19\]](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#retries-and-backoff). So back off exponentially with a cap, [\[19\]](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#retries-and-backoff) add jitter so retries do not arrive together, [\[20\]](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#jitter) limit retries per request, keep a retry budget, retry at few layers, and do not retry errors that cannot succeed [\[21\]](../sources/distributed-system-design-google-sre-cascading-failures.md#retries). Retrying at every layer multiplies: three layers of four attempts make 64 database calls per user action [\[21\]](../sources/distributed-system-design-google-sre-cascading-failures.md#retries).
+Transient faults, such as a momentary network loss or a busy service, usually correct themselves, so repeating the call after a delay often succeeds [\[13\]](../sources/distributed-system-design-azure-retry-pattern.md#context-and-problem). Back off exponentially, waiting longer after each failure, and add jitter so many clients do not retry at the same moment [\[11\]](../sources/distributed-system-design-azure-transient-fault-handling.md#determine-an-appropriate-retry-count-and-interval), [\[14\]](../sources/distributed-system-design-azure-transient-fault-handling.md#avoid-antipatterns). Never retry endlessly, avoid retries at every layer, and keep a retry budget across all requests: three retries at each of two layers already make nine attempts against the service, and a budget such as 60 retries a minute keeps a local capacity problem from becoming a cascading failure [\[14\]](../sources/distributed-system-design-azure-transient-fault-handling.md#avoid-antipatterns).
 
 #### 5.2.3 Make operations idempotent
 
-A retry after a timeout may repeat a side effect that already happened, so APIs with side effects are safe to retry only when idempotent; EC2's RunInstances takes a client token for this [\[19\]](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#retries-and-backoff). Adding to a set is idempotent where incrementing a counter is not; idempotence or deduplication turns at-least-once retries into exactly-once effects [\[22\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#manipulating-remote-state). The shop sends a payment ID with each charge, so a retry charges once [→].
+A service may process a request but fail to send its response; the retry then repeats the operation, which is safe only if it is idempotent [\[15\]](../sources/distributed-system-design-azure-retry-pattern.md#idempotency). Incrementing a value twice gives a wrong result, so design each step of a multistep process as idempotent [\[16\]](../sources/distributed-system-design-azure-transient-fault-handling.md#other-considerations). Adding to a set is idempotent where incrementing a counter is not; idempotence or deduplication turns at-least-once retries into exactly-once effects [\[17\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#manipulating-remote-state). The shop sends a payment ID with each charge, so a retry charges once [→].
 
 #### 5.2.4 Isolate failures and fail fast
 
-When a dependency fails, mark it down and stop calling it rather than tie up threads waiting, and keep working in a degraded mode where possible [\[23\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-6). Pods or clusters should be nearly independent, so one cannot take another down [\[7\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-3). Azure names circuit breakers and bulkheads; [\[3\]](../sources/distributed-system-design-azure-design-principles.md#core-principles) AWS finds circuit breakers' modal behaviour hard to test and limits retries with a token bucket instead [\[19\]](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#retries-and-backoff).
+A circuit breaker counts recent failures to a service and, past a threshold, fails calls immediately instead of waiting, then lets a few trial calls through to detect recovery [\[18\]](../sources/distributed-system-design-azure-circuit-breaker-pattern.md#solution). It complements retries: a retry expects the call to succeed eventually, a circuit breaker stops calls that are likely to fail [\[18\]](../sources/distributed-system-design-azure-circuit-breaker-pattern.md#solution). Bulkheads partition resources, such as a connection pool per downstream service, so one failing service exhausts only its own pool and the rest keep working [\[19\]](../sources/distributed-system-design-azure-bulkhead-pattern.md#solution).
 
 #### 5.2.5 Shed load and degrade gracefully
 
-Overload is the most common cause of cascading failures: one cluster fails, its traffic moves to the next, which fails in turn [\[24\]](../sources/distributed-system-design-google-sre-cascading-failures.md#server-overload). The defence is to admit only the work the system can do: admission control at every major boundary, [\[25\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-4) rejecting requests past a limit, keeping queues short, and serving cheaper results when overloaded [\[26\]](../sources/distributed-system-design-google-sre-cascading-failures.md#load-shedding-and-graceful-degradation). Hamilton adds a tested, reversible "big red switch" that sheds non-critical work, and a knob to let users back in slowly after an outage [\[27\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-11). The shop could turn off recommendations to keep checkout alive [→].
+Overload cascades: when one node fails or goes down for maintenance, its traffic moves to another path, which becomes overloaded and fails in turn [\[20\]](../sources/distributed-system-design-wikipedia-cascading-failure.md#in-computer-networks). The defence is to cap resource use and throttle requests past the cap, so the system keeps meeting its objectives: rate limits per user, turning off nonessential features, smoothing bursts through a queue, and deferring low-priority work [\[21\]](../sources/distributed-system-design-azure-throttling-pattern.md#solution). The shop could turn off recommendations to keep checkout alive [→].
 
 ### 5.3 Spread out
 
@@ -117,75 +116,69 @@ These items remove any part whose loss or limits would decide the whole system's
 
 #### 5.3.1 Redundancy, no single point of failure
 
-Make everything redundant, with multiple instances, replicas and zones, sized to the business's risk tolerance [\[3\]](../sources/distributed-system-design-azure-design-principles.md#core-principles). Replace one large resource with many small ones that share no common point of failure [\[4\]](../sources/distributed-system-design-aws-well-architected-reliability-principles.md#design-principles). The Internet is designed to have no single point of failure [\[10\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability). Consensus algorithms such as Raft make replicas act as one reliable machine while a majority is up: five servers tolerate two failures [\[28\]](../sources/distributed-system-design-ongaro-raft-consensus.md#page-2).
+Make everything redundant, with multiple instances, replicas and zones, sized to the business's risk tolerance [\[2\]](../sources/distributed-system-design-azure-design-principles.md#core-principles). Replace one large resource with many small ones, so one failure affects less [\[3\]](../sources/distributed-system-design-aws-well-architected-reliability-principles.md#design-principles). A part whose failure brings the whole system down is a single point of failure, which fault-tolerant systems try to avoid [\[7\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability). Consensus algorithms such as Raft remove the single leader as a single point of failure: when the leader is suspected to have crashed, a quorum of nodes elects a new one [\[22\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction-to-consensus). With five nodes a majority quorum is three [\[23\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#quorums), so two can fail and the rest still decide [→].
 
 #### 5.3.2 Scale out and partition
 
-Scale out by adding machines; the techniques are hiding latency, partitioning work and replicating [\[29\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#342-scaling-techniques). Prefer stateless, interchangeable servers, and partition data finely, by user rather than company, through a lookup table so partitions can move [\[25\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-4). Choose partition keys that avoid hotspots and autoscale on live metrics [\[3\]](../sources/distributed-system-design-azure-design-principles.md#core-principles).
+Scale out by adding machines; the techniques are hiding latency, partitioning work and replicating [\[24\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#342-scaling-techniques). Avoid session stickiness, choose partition keys that avoid hotspots and autoscale on live metrics [\[2\]](../sources/distributed-system-design-azure-design-principles.md#core-principles).
 
 #### 5.3.3 Minimize coordination
 
-Use decoupled components that talk asynchronously, and eventual consistency where it fits [\[3\]](../sources/distributed-system-design-azure-design-principles.md#core-principles). Asynchronous calls hide latency by doing other work while a reply is pending [\[29\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#342-scaling-techniques). Decoupling also limits failure: reusing a session key avoids a login storm after a network blip [\[23\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-6). The shop can confirm the order and send the receipt email from a queue [→].
+Use decoupled components that talk asynchronously, and eventual consistency where it fits [\[2\]](../sources/distributed-system-design-azure-design-principles.md#core-principles). Asynchronous calls hide latency by doing other work while a reply is pending [\[24\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#342-scaling-techniques). Coordination protocols such as Paxos and two-phase commit are so expensive that programmers treat them as "forbidden fruit" [\[25\]](../sources/calm-theorem-keeping-calm.md#11-the-high-cost-of-coordination). The shop can confirm the order and send the receipt email from a queue [→].
 
 ### 5.4 Be explicit about distribution
 
-These items come from the classic papers: what a network forces on a design, and why hiding it does not work [→].
+These items come from the classic ideas: what a network forces on a design, and why hiding it does not work [→].
 
 #### 5.4.1 Choose consistency deliberately
 
-During a partition, a node must either refuse an operation, losing availability, or proceed and risk inconsistency [\[30\]](../sources/distributed-system-design-brewer-cap-twelve-years-later.md#cap-latency-connection). Brewer calls the "2 of 3" reading misleading: partitions are rare, the choice can differ per operation or data item, and all three properties are matters of degree [\[31\]](../sources/distributed-system-design-brewer-cap-twelve-years-later.md#why-2-of-3-is-missleading). Manage partitions explicitly: detect them, limit some operations, record history, then restore consistency and compensate for mistakes [\[32\]](../sources/distributed-system-design-brewer-cap-twelve-years-later.md#managing-partitions). Charging a card can be recorded as intent and done after recovery [\[33\]](../sources/distributed-system-design-brewer-cap-twelve-years-later.md#which-operations-should-proceed).
+A partition has to be tolerated, so during one a system chooses: consistency, returning an error or a timeout when it cannot guarantee up-to-date data, or availability, answering with what it has [\[26\]](../sources/distributed-system-design-wikipedia-cap-theorem.md#explanation). Without a partition, both are possible [\[26\]](../sources/distributed-system-design-wikipedia-cap-theorem.md#explanation). Brewer later called "two out of three" misleading: only consistency or availability is given up, only during a partition, and partitions can be managed and recovered from [\[27\]](../sources/distributed-system-design-wikipedia-cap-theorem.md#history). PACELC adds that even without a partition, a system trades latency against consistency [\[27\]](../sources/distributed-system-design-wikipedia-cap-theorem.md#history).
 
 #### 5.4.2 Order events without a global clock
 
-In a distributed system one cannot always say which of two events came first: "happened before" is only a partial order, and problems arise when people forget it [\[34\]](../sources/distributed-system-design-lamport-time-clocks.md#page-1). Logical clocks give a consistent order without synchronized time [\[34\]](../sources/distributed-system-design-lamport-time-clocks.md#page-1). Replicas tag writes with logical timestamps to tell newer from older; last-writer-wins is simple but loses concurrent writes [\[22\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#manipulating-remote-state).
+Nodes cannot always say which of two events came first: "happens-before" is a partial order, and events neither before nor after each other are concurrent [\[28\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#causality-and-happens-before). Logical clocks count events instead of measuring time, giving an order consistent with causality [\[29\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#logical-time). Replicas tag writes with logical timestamps to tell newer from older; last-writer-wins is simple but loses concurrent writes [\[17\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#manipulating-remote-state).
 
 #### 5.4.3 Put functions at the end points
 
-The end-to-end argument: a function such as reliable delivery can be done completely and correctly only by the application at the end points, so the network cannot provide it; a lower-level version is only a performance aid [\[35\]](../sources/distributed-system-design-saltzer-end-to-end-arguments.md#introduction). Duplicate suppression is the classic case: the application creates its own duplicates when it retries, so it must detect them anyway [\[36\]](../sources/distributed-system-design-saltzer-end-to-end-arguments.md#duplicate-message-suppression). The same reasoning warns against hiding distribution: a remote call behaves differently from a local one over a faulty link, so the price of full transparency can be surprisingly high [\[37\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#322-degree-of-distribution-transparency). The shop checks the charge with the payment ID, whatever the network promised [→].
+The end-to-end principle: the network offers only best-effort delivery, and features such as reliability and security belong at the end points [\[30\]](../sources/distributed-system-design-wikipedia-end-to-end-principle.md#concept). A completely reliable file transfer needs a checksum over the whole stream, checked by the end points; checks inside the network only improve performance [\[31\]](../sources/distributed-system-design-wikipedia-end-to-end-principle.md#file-transfer). The same reasoning warns against hiding distribution: a remote call behaves differently from a local one over a faulty link, so the price of full transparency can be surprisingly high [\[32\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#322-degree-of-distribution-transparency). The shop checks the charge with the payment ID, whatever the network promised [→].
 
 ### 5.5 Keep it operable
 
-These items treat people as part of the system: designs that are simple, automated and observable fail less and recover faster [→].
+These items treat people as part of the system: designs that are automated and observable fail less and recover faster [→].
 
-#### 5.5.1 Keep it simple
+#### 5.5.1 Automate and observe
 
-"Complexity breeds problems", says Hoffman's second tenet [\[2\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-1). Simple and nearly stupid is almost always better at high scale; only order-of-magnitude optimizations are worth their complexity [\[7\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-3). Google warns that complex load shedding can itself trip into degraded mode at the wrong time [\[26\]](../sources/distributed-system-design-google-sre-cascading-failures.md#load-shedding-and-graceful-degradation). Raft was designed for understandability first, and students learned it better than Paxos [\[38\]](../sources/distributed-system-design-ongaro-raft-consensus.md#page-1).
+Make changes through automation [\[3\]](../sources/distributed-system-design-aws-well-architected-reliability-principles.md#design-principles). Build in logging, distributed tracing and standard metrics [\[6\]](../sources/distributed-system-design-azure-design-principles.md#operational-principles), and log transient faults as well as failures, so a rise in retries shows before an outage [\[33\]](../sources/distributed-system-design-azure-transient-fault-handling.md#log-and-track-transient-and-nontransient-faults).
 
-#### 5.5.2 Automate and observe
+#### 5.5.2 Change in small, reversible steps
 
-"Automate everything", the third tenet, because people make mistakes, need sleep and forget; [\[2\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-1) under pressure, operators err about 20% of the time [\[25\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-4). Make changes through tracked, reviewed automation [\[4\]](../sources/distributed-system-design-aws-well-architected-reliability-principles.md#design-principles). Build in logging, distributed tracing and standard metrics, [\[8\]](../sources/distributed-system-design-azure-design-principles.md#operational-principles) audit every configuration change, and alert only on real problems [\[39\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-9).
-
-#### 5.5.3 Change in small, reversible steps
-
-Expect versions n and n+1 to run side by side during a rollout [\[25\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-4). Roll out in stages, one system, then each data center, then global, with a tested roll-back: big-bang deployments are very dangerous [\[23\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-6). Azure's design for evolution asks for loose coupling and versioned APIs, [\[15\]](../sources/distributed-system-design-azure-design-principles.md#strategic-principles) and Richards and Ford add "versioning is simple" to the fallacies [\[40\]](../sources/distributed-system-design-wikipedia-fallacies.md#history).
+A service that tolerates one of three nodes being down can roll out a software upgrade one node at a time, without clients noticing [\[7\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability). Azure's design for evolution asks for loose coupling and versioned APIs, [\[10\]](../sources/distributed-system-design-azure-design-principles.md#strategic-principles) and Richards and Ford add "versioning is simple" to the fallacies [\[34\]](../sources/distributed-system-design-wikipedia-fallacies.md#history).
 
 ## 6. Tensions and trade-offs
 
-**Retries versus overload.** Retries mask transient faults but amplify overload, so AWS retries only while the dependency is healthy [\[41\]](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#conclusion). More generally, retries, caches and load shifting improve the normal case yet can raise the risk of a full outage [\[42\]](../sources/distributed-system-design-google-sre-cascading-failures.md#closing-remarks).
+**Retries versus overload.** Retries mask transient faults, but aggressive retries keep an overloaded service from recovering, and the extra requests feed the cycle [\[11\]](../sources/distributed-system-design-azure-transient-fault-handling.md#determine-an-appropriate-retry-count-and-interval).
 
-**Consistency versus availability and latency.** Replication improves availability and performance but brings consistency problems, and keeping replicas strongly consistent may not scale [\[29\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#342-scaling-techniques). Choosing availability has a hidden cost: designers must know every invariant to restore it [\[43\]](../sources/distributed-system-design-brewer-cap-twelve-years-later.md#cap-confusion).
+**Consistency versus availability and latency.** Replication improves availability and performance but brings consistency problems, and keeping replicas strongly consistent may not scale [\[24\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#342-scaling-techniques). Even without partitions, stronger consistency costs latency [\[27\]](../sources/distributed-system-design-wikipedia-cap-theorem.md#history).
 
-**Automation versus speed.** Synchronous replication costs latency and throughput, but makes failover a simple decision a script can take [\[13\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-5).
+**Short versus long timeouts.** A short timeout fails calls that would have succeeded; a long one lets threads and connections pile up [\[11\]](../sources/distributed-system-design-azure-transient-fault-handling.md#determine-an-appropriate-retry-count-and-interval).
 
-**Availability versus cost.** Beyond some point, more nines cost more than occasional downtime, so the target comes from the business [\[10\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability). Azure starts from recovery-time objectives, SLAs and SLOs [\[15\]](../sources/distributed-system-design-azure-design-principles.md#strategic-principles).
+**Availability versus cost.** Beyond some point, more nines cost more than occasional downtime, so the target comes from the business [\[7\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability). Azure starts from recovery-time objectives, SLAs and SLOs [\[10\]](../sources/distributed-system-design-azure-design-principles.md#strategic-principles).
 
-**Flexibility versus simplicity.** Separating policy from mechanism makes a system adaptable, but leads to hundreds of configuration parameters [\[44\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#332-separating-policy-from-mechanism).
+**Flexibility versus simplicity.** Separating policy from mechanism makes a system adaptable, but leads to hundreds of configuration parameters [\[35\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#332-separating-policy-from-mechanism).
 
 ## 7. Classic case studies
 
-**amazon.com and the full disk.** One catalog server's disk filled; it returned empty responses very fast, and the load balancer, seeing the fastest server, sent it a huge share of the traffic, taking amazon.com down [\[45\]](../sources/distributed-system-design-aws-challenges-distributed-systems.md#distributed-bugs-spread-epidemically). It shows why to distrust everything and isolate failures [→].
+**Gmail, December 2012.** A routine update to load-balancing software, with logic that said "all" where it meant "some", took out 40% of Gmail worldwide for 18 minutes; it was fixed by fully updating a single node instead of partially updating every node at once [\[36\]](../sources/distributed-system-design-wikipedia-cascading-failure.md#example). It shows small, reversible changes and why overload spreads [→].
 
-**The MIT gateway.** Programmers trusted per-hop checksums; one gateway swapped byte pairs in memory, corrupting source files [\[46\]](../sources/distributed-system-design-saltzer-end-to-end-arguments.md#a-too-real-example). It is the end-to-end argument's founding example [→].
+**The ARPANET.** Because packets can arrive out of order or twice, reordering and duplicate detection had to live at the end points, and the network was split into a packet-moving lower level and an end-to-end upper level [\[37\]](../sources/distributed-system-design-wikipedia-end-to-end-principle.md#arpanet). It is the end-to-end principle in a real network [→].
 
-**ATM stand-in mode.** During a partition, ATMs allow withdrawals up to a limit, then reconcile and charge overdraft fees [\[47\]](../sources/distributed-system-design-brewer-cap-twelve-years-later.md#compensation-issues-in-an-automated-teller-machine). It shows choosing availability and compensating later [→].
-
-**News sites on 9/11.** Most news services melted down; serving a subset of articles reliably would have been better [\[27\]](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-11). It shows graceful degradation [→].
+**Dynamo's shopping cart.** Amazon's cart lets replicas receive adds in different orders with no coordination, yet all reach the same final state, because adding items to a set commutes [\[38\]](../sources/calm-theorem-keeping-calm.md#21-program-consistency-confluence). It shows minimizing coordination and choosing availability [→].
 
 ## 8. Applying them [→]
 
 Learn the groups in the map's order. Then ask of a design:
 
-- What happens when each dependency is down, slow, or returns UNKNOWN?
+- What happens when each dependency is down, slow, or never answers?
 - Does every remote call have a timeout, bounded retries with jitter, and an idempotent operation behind it?
 - Which part, if lost, takes everything down?
 - At what load does each component break, and what does it do past that point?
@@ -195,103 +188,101 @@ Learn the groups in the map's order. Then ask of a design:
 ## 9. Where to go next
 
 - [What is a distributed system?](what-is-a-distributed-system.md): why these principles are needed.
-- Not yet narratives: How should timeouts, retries and backoff be set? How do services avoid cascading failures? How are partitions managed under CAP? How does Raft reach consensus? How do logical clocks order events? What is the end-to-end argument?
-- Why shouldn't distribution be transparent? Waldo et al. argue it, but the wiki keeps only a link to their paper, so it was not read [?].
+- [What does "Keeping CALM: When Distributed Consistency is Easy" argue, and is it worth reading in full?](what-does-keeping-calm-argue-and-is-it-worth-reading-in-full.md): when coordination can be avoided altogether.
+- Not yet narratives: How should timeouts, retries and backoff be set? How do services avoid cascading failures? How are partitions managed under CAP? How does Raft reach consensus? How do logical clocks order events?
 
 ## 10. References
 
 ### 10.1 Sources read
 
-- [distributed-system-design-hamilton-internet-scale-services](../sources/distributed-system-design-hamilton-internet-scale-services.md): Hoffman's three tenets and most operational items.
 - [distributed-system-design-azure-design-principles](../sources/distributed-system-design-azure-design-principles.md): a vendor's list of core, operational and strategic principles.
 - [distributed-system-design-aws-well-architected-reliability-principles](../sources/distributed-system-design-aws-well-architected-reliability-principles.md): five reliability principles.
+- [distributed-system-design-azure-transient-fault-handling](../sources/distributed-system-design-azure-transient-fault-handling.md), [distributed-system-design-azure-retry-pattern](../sources/distributed-system-design-azure-retry-pattern.md), [distributed-system-design-azure-circuit-breaker-pattern](../sources/distributed-system-design-azure-circuit-breaker-pattern.md), [distributed-system-design-azure-bulkhead-pattern](../sources/distributed-system-design-azure-bulkhead-pattern.md), [distributed-system-design-azure-throttling-pattern](../sources/distributed-system-design-azure-throttling-pattern.md): timeouts, retries, backoff and jitter, idempotency, circuit breakers, bulkheads and throttling.
 - [distributed-system-design-wikipedia-fallacies](../sources/distributed-system-design-wikipedia-fallacies.md): the fallacies and their effects.
-- [distributed-system-design-aws-timeouts-retries-backoff](../sources/distributed-system-design-aws-timeouts-retries-backoff.md): timeouts, retries, backoff, jitter and idempotency.
-- [distributed-system-design-aws-challenges-distributed-systems](../sources/distributed-system-design-aws-challenges-distributed-systems.md): unknown outcomes, distrust everything, the amazon.com case.
-- [distributed-system-design-google-sre-cascading-failures](../sources/distributed-system-design-google-sre-cascading-failures.md): overload, load shedding, retries, deadlines, testing to failure.
-- [distributed-system-design-saltzer-end-to-end-arguments](../sources/distributed-system-design-saltzer-end-to-end-arguments.md): the end-to-end argument and the MIT gateway.
-- [distributed-system-design-brewer-cap-twelve-years-later](../sources/distributed-system-design-brewer-cap-twelve-years-later.md): CAP, managing partitions, the ATM.
+- [distributed-system-design-wikipedia-cap-theorem](../sources/distributed-system-design-wikipedia-cap-theorem.md), [distributed-system-design-wikipedia-end-to-end-principle](../sources/distributed-system-design-wikipedia-end-to-end-principle.md), [distributed-system-design-wikipedia-cascading-failure](../sources/distributed-system-design-wikipedia-cascading-failure.md): CAP and PACELC, the end-to-end principle and the ARPANET, cascading failures and the Gmail outage.
 - [distributed-systems-van-steen-tanenbaum-brief-intro](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md): design goals, scaling techniques, limits of transparency.
-- [distributed-systems-kleppmann-cambridge-notes](../sources/distributed-systems-kleppmann-cambridge-notes.md): fault tolerance, SPOF, idempotence, timestamps.
-- [distributed-system-design-ongaro-raft-consensus](../sources/distributed-system-design-ongaro-raft-consensus.md): replicated state machines and understandability.
-- [distributed-system-design-lamport-time-clocks](../sources/distributed-system-design-lamport-time-clocks.md): the partial order of events.
+- [distributed-systems-kleppmann-cambridge-notes](../sources/distributed-systems-kleppmann-cambridge-notes.md): fault tolerance, SPOF, consensus and quorums, idempotence, happens-before and logical time, rolling upgrades.
+- [calm-theorem-keeping-calm](../sources/calm-theorem-keeping-calm.md): the cost of coordination and Dynamo's shopping cart.
 
 ### 10.2 Citations
 
-1. [distributed-system-design-aws-challenges-distributed-systems: Summary of problems in distributed systems](../sources/distributed-system-design-aws-challenges-distributed-systems.md#summary-of-problems-in-distributed-systems)
-2. [distributed-system-design-hamilton-internet-scale-services: Page 1](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-1)
-3. [distributed-system-design-azure-design-principles: Core principles](../sources/distributed-system-design-azure-design-principles.md#core-principles)
-4. [distributed-system-design-aws-well-architected-reliability-principles: Design principles](../sources/distributed-system-design-aws-well-architected-reliability-principles.md#design-principles)
-5. [distributed-systems-van-steen-tanenbaum-brief-intro: 3 Design goals](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#3-design-goals)
-6. [distributed-system-design-wikipedia-fallacies: The fallacies](../sources/distributed-system-design-wikipedia-fallacies.md#the-fallacies)
-7. [distributed-system-design-hamilton-internet-scale-services: Page 3](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-3)
-8. [distributed-system-design-azure-design-principles: Operational principles](../sources/distributed-system-design-azure-design-principles.md#operational-principles)
-9. [distributed-system-design-hamilton-internet-scale-services: Page 2](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-2)
-10. [distributed-systems-kleppmann-cambridge-notes: Fault tolerance and high availability](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability)
-11. [distributed-system-design-wikipedia-fallacies: The effects of the fallacies](../sources/distributed-system-design-wikipedia-fallacies.md#the-effects-of-the-fallacies)
-12. [distributed-system-design-aws-challenges-distributed-systems: Handling unknown unknowns](../sources/distributed-system-design-aws-challenges-distributed-systems.md#handling-unknown-unknowns)
-13. [distributed-system-design-hamilton-internet-scale-services: Page 5](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-5)
-14. [distributed-system-design-google-sre-cascading-failures: Test Until Failure and Beyond](../sources/distributed-system-design-google-sre-cascading-failures.md#test-until-failure-and-beyond)
-15. [distributed-system-design-azure-design-principles: Strategic principles](../sources/distributed-system-design-azure-design-principles.md#strategic-principles)
-16. [distributed-system-design-aws-timeouts-retries-backoff: Timeouts](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#timeouts)
-17. [distributed-system-design-aws-timeouts-retries-backoff: Failures Happen](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#failures-happen)
-18. [distributed-system-design-google-sre-cascading-failures: Deadline propagation](../sources/distributed-system-design-google-sre-cascading-failures.md#deadline-propagation)
-19. [distributed-system-design-aws-timeouts-retries-backoff: Retries and backoff](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#retries-and-backoff)
-20. [distributed-system-design-aws-timeouts-retries-backoff: Jitter](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#jitter)
-21. [distributed-system-design-google-sre-cascading-failures: Retries](../sources/distributed-system-design-google-sre-cascading-failures.md#retries)
-22. [distributed-systems-kleppmann-cambridge-notes: Manipulating remote state](../sources/distributed-systems-kleppmann-cambridge-notes.md#manipulating-remote-state)
-23. [distributed-system-design-hamilton-internet-scale-services: Page 6](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-6)
-24. [distributed-system-design-google-sre-cascading-failures: Server Overload](../sources/distributed-system-design-google-sre-cascading-failures.md#server-overload)
-25. [distributed-system-design-hamilton-internet-scale-services: Page 4](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-4)
-26. [distributed-system-design-google-sre-cascading-failures: Load Shedding and Graceful Degradation](../sources/distributed-system-design-google-sre-cascading-failures.md#load-shedding-and-graceful-degradation)
-27. [distributed-system-design-hamilton-internet-scale-services: Page 11](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-11)
-28. [distributed-system-design-ongaro-raft-consensus: Page 2](../sources/distributed-system-design-ongaro-raft-consensus.md#page-2)
-29. [distributed-systems-van-steen-tanenbaum-brief-intro: 3.4.2 Scaling techniques](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#342-scaling-techniques)
-30. [distributed-system-design-brewer-cap-twelve-years-later: Cap-latency connection](../sources/distributed-system-design-brewer-cap-twelve-years-later.md#cap-latency-connection)
-31. [distributed-system-design-brewer-cap-twelve-years-later: Why "2 of 3" is missleading](../sources/distributed-system-design-brewer-cap-twelve-years-later.md#why-2-of-3-is-missleading)
-32. [distributed-system-design-brewer-cap-twelve-years-later: Managing partitions](../sources/distributed-system-design-brewer-cap-twelve-years-later.md#managing-partitions)
-33. [distributed-system-design-brewer-cap-twelve-years-later: Which operations should proceed?](../sources/distributed-system-design-brewer-cap-twelve-years-later.md#which-operations-should-proceed)
-34. [distributed-system-design-lamport-time-clocks: Page 1](../sources/distributed-system-design-lamport-time-clocks.md#page-1)
-35. [distributed-system-design-saltzer-end-to-end-arguments: Introduction](../sources/distributed-system-design-saltzer-end-to-end-arguments.md#introduction)
-36. [distributed-system-design-saltzer-end-to-end-arguments: Duplicate message suppression](../sources/distributed-system-design-saltzer-end-to-end-arguments.md#duplicate-message-suppression)
-37. [distributed-systems-van-steen-tanenbaum-brief-intro: 3.2.2 Degree of distribution transparency](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#322-degree-of-distribution-transparency)
-38. [distributed-system-design-ongaro-raft-consensus: Page 1](../sources/distributed-system-design-ongaro-raft-consensus.md#page-1)
-39. [distributed-system-design-hamilton-internet-scale-services: Page 9](../sources/distributed-system-design-hamilton-internet-scale-services.md#page-9)
-40. [distributed-system-design-wikipedia-fallacies: History](../sources/distributed-system-design-wikipedia-fallacies.md#history)
-41. [distributed-system-design-aws-timeouts-retries-backoff: Conclusion](../sources/distributed-system-design-aws-timeouts-retries-backoff.md#conclusion)
-42. [distributed-system-design-google-sre-cascading-failures: Closing Remarks](../sources/distributed-system-design-google-sre-cascading-failures.md#closing-remarks)
-43. [distributed-system-design-brewer-cap-twelve-years-later: Cap confusion](../sources/distributed-system-design-brewer-cap-twelve-years-later.md#cap-confusion)
-44. [distributed-systems-van-steen-tanenbaum-brief-intro: 3.3.2 Separating policy from mechanism](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#332-separating-policy-from-mechanism)
-45. [distributed-system-design-aws-challenges-distributed-systems: Distributed bugs spread epidemically](../sources/distributed-system-design-aws-challenges-distributed-systems.md#distributed-bugs-spread-epidemically)
-46. [distributed-system-design-saltzer-end-to-end-arguments: A too-real example](../sources/distributed-system-design-saltzer-end-to-end-arguments.md#a-too-real-example)
-47. [distributed-system-design-brewer-cap-twelve-years-later: Compensation issues in an automated teller machine](../sources/distributed-system-design-brewer-cap-twelve-years-later.md#compensation-issues-in-an-automated-teller-machine)
+1. [distributed-system-design-azure-transient-fault-handling: Why do transient faults occur in the cloud?](../sources/distributed-system-design-azure-transient-fault-handling.md#why-do-transient-faults-occur-in-the-cloud)
+2. [distributed-system-design-azure-design-principles: Core principles](../sources/distributed-system-design-azure-design-principles.md#core-principles)
+3. [distributed-system-design-aws-well-architected-reliability-principles: Design principles](../sources/distributed-system-design-aws-well-architected-reliability-principles.md#design-principles)
+4. [distributed-systems-van-steen-tanenbaum-brief-intro: 3 Design goals](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#3-design-goals)
+5. [distributed-system-design-wikipedia-fallacies: The fallacies](../sources/distributed-system-design-wikipedia-fallacies.md#the-fallacies)
+6. [distributed-system-design-azure-design-principles: Operational principles](../sources/distributed-system-design-azure-design-principles.md#operational-principles)
+7. [distributed-systems-kleppmann-cambridge-notes: Fault tolerance and high availability](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability)
+8. [distributed-system-design-wikipedia-fallacies: The effects of the fallacies](../sources/distributed-system-design-wikipedia-fallacies.md#the-effects-of-the-fallacies)
+9. [distributed-systems-kleppmann-cambridge-notes: Example: Remote Procedure Calls (RPC)](../sources/distributed-systems-kleppmann-cambridge-notes.md#example-remote-procedure-calls-rpc)
+10. [distributed-system-design-azure-design-principles: Strategic principles](../sources/distributed-system-design-azure-design-principles.md#strategic-principles)
+11. [distributed-system-design-azure-transient-fault-handling: Determine an appropriate retry count and interval](../sources/distributed-system-design-azure-transient-fault-handling.md#determine-an-appropriate-retry-count-and-interval)
+12. [distributed-system-design-azure-circuit-breaker-pattern: Context and problem](../sources/distributed-system-design-azure-circuit-breaker-pattern.md#context-and-problem)
+13. [distributed-system-design-azure-retry-pattern: Context and problem](../sources/distributed-system-design-azure-retry-pattern.md#context-and-problem)
+14. [distributed-system-design-azure-transient-fault-handling: Avoid antipatterns](../sources/distributed-system-design-azure-transient-fault-handling.md#avoid-antipatterns)
+15. [distributed-system-design-azure-retry-pattern: Idempotency](../sources/distributed-system-design-azure-retry-pattern.md#idempotency)
+16. [distributed-system-design-azure-transient-fault-handling: Other considerations](../sources/distributed-system-design-azure-transient-fault-handling.md#other-considerations)
+17. [distributed-systems-kleppmann-cambridge-notes: Manipulating remote state](../sources/distributed-systems-kleppmann-cambridge-notes.md#manipulating-remote-state)
+18. [distributed-system-design-azure-circuit-breaker-pattern: Solution](../sources/distributed-system-design-azure-circuit-breaker-pattern.md#solution)
+19. [distributed-system-design-azure-bulkhead-pattern: Solution](../sources/distributed-system-design-azure-bulkhead-pattern.md#solution)
+20. [distributed-system-design-wikipedia-cascading-failure: In computer networks](../sources/distributed-system-design-wikipedia-cascading-failure.md#in-computer-networks)
+21. [distributed-system-design-azure-throttling-pattern: Solution](../sources/distributed-system-design-azure-throttling-pattern.md#solution)
+22. [distributed-systems-kleppmann-cambridge-notes: Introduction to consensus](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction-to-consensus)
+23. [distributed-systems-kleppmann-cambridge-notes: Quorums](../sources/distributed-systems-kleppmann-cambridge-notes.md#quorums)
+24. [distributed-systems-van-steen-tanenbaum-brief-intro: 3.4.2 Scaling techniques](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#342-scaling-techniques)
+25. [calm-theorem-keeping-calm: 1.1 The High Cost of Coordination](../sources/calm-theorem-keeping-calm.md#11-the-high-cost-of-coordination)
+26. [distributed-system-design-wikipedia-cap-theorem: Explanation](../sources/distributed-system-design-wikipedia-cap-theorem.md#explanation)
+27. [distributed-system-design-wikipedia-cap-theorem: History](../sources/distributed-system-design-wikipedia-cap-theorem.md#history)
+28. [distributed-systems-kleppmann-cambridge-notes: Causality and happens-before](../sources/distributed-systems-kleppmann-cambridge-notes.md#causality-and-happens-before)
+29. [distributed-systems-kleppmann-cambridge-notes: Logical time](../sources/distributed-systems-kleppmann-cambridge-notes.md#logical-time)
+30. [distributed-system-design-wikipedia-end-to-end-principle: Concept](../sources/distributed-system-design-wikipedia-end-to-end-principle.md#concept)
+31. [distributed-system-design-wikipedia-end-to-end-principle: File transfer](../sources/distributed-system-design-wikipedia-end-to-end-principle.md#file-transfer)
+32. [distributed-systems-van-steen-tanenbaum-brief-intro: 3.2.2 Degree of distribution transparency](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#322-degree-of-distribution-transparency)
+33. [distributed-system-design-azure-transient-fault-handling: Log and track transient and nontransient faults](../sources/distributed-system-design-azure-transient-fault-handling.md#log-and-track-transient-and-nontransient-faults)
+34. [distributed-system-design-wikipedia-fallacies: History](../sources/distributed-system-design-wikipedia-fallacies.md#history)
+35. [distributed-systems-van-steen-tanenbaum-brief-intro: 3.3.2 Separating policy from mechanism](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#332-separating-policy-from-mechanism)
+36. [distributed-system-design-wikipedia-cascading-failure: Example](../sources/distributed-system-design-wikipedia-cascading-failure.md#example)
+37. [distributed-system-design-wikipedia-end-to-end-principle: ARPANET](../sources/distributed-system-design-wikipedia-end-to-end-principle.md#arpanet)
+38. [calm-theorem-keeping-calm: 2.1 Program Consistency: Confluence](../sources/calm-theorem-keeping-calm.md#21-program-consistency-confluence)
 
 ## 11. Metadata
 
-- **Version:** 1.0
+- **Version:** 2.0
 - **Template:** survey
 - **Language:** en
+- **Model:** claude-opus-5-5
 - **Created:** 2026-10-23
 - **Last modified:** 2026-10-25
-- **Words:** 2,389 (about 10 min)
+- **Words:** 2,336 (about 10 min)
 - **History:**
+  - 2.0 (2026-10-25): Rebuilt on openly licensed sources only, for a public demo: Hamilton, the AWS Builders' Library, Google SRE, Brewer, Saltzer, Raft and Lamport (now links) replaced by Microsoft's resilience patterns, Wikipedia on CAP, the end-to-end principle and cascading failures, Kleppmann's notes and the CALM paper; Keep it simple dropped (no open source states it); new case studies: Gmail 2012, the ARPANET, Dynamo's cart
   - 1.0 (2026-10-23): First version.
 - **Reading plan:**
-  1. `distributed-system-design-lamport-time-clocks`, in full: medium relevance, authority A, 1978-07-01
-  2. `distributed-system-design-ongaro-raft-consensus`, in full: medium relevance, authority A, 2014-06-19
-  3. `distributed-systems-kleppmann-cambridge-notes`, in full: medium relevance, authority A, 2021-10-01
-  4. `distributed-system-design-wikipedia-fallacies`, in full: high relevance, authority B, undated
-  5. `distributed-system-design-aws-timeouts-retries-backoff`, in full: high relevance, authority A, undated
-  6. `distributed-system-design-aws-challenges-distributed-systems`, in full: high relevance, authority A, undated
+  1. `what-does-keeping-calm-argue-and-is-it-worth-reading-in-full`, in full: existing narrative, medium relevance
+  2. `calm-theorem-keeping-calm`, in full: medium relevance, authority A, 2019-01-26
+  3. `distributed-system-design-wikipedia-fallacies`, in full: high relevance, authority B, undated
+  4. `distributed-system-design-wikipedia-cap-theorem`, in full: high relevance, authority B, undated
+  5. `distributed-system-design-wikipedia-end-to-end-principle`, in full: high relevance, authority B, undated
+  6. `distributed-system-design-wikipedia-cascading-failure`, in full: high relevance, authority B, undated
   7. `distributed-system-design-aws-well-architected-reliability-principles`, in full: high relevance, authority A, undated
   8. `distributed-system-design-azure-design-principles`, in full: high relevance, authority A, undated
-  9. `distributed-system-design-saltzer-end-to-end-arguments`, in full: high relevance, authority A, 1984-11-01
-  10. `distributed-system-design-hamilton-internet-scale-services`, in full: high relevance, authority A, 2007-11-01
-  11. `distributed-system-design-brewer-cap-twelve-years-later`, in full: high relevance, authority A, 2012-05-30
-  12. `distributed-system-design-google-sre-cascading-failures`, in full: high relevance, authority A, 2016-04-01
-  13. `distributed-systems-van-steen-tanenbaum-brief-intro`, in full: high relevance, authority A, 2016-09-01
-  14. `what-is-a-distributed-system`, in full: existing narrative, high relevance: built on
-  15. `ewma-linkerd-beyond-round-robin`, abstract only: low relevance
-  16. `distributed-systems-lamport-definition-email`, abstract only: low relevance
-  17. `distributed-systems-wikipedia-distributed-computing`, abstract only: low relevance
-  18. `distributed-system-design-waldo-note-on-distributed-computing`, not read: a link, no saved copy
+  9. `distributed-system-design-azure-retry-pattern`, in full: high relevance, authority A, undated
+  10. `distributed-system-design-azure-circuit-breaker-pattern`, in full: high relevance, authority A, undated
+  11. `distributed-system-design-azure-bulkhead-pattern`, in full: high relevance, authority A, undated
+  12. `distributed-system-design-azure-throttling-pattern`, in full: high relevance, authority A, undated
+  13. `distributed-system-design-azure-transient-fault-handling`, in full: high relevance, authority A, undated
+  14. `distributed-systems-van-steen-tanenbaum-brief-intro`, in full: high relevance, authority A, 2016-09-01
+  15. `distributed-systems-kleppmann-cambridge-notes`, in full: high relevance, authority A, 2021-10-01
+  16. `what-is-a-distributed-system`, in full: existing narrative, high relevance: built on
+  17. `ewma-linkerd-beyond-round-robin`, abstract only: low relevance
+  18. `distributed-systems-wikipedia-distributed-computing`, abstract only: low relevance
+  19. `distributed-system-design-waldo-note-on-distributed-computing`, not read: a link, no saved copy
+  20. `distributed-system-design-hamilton-internet-scale-services`, not read: a link, no saved copy
+  21. `distributed-system-design-aws-timeouts-retries-backoff`, not read: a link, no saved copy
+  22. `distributed-system-design-aws-challenges-distributed-systems`, not read: a link, no saved copy
+  23. `distributed-system-design-google-sre-cascading-failures`, not read: a link, no saved copy
+  24. `distributed-system-design-brewer-cap-twelve-years-later`, not read: a link, no saved copy
+  25. `distributed-system-design-ongaro-raft-consensus`, not read: a link, no saved copy
+  26. `distributed-system-design-lamport-time-clocks`, not read: a link, no saved copy
+  27. `distributed-system-design-saltzer-end-to-end-arguments`, not read: a link, no saved copy
+  28. `distributed-systems-lamport-definition-email`, not read: a link, no saved copy
