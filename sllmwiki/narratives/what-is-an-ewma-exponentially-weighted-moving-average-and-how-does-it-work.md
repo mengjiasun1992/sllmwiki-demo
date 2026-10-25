@@ -189,8 +189,10 @@ With $k = 3$ (α = 1/8) and 4 fractional bits, the first sample 100 seeds the st
 
 - **Version:** 1.0
 - **Template:** technical_brief_overview
+- **Language:** en
 - **Created:** 2026-10-23
-- **Last modified:** 2026-10-23
+- **Last modified:** 2026-10-25
+- **Words:** 1,962 (about 9 min)
 - **History:**
   - 1.0 (2026-10-23): First version.
 - **Reading plan:**

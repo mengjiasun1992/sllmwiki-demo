@@ -123,8 +123,10 @@ Three nuances matter beyond the short version. First, a node need not be a whole
 
 - **Version:** 1.0
 - **Template:** concept_brief_overview
+- **Language:** en
 - **Created:** 2026-10-23
-- **Last modified:** 2026-10-23
+- **Last modified:** 2026-10-25
+- **Words:** 1,259 (about 5 min)
 - **History:**
   - 1.0 (2026-10-23): First version.
 - **Reading plan:**

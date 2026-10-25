@@ -194,8 +194,10 @@ Gaussian and Blackman kernels and multiple-pass SMAs filter frequencies better t
 
 - **Version:** 1.0
 - **Template:** comparison
+- **Language:** en
 - **Created:** 2026-10-23
-- **Last modified:** 2026-10-23
+- **Last modified:** 2026-10-25
+- **Words:** 1,710 (about 7 min)
 - **History:**
   - 1.0 (2026-10-23): First version.
 - **Reading plan:**
