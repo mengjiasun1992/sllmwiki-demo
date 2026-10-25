@@ -84,7 +84,7 @@ Why it holds, intuitively: a monotonic program is safe with missing information,
 
 Consistency is **confluence**: an operation produces the same outputs for any ordering and batching of its inputs, confluent operations compose, and a program built only from them is confluent by construction [\[3\]](../sources/calm-theorem-keeping-calm.md#21-program-consistency-confluence). Confluence promises nothing about recency or the order of writes, so storage-level anomalies are allowed as long as they don't change the outcome [\[3\]](../sources/calm-theorem-keeping-calm.md#21-program-consistency-confluence).
 
-Coordination gets a precise meaning in the proof: messages a program must send under every way of partitioning the data, even with all of it on one machine; a garbage collector holding all the data must still ask the others whether they have more edges [\[5\]](../sources/calm-theorem-keeping-calm.md#22-a-sketch-of-the-proof). The "if" direction is straightforward, the "only if" harder, since it must rule out every scheme for avoiding coordination [\[5\]](../sources/calm-theorem-keeping-calm.md#22-a-sketch-of-the-proof). In a query language, monotonic means selection, projection, intersection, join and transitive closure, but not set difference; in logic, no universal quantifier, the "everything there is to hear" that garbage collection needs [\[5\]](../sources/calm-theorem-keeping-calm.md#22-a-sketch-of-the-proof).
+Coordination gets a precise meaning in the proof: messages a program must send under every way of partitioning the data, even with all of it on one machine; a garbage collector holding all the data must still ask the others whether they have more edges [\[5\]](../sources/calm-theorem-keeping-calm.md#22-a-sketch-of-the-proof). The "if" direction is straightforward, the "only if" harder, since it must rule out every scheme for avoiding coordination [\[5\]](../sources/calm-theorem-keeping-calm.md#22-a-sketch-of-the-proof). In relational algebra, monotonic means selection, projection, intersection, join and transitive closure, but not set difference; in logic, no universal quantifier, the "everything there is to hear" that garbage collection needs [\[5\]](../sources/calm-theorem-keeping-calm.md#22-a-sketch-of-the-proof).
 
 ### 6.4 What follows
 
@@ -102,7 +102,7 @@ The practical case rests on examples and the authors' own systems: the Dynamo ca
 
 The authors name the limits. CALM is not constructive: it doesn't say how to find a monotonic specification or how to implement one [\[10\]](../sources/calm-theorem-keeping-calm.md#6-conclusion). The expressive power of monotonic distributed programs is open [\[16\]](../sources/calm-theorem-keeping-calm.md#41-expressiveness). Confluence doesn't capture coordinated non-monotonic programs, because Paxos makes one run's decisions uniform without making different runs agree [\[17\]](../sources/calm-theorem-keeping-calm.md#43-analyzing-non-monotonic-code). Statistical results such as Hogwild!'s convergence fall outside it [\[18\]](../sources/calm-theorem-keeping-calm.md#44-stochastic-calm).
 
-In this primer's reading, the practice section leans toward the authors' own language-based work, and the related work gets a single page [→].
+In this primer's reading, the practice section leans toward the authors' own language-based work, and the related work gets only a few paragraphs [→].
 
 ## 8. Should you read it
 
@@ -145,7 +145,7 @@ Read it in full if you design replicated services or storage and want a principl
 
 ## 10. Metadata
 
-- **Version:** 1.0
+- **Version:** 1.1
 - **Template:** skim_read
 - **Language:** en
 - **Model:** claude-opus-5-5
@@ -153,6 +153,7 @@ Read it in full if you design replicated services or storage and want a principl
 - **Last modified:** 2026-10-24
 - **Words:** 1,662 (about 7 min)
 - **History:**
+  - 1.1 (2026-10-24): Lint: relational algebra, as the paper says; the related work's length.
   - 1.0 (2026-10-24): First version.
 - **Reading plan:**
   1. `calm-theorem-keeping-calm`, in full: high relevance, authority A, 2019-01-26
