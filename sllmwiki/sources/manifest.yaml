@@ -10,16 +10,6 @@ distributed-systems-van-steen-tanenbaum-brief-intro:
   tags: [distributed-systems, distributed-system-design]
   abstract: "Open-access survey article by Maarten van Steen and Andrew S. Tanenbaum (Computing 98, 2016) giving a brief overview of distributed systems: what they are, their general design goals, and the most common types. It loosely characterises a distributed system as a collection of autonomous computing elements (nodes) that appears to its users as a single coherent system, and draws out the consequences: nodes collaborate by message passing, there is no global clock, group membership and overlay networks must be managed, and partial failures are inherent and hard to hide. It presents middleware as the 'operating system' of a distributed system (RPC, transactions, service composition, reliability). Four design goals are discussed in depth: supporting resource sharing; distribution transparency (access, location, relocation, migration, replication, concurrency and failure transparency, and the limits and costs of hiding distribution); openness (interfaces and IDLs, interoperability, portability, extensibility, separating policy from mechanism); and scalability along size, geographical and administrative dimensions, including a queuing-model analysis of centralised bottlenecks and the scaling techniques of hiding latency, partitioning and distribution, and replication and caching with their consistency trade-offs (CAP). It lists Peter Deutsch's false assumptions as pitfalls. It then surveys types of distributed systems: high-performance computing (cluster, grid, cloud), distributed information systems (transaction processing, enterprise application integration) and pervasive systems (ubiquitous, mobile, sensor networks), and closes with an outlook on dependability and Internet-scale scalability."
 
-distributed-systems-lamport-definition-email:
-  file: sources/distributed-systems-lamport-definition-email.md
-  kind: text
-  url: https://lamport.azurewebsites.net/pubs/distributed-system.txt
-  published: "1987-05-28"
-  ingested: "2026-10-20"
-  license: unknown
-  tags: [distributed-systems]
-  abstract: "A short internal email that Leslie Lamport sent to colleagues at DEC's Systems Research Center (SRC) on 28 May 1987, the origin of his much-quoted tongue-in-cheek definition: a distributed system is one in which the failure of a computer you didn't even know existed can render your own computer unusable. Lamport notes the long debate over what constitutes a distributed system and says this definition appears to have been adopted at SRC. Prompted by an electrical problem in the machine room, he observes that each new version of the system software makes users' workstations more dependent on programs running elsewhere, so that a server outage can leave a user's machine inoperative through no fault of its own, and that waiting hours for servers to be rebooted is far more annoying than waiting seconds for a program to be swapped in. He proposes a development project to make the system more robust, without prescribing an approach (stand-alone operation being one possibility), and volunteers to gather data, asking colleagues to report incidents of workstations becoming unusable because of failures elsewhere. The email is a concise statement of the dependency and partial-failure problem at the heart of distributed systems."
-
 distributed-systems-wikipedia-distributed-computing:
   file: sources/distributed-systems-wikipedia-distributed-computing.md
   kind: html
@@ -39,45 +29,6 @@ distributed-system-design-wikipedia-fallacies:
   license_url: https://creativecommons.org/licenses/by-sa/4.0/
   tags: [distributed-system-design]
   abstract: "The Wikipedia article on the fallacies of distributed computing: a set of false assumptions, set out by L. Peter Deutsch and others at Sun Microsystems, that programmers new to distributed applications invariably make. It lists the eight original fallacies: the network is reliable; latency is zero; bandwidth is infinite; the network is secure; topology doesn't change; there is one administrator; transport cost is zero; the network is homogeneous. For each it gives an effect of believing it, such as applications with little handling of network errors that stall, wait forever or never retry; unbounded traffic that increases dropped packets; bottlenecks; being blindsided by malicious users; conflicting policies of multiple administrators; and unbudgeted hidden network costs. Its history section says Deutsch first listed seven fallacies in 1994, incorporating four that Bill Joy and Dave Lyon had already identified in 'The Fallacies of Networked Computing', and that James Gosling added the eighth around 1997. It also records a ninth fallacy Deutsch later proposed on Software Engineering Radio (2021), that the party you are communicating with is trustworthy, and three further fallacies added by Mark Richards and Neal Ford in 2020: versioning is simple, compensating updates always work, and observability is optional. It links to the CAP theorem and PACELC as related topics."
-
-distributed-system-design-hamilton-internet-scale-services:
-  file: sources/distributed-system-design-hamilton-internet-scale-services.md
-  kind: pdf
-  url: https://www.usenix.org/legacy/event/lisa07/tech/full_papers/hamilton/hamilton.pdf
-  published: "2007-11-01"
-  ingested: "2026-10-20"
-  license: proprietary
-  tags: [distributed-system-design]
-  abstract: "James Hamilton's LISA 2007 paper (Windows Live Services Platform, Microsoft) summarises best practices, drawn from MSN, Windows Live, Exchange Hosted Services and other very large services, for designing and deploying operations-friendly internet-scale services: services that need little human intervention and detect and recover from all but the most obscure failures on their own. It notes that system-to-administrator ratios range from 2:1 to 2,500:1 and argues that the service design, more than auto-administration tooling, decides that ratio, since about 80% of operations issues originate in design and development. It opens with Bill Hoffman's three tenets: expect failures, keep things simple, automate everything. It then lists basic design tenets (design for failure, redundancy and fault recovery, a commodity hardware slice, single-version software, multi-tenancy) and more specific practices in ten areas: overall application design (zero trust of components, pod isolation, admission control at all levels, partitioning, avoiding single points of failure), automatic management and provisioning, dependency management (timeouts, idempotency, bounded restarts, fail fast, decoupling), release cycle and testing (testing in production, staged rollout, roll-back, frequent shipping), hardware standardisation, operations and capacity planning, auditing, monitoring and alerting, graceful degradation and admission control (a 'big red switch', metered admission, client jitter and backoff), customer and press communication, and customer self-provisioning. The text is converted from the PDF, page by page."
-
-distributed-system-design-aws-timeouts-retries-backoff:
-  file: sources/distributed-system-design-aws-timeouts-retries-backoff.md
-  kind: html
-  url: https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/
-  ingested: "2026-10-20"
-  license: proprietary
-  tags: [distributed-system-design]
-  abstract: "An Amazon Builders' Library article by Marc Brooker (December 2019) on how Amazon handles transient failures in calls between services without overwhelming struggling ones. It starts from the premise that failures in remote calls are inevitable and that systems must tolerate them without magnifying a small percentage of failures into a complete outage, using three tools: timeouts, retries and backoff, plus jitter. Timeouts: set one on every remote call and every cross-process call, covering connection and request; choose the value from the downstream service's latency percentile matching an acceptable false-timeout rate (for example p99.9 for 0.1%), with care for internet latency, tight latency bounds and timeouts that miss DNS or TLS work. Retries are described as 'selfish' and dangerous under overload; the article recommends capped exponential backoff, limiting the number of retries, retrying at a single point in the stack (independent retries in a five-layer stack can multiply database load 243 times), local retry limiting with a token bucket rather than circuit breakers, retrying only idempotent APIs, and distinguishing retryable from non-retryable errors. Jitter adds randomness to backoff so correlated retries do not collide, and should also be applied to timers and periodic jobs, preferably deterministically per host. It concludes that retries should happen only while the dependency is healthy."
-
-distributed-system-design-aws-challenges-distributed-systems:
-  file: sources/distributed-system-design-aws-challenges-distributed-systems.md
-  kind: html
-  url: https://aws.amazon.com/builders-library/challenges-with-distributed-systems/
-  ingested: "2026-10-20"
-  license: proprietary
-  tags: [distributed-systems, distributed-system-design]
-  abstract: "An Amazon Builders' Library article by Jacob Gabrielson (2019) explaining why distributed systems are harder and less intuitive than other computing, the background for AWS's design practices. It attributes the most impactful problems to independent failures and nondeterminism, and to the impossibility of always knowing whether something failed. It places distributed systems on a spectrum of difficulty: offline (batch) systems, soft real-time systems, and hard real-time request/reply services, which are the hardest and the article's focus. Using a networked Pac-Man example, it shows that any request/reply across a network involves eight unavoidable steps (post request, deliver request, validate request, update server state, post reply, deliver reply, validate reply, update client state), each of which can fail independently because client, server and network do not share fate; these are the 'eight failure modes of the apocalypse'. A timeout leaves the outcome UNKNOWN, which code must handle, and which is especially hard with side effects such as withdrawing money. The article shows how these outcomes multiply the testing matrix on both client and server, advises distrusting everything, and explains that the same failure modes recur recursively at every level of grouping (machines, groups, Availability Zones, Regions). It notes that distributed bugs are often latent and spread epidemically, illustrated by an amazon.com outage caused by one catalog server with a full disk, and closes with a summary of why distributed engineering is hard."
-
-distributed-system-design-google-sre-cascading-failures:
-  file: sources/distributed-system-design-google-sre-cascading-failures.md
-  kind: html
-  url: https://sre.google/sre-book/addressing-cascading-failures/
-  published: "2016-04-01"
-  ingested: "2026-10-20"
-  license: CC-BY-NC-ND-4.0
-  license_url: https://creativecommons.org/licenses/by-nc-nd/4.0/
-  tags: [distributed-system-design]
-  abstract: "Chapter 22 of Google's Site Reliability Engineering book (2017), 'Addressing Cascading Failures', written by Mike Ulrich, using the book's sample Shakespeare search service as its running example. A cascading failure is one that grows over time through positive feedback: part of a system fails and raises the chance that other parts fail, as when an overloaded replica crashes and pushes its load onto the rest. The chapter explains the causes: server overload (the most common), exhaustion of CPU, memory, threads and file descriptors and how these feed each other, and service unavailability through crash loops and health-check failures. It then sets out prevention in rough priority order: load test to and beyond failure, serve degraded results, reject requests early when overloaded, rate limit at higher layers, and plan capacity (for example N+2). Further sections cover queue management, load shedding and graceful degradation, retries (randomised exponential backoff, per-request limits, server-wide retry budgets, avoiding retries at several layers, clear retriable versus non-retriable response codes), deadlines and their propagation, cancellation propagation, bimodal latency and failing fast, slow startup and cold caches, and avoiding intra-layer communication. It lists triggering conditions (process death, updates, rollouts, organic growth, drains, resource limits), testing strategies, and immediate remedies such as adding resources, disabling health-check kills, restarting servers, dropping traffic, entering degraded modes and eliminating batch or bad traffic."
 
 distributed-system-design-aws-well-architected-reliability-principles:
   file: sources/distributed-system-design-aws-well-architected-reliability-principles.md
@@ -194,46 +145,6 @@ distributed-system-design-azure-design-principles:
   tags: [distributed-system-design]
   abstract: "The index page of the Azure Architecture Center's design principles for Azure applications (Microsoft Learn), an official vendor list of principles for building cloud applications that withstand failures, scale with demand and evolve with business needs. It groups eleven principles. Core: design for self-healing (detect failures, respond gracefully, recover automatically, with retries, health endpoint monitoring, circuit breakers and bulkheads, because in distributed systems failures are inevitable); make all things redundant (load balancers, multiple instances, database replicas, multi-zone or multi-region deployment, sized to business risk); minimize coordination (decoupled, asynchronous components, eventual consistency where appropriate, domain events); design to scale out (horizontal scaling, no session stickiness, find bottlenecks, autoscale on live metrics); partition around limits (horizontal, vertical or functional partitioning, partition keys that avoid hotspots). Operational: design for operations (logging, distributed tracing, standard metrics, automated management); use managed services (PaaS over IaaS); use an identity service. Strategic: design for evolution (loose coupling, encapsulated domain knowledge, asynchronous messaging, versioned APIs); build for the needs of business (RTOs, SLAs, SLOs, domain models); perform failure mode analysis during design. A closing list says how they combine: start from business requirements, design for failure, plan for scale, use managed services, support operations, build for change. Each principle links to its own article, which this copy does not include."
 
-distributed-system-design-brewer-cap-twelve-years-later:
-  file: sources/distributed-system-design-brewer-cap-twelve-years-later.md
-  kind: html
-  url: https://www.infoq.com/articles/cap-twelve-years-later-how-the-rules-have-changed/
-  published: "2012-05-30"
-  ingested: "2026-10-21"
-  license: proprietary
-  tags: [distributed-system-design]
-  abstract: "Eric Brewer's 2012 retrospective on the CAP theorem (first published in IEEE Computer, republished by InfoQ), by the theorem's originator. CAP says a networked shared-data system can have at most two of consistency (C), availability (A) and partition tolerance (P); Brewer explains why the '2 of 3' formulation, meant to open a wider design space, is misleading: partitions are rare, so there is little reason to give up C or A when there is none; the choice between C and A can be made many times, per subsystem, operation, data item or user; and all three properties are continuous rather than binary. He relates ACID and BASE (basically available, soft state, eventually consistent), noting the C in CAP is only single-copy consistency. Operationally, the CAP choice happens during a timeout: cancel the operation (lose availability) or proceed (risk inconsistency); a partition is a time bound on communication, and retrying via Paxos or two-phase commit only delays the decision. He proposes managing partitions explicitly in three steps: detect a partition, enter a partition mode that limits some operations and records history, and on recovery restore consistency and compensate for mistakes. Tools include deciding per invariant which operations proceed, version vectors to track causal history, commutative operations and CRDTs for automatic convergence, and compensating transactions (sagas); an ATM sidebar shows a bounded stand-in mode. He concludes that designers should not blindly sacrifice C or A. The copy lacks the article's opening paragraphs and figures."
-
-distributed-system-design-ongaro-raft-consensus:
-  file: sources/distributed-system-design-ongaro-raft-consensus.md
-  kind: pdf
-  url: https://raft.github.io/raft.pdf
-  published: "2014-06-19"
-  ingested: "2026-10-21"
-  license: proprietary
-  tags: [distributed-system-design]
-  abstract: "Diego Ongaro and John Ousterhout's 'In Search of an Understandable Consensus Algorithm (Extended Version)' (Stanford, 2014; extended from the USENIX ATC 2014 paper), the paper that introduced Raft. Raft is a consensus algorithm for managing a replicated log, equivalent in result and efficiency to (multi-)Paxos but structured for understandability: it separates leader election, log replication and safety, and reduces the states to consider. The introduction says consensus lets a collection of machines work as a coherent group that survives the failures of some members, and so plays a key role in reliable large-scale systems. Section 2 frames consensus within replicated state machines: deterministic state machines on several servers apply the same log of commands in the same order and so compute the same state, appearing as one highly reliable machine; examples are Chubby and ZooKeeper. Practical consensus algorithms are safe under all non-Byzantine conditions (delays, partitions, loss, duplication, reordering), available while any majority of servers is up (five servers tolerate two failures), do not depend on timing for consistency, and complete a command once a majority responds. Section 3 explains why Paxos is hard to understand and to build on. Later sections give Raft's strong leader, randomized election timeouts, log replication, safety argument, joint-consensus membership changes, log compaction, client interaction, a user study (33 of 43 students did better on Raft), correctness and performance evaluation, and related work. The PDF copy has page-level anchors only."
-
-distributed-system-design-lamport-time-clocks:
-  file: sources/distributed-system-design-lamport-time-clocks.md
-  kind: pdf
-  url: https://lamport.azurewebsites.net/pubs/time-clocks.pdf
-  published: "1978-07-01"
-  ingested: "2026-10-21"
-  license: proprietary
-  tags: [distributed-system-design]
-  abstract: "Leslie Lamport's 'Time, Clocks, and the Ordering of Events in a Distributed System' (Communications of the ACM 21(7), 1978), saved from the author's own site. It examines the concept of one event happening before another in a distributed system, defined as a collection of spatially separated processes communicating by messages, where message delay is not negligible compared with the time between events. Because it is sometimes impossible to say which of two events happened first, the 'happened before' relation is only a partial ordering, defined without physical clocks; problems often arise when people are not aware of this. Lamport introduces logical clocks (counters assigning numbers to events) satisfying a clock condition, gives a distributed algorithm that extends the partial order to a consistent total order, and uses it to solve a mutual-exclusion synchronization problem without a central scheduler. He shows that the total order can disagree with what users perceive outside the system, producing anomalous behaviour, which properly synchronized physical clocks prevent; he gives a method for synchronizing physical clocks and a theorem bounding how far out of synchrony they can drift, proved in an appendix. The conclusion stresses that in a distributed system the order of events is only partial. The PDF copy has page-level anchors only, OCR-like artifacts in the formulas, and its last page also carries the start of an unrelated article (Baker, 'Shallow Binding in Lisp 1.5')."
-
-distributed-system-design-saltzer-end-to-end-arguments:
-  file: sources/distributed-system-design-saltzer-end-to-end-arguments.md
-  kind: html
-  url: https://deepplum.com/Papers/EndtoEnd.html
-  published: "1984-11-01"
-  ingested: "2026-10-21"
-  license: proprietary
-  tags: [distributed-system-design]
-  abstract: "Saltzer, Reed and Clark's 'End-to-End Arguments in System Design' (ACM Transactions on Computer Systems, 1984; revised from a 1981 conference paper), the classic paper stating a design principle for placing functions among the modules of a distributed system, saved from the copy on co-author David Reed's site. The end-to-end argument: a function can be completely and correctly implemented only with the knowledge and help of the application at the end points, so providing it inside the communication system is not possible; an incomplete low-level version is justified only as a performance enhancement. The case study is careful file transfer: whatever the network does, the application must still check the file end to end; a too-real MIT example tells of a gateway that swapped byte pairs in memory despite per-hop checksums. A performance section argues that the right amount of low-level reliability is an engineering trade-off, since low levels charge every application and know less. Further examples: delivery acknowledgements (what matters is whether the target application acted), encryption (keys, cleartext at the host, authenticity), duplicate message suppression (applications generate their own duplicates on retry, so they must suppress them anyway), FIFO delivery and transaction management. A history section traces the argument in other system areas. The conclusion calls end-to-end arguments a kind of Occam's razor for choosing a communication subsystem's functions and part of a set of rational principles for layered systems."
-
 ewma-jacobson-congestion-avoidance:
   file: sources/ewma-jacobson-congestion-avoidance.md
   kind: pdf
@@ -306,3 +217,163 @@ calm-theorem-keeping-calm:
   license_url: https://creativecommons.org/licenses/by/4.0/
   tags: [calm-theorem]
   abstract: "Hellerstein and Alvaro's survey of the CALM theorem (Consistency As Logical Monotonicity), written for practitioners (arXiv, 2019). It asks which problems can be computed consistently in a distributed system without coordination, given that coordination protocols such as Paxos and two-phase commit are the main cost in throughput and availability. Two nearly identical graph problems frame the answer: distributed deadlock detection needs no coordination, because a cycle once seen stays a cycle, while distributed garbage collection does, because an object that looks unreachable may turn out reachable. The theorem: a program has a consistent, coordination-free distributed implementation if and only if it is monotonic, meaning more input never retracts output. Consistency is defined as confluence of program outcomes, not memory consistency. The paper sketches Ameloot et al.'s proof on relational transducers, relates CALM to CAP (monotonic programs can have consistency, availability and partition tolerance together), and reads common patterns through it: the Dynamo shopping cart, tombstones, CRDTs, immutability, the Bloom language, moving coordination off the critical path, and compensation. It closes with open questions (expressiveness, program synthesis, checking non-monotonic code, stochastic CALM) and related work. 9 pages, about 8,500 words."
+
+distributed-system-design-azure-retry-pattern:
+  file: sources/distributed-system-design-azure-retry-pattern.md
+  kind: html
+  url: https://learn.microsoft.com/en-us/azure/architecture/patterns/retry
+  ingested: "2026-10-25"
+  license: CC-BY-4.0
+  license_url: https://github.com/MicrosoftDocs/architecture-center/blob/main/LICENSE
+  tags: [distributed-system-design]
+  abstract: "Microsoft's Retry pattern from the Azure Architecture Center (Microsoft Learn). Its context: applications in the cloud meet transient faults, such as a momentary loss of network connectivity, a service that is temporarily unavailable, or timeouts when a service is busy, and these usually correct themselves, so an operation repeated after a suitable delay is likely to succeed; a busy database may throttle requests, for example. The solution is a retry mechanism: retry an unsuccessful request a predefined number of times, then treat the fault as an exception. It describes retry strategies (cancel, retry immediately, retry after a delay, with growing delays) and the issues to weigh: the effect of retries on performance, idempotency (a service may process a request but fail to send its response, so a retried non-idempotent operation runs twice), which exception types to retry, and transaction consistency. It notes that many client libraries and cloud services now include built-in retry mechanisms, and says when to use the pattern and when not to, with links to related guidance on transient fault handling and the Circuit Breaker pattern."
+
+distributed-system-design-azure-circuit-breaker-pattern:
+  file: sources/distributed-system-design-azure-circuit-breaker-pattern.md
+  kind: html
+  url: https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker
+  ingested: "2026-10-25"
+  license: CC-BY-4.0
+  license_url: https://github.com/MicrosoftDocs/architecture-center/blob/main/LICENSE
+  tags: [distributed-system-design]
+  abstract: "Microsoft's Circuit Breaker pattern from the Azure Architecture Center. It starts from faults that take longer to fix than transient ones: an application shouldn't keep retrying an operation unlikely to succeed, and requests blocked on a slow service until their timeout hold memory, threads and database connections, which can exhaust resources and fail unrelated parts of the system, a cascading failure. A circuit breaker is a proxy that counts recent failures to an operation and works as a state machine: closed (calls pass and failures are counted), open (past a threshold within a period, calls fail immediately and a timer starts) and half-open (a limited number of trial calls test whether the fault is fixed, closing the breaker on success). It explains how the pattern differs from Retry, which expects success, and how the two combine, then covers problems and considerations (exception handling, types of exceptions, monitoring, recoverability, testing failed operations, manual override, concurrency, resource differentiation, accelerated breaking, multiregion deployments, service-mesh circuit breakers, replaying failed requests, inappropriate timeouts on external services), when to use it, workload design, and an example with the three flows."
+
+distributed-system-design-azure-bulkhead-pattern:
+  file: sources/distributed-system-design-azure-bulkhead-pattern.md
+  kind: html
+  url: https://learn.microsoft.com/en-us/azure/architecture/patterns/bulkhead
+  ingested: "2026-10-25"
+  license: CC-BY-4.0
+  license_url: https://github.com/MicrosoftDocs/architecture-center/blob/main/LICENSE
+  tags: [distributed-system-design]
+  abstract: "Microsoft's Bulkhead pattern from the Azure Architecture Center, named after the partitioned sections of a ship's hull. Its problem: excessive load or failure in a service affects all its consumers, and a consumer calling an unresponsive service can exhaust its own resources, such as a connection pool, so its calls to other services fail too, a cascading failure. The solution partitions service instances into groups by consumer load and availability needs, and lets a consumer partition its resources, for example one connection pool per downstream service, so a failing service affects only the pool assigned to it. Benefits listed: consumers and services are isolated from cascading failures, some functionality survives a failure, and different quality-of-service levels can be offered. Diagrams show bulkheads around connection pools and around service instances per client. It discusses problems and considerations (granularity, combining with retry, circuit breaker and throttling, isolation in processes, containers or virtual machines, monitoring each partition), when to use it, workload design, and an example using Kubernetes resource limits."
+
+distributed-system-design-azure-throttling-pattern:
+  file: sources/distributed-system-design-azure-throttling-pattern.md
+  kind: html
+  url: https://learn.microsoft.com/en-us/azure/architecture/patterns/throttling
+  ingested: "2026-10-25"
+  license: CC-BY-4.0
+  license_url: https://github.com/MicrosoftDocs/architecture-center/blob/main/LICENSE
+  tags: [distributed-system-design]
+  abstract: "Microsoft's Throttling pattern from the Azure Architecture Center. Load on a cloud application varies by time of day, month-end jobs and sudden bursts, and when demand exceeds capacity the system slows or fails and misses its service-level objectives; autoscaling helps but takes time and money, so demand can outrun it. The pattern caps resource use and throttles requests above the cap so the system keeps functioning and meeting its SLOs. It frames throttling as a control loop with signals at the infrastructure, application and per-principal levels, and lists strategies: per-principal rate limits, graceful feature degradation (turn off nonessential features so essential ones keep resources, trading completeness for availability), load leveling through a queue, priority-based deferral of lower-priority work, and outbound rate limits toward a failing dependency. A chart shows features throttled as resource use nears a soft limit. It covers problems and considerations (deciding early, responding quickly, returning a specific error such as HTTP 429 with Retry-After, combining with autoscaling), when to use the pattern, workload design, and a multitenant example."
+
+distributed-system-design-azure-transient-fault-handling:
+  file: sources/distributed-system-design-azure-transient-fault-handling.md
+  kind: html
+  url: https://learn.microsoft.com/en-us/azure/architecture/best-practices/transient-faults
+  ingested: "2026-10-25"
+  license: CC-BY-4.0
+  license_url: https://github.com/MicrosoftDocs/architecture-center/blob/main/LICENSE
+  tags: [distributed-system-design]
+  abstract: "Microsoft's best practices for transient fault handling, from the Azure Architecture Center. Transient faults happen in the cloud because it runs on many commodity hardware units that are recycled and replaced automatically, resources are shared and throttled, and the network between client and service has many components. General guidelines: check whether a built-in retry mechanism exists; check whether retrying suits the operation; choose retry count and interval (exponential back-off with jitter, incremental, regular, immediate or randomized intervals; exponential back-off for background work, short retries for interactive work); keep the total time, timeouts and delays included, within the latency objective; set timeouts on every outbound call before adding retries; follow Retry-After headers. Antipatterns: duplicated or cascading retries at every layer (three retries at each of two layers make nine attempts), endless retries, aggressive retries that keep a service from recovering, and retries without a budget; a retry budget, such as 60 retries a minute, keeps a local capacity problem from becoming a cascading failure. It adds testing retries, managing retry policy configuration, logging transient faults as warnings and alerting on rising retry counts, using a circuit breaker for operations that keep failing, and designing each step as idempotent."
+
+distributed-system-design-wikipedia-cap-theorem:
+  file: sources/distributed-system-design-wikipedia-cap-theorem.md
+  kind: html
+  url: https://en.wikipedia.org/wiki/CAP_theorem
+  ingested: "2026-10-25"
+  license: CC-BY-SA-4.0
+  license_url: https://creativecommons.org/licenses/by-sa/4.0/
+  tags: [distributed-system-design]
+  abstract: "Wikipedia's article on the CAP theorem. It states that any distributed data store can provide at most two of three guarantees: consistency (every read receives the most recent write or an error), availability (every request receives a non-error response, without the guarantee that it contains the most recent write) and partition tolerance (the system keeps operating despite messages dropped or delayed between nodes). Its Explanation section says network partitions have to be tolerated, so during one a system chooses consistency, returning an error or a timeout when it cannot guarantee up-to-date data, or availability, answering with the most recent version it has; without a partition both can be satisfied. Traditional ACID databases choose consistency; BASE systems, common in NoSQL, choose availability. Its History traces the idea from Eric Brewer in 1998 and 2000 to Gilbert and Lynch's 2002 proof; notes Brewer's 2012 clarification that the 'two out of three' framing is misleading, since consistency or availability is sacrificed only during partitions and partitions can be managed and recovered from; mentions Birman and Friedman's 1996 result; and describes PACELC, which adds that without a partition a system trades latency against consistency."
+
+distributed-system-design-wikipedia-end-to-end-principle:
+  file: sources/distributed-system-design-wikipedia-end-to-end-principle.md
+  kind: html
+  url: https://en.wikipedia.org/wiki/End-to-end_principle
+  ingested: "2026-10-25"
+  license: CC-BY-SA-4.0
+  license_url: https://creativecommons.org/licenses/by-sa/4.0/
+  tags: [distributed-system-design]
+  abstract: "Wikipedia's article on the end-to-end principle, a design principle in computer networking that places application-specific features such as reliability and security in the communicating end nodes rather than in intermediary nodes. Its Concept section says the network provides best-effort connections and the terminals provide reliability and security, because a communication means cannot be expected to match the reliability the processes need; the principle covers end-to-end error control and security, not parameters such as latency and throughput, and relates to net neutrality. History traces it to Paul Baran's and Donald Davies's 1960s remarks on reliability, and to Saltzer, Reed and Clark's 1984 paper \"End-to-end arguments in system design\". Applications include the ARPANET, where packet switching forced reordering and duplicate detection to the end points and split the network into a packet-moving lower level and an end-to-end upper level; TCP/IP, with best-effort IP and reliability in TCP at the end hosts; and file transfer, where only a checksum over the whole stream, checked end to end, gives a completely reliable transfer, lower-level checks being performance optimizations. Limitations: the premise is not trivial to implement, mobile IPv6 strains it, and network address translation reduces network transparency."
+
+distributed-system-design-wikipedia-cascading-failure:
+  file: sources/distributed-system-design-wikipedia-cascading-failure.md
+  kind: html
+  url: https://en.wikipedia.org/wiki/Cascading_failure
+  ingested: "2026-10-25"
+  license: CC-BY-SA-4.0
+  license_url: https://creativecommons.org/licenses/by-sa/4.0/
+  tags: [distributed-system-design]
+  abstract: "Wikipedia's article on cascading failure: a failure in a system of interconnected parts in which the failure of one or a few parts triggers the failure of others, and so on. It covers power transmission, where an overloaded line or failed component shifts load onto others until they fail too, with examples of large blackouts; computer networks, where a cascade failure usually starts with the overload or maintenance of a crucial router or node, its traffic routed through an alternative path that becomes overloaded in turn, with symptoms of packet loss and high latency across whole sections of a network, congestion collapse, and walking failures that ripple through the same sections several times; an example of an ISP rerouting traffic over a longer path, DNS failures spreading to unrelated systems, and Gmail's December 2012 global partial outage (40% for 18 minutes) caused by faulty load-balancing logic and fixed by fully updating a single node instead of partially updating all nodes at once. It also covers cascading structural failure and fracture cascades, examples in biology, electronics and finance, interdependent networks, and a model for overload cascading failures."
+
+distributed-systems-lamport-definition-email:
+  kind: link
+  url: https://lamport.azurewebsites.net/pubs/distributed-system.txt
+  published: "1987-05-28"
+  ingested: "2026-10-25"
+  license: unknown
+  tags: [distributed-systems]
+  abstract: "A short internal email that Leslie Lamport sent to colleagues at DEC's Systems Research Center (SRC) on 28 May 1987, the origin of his much-quoted tongue-in-cheek definition: a distributed system is one in which the failure of a computer you didn't even know existed can render your own computer unusable. Lamport notes the long debate over what constitutes a distributed system and says this definition appears to have been adopted at SRC. Prompted by an electrical problem in the machine room, he observes that each new version of the system software makes users' workstations more dependent on programs running elsewhere, so that a server outage can leave a user's machine inoperative through no fault of its own, and that waiting hours for servers to be rebooted is far more annoying than waiting seconds for a program to be swapped in. He proposes a development project to make the system more robust, without prescribing an approach (stand-alone operation being one possibility), and volunteers to gather data, asking colleagues to report incidents of workstations becoming unusable because of failures elsewhere. The email is a concise statement of the dependency and partial-failure problem at the heart of distributed systems."
+
+distributed-system-design-hamilton-internet-scale-services:
+  kind: link
+  url: https://www.usenix.org/legacy/event/lisa07/tech/full_papers/hamilton/hamilton.pdf
+  published: "2007-11-01"
+  ingested: "2026-10-25"
+  license: proprietary
+  tags: [distributed-system-design]
+  abstract: "James Hamilton's LISA 2007 paper (Windows Live Services Platform, Microsoft) summarises best practices, drawn from MSN, Windows Live, Exchange Hosted Services and other very large services, for designing and deploying operations-friendly internet-scale services: services that need little human intervention and detect and recover from all but the most obscure failures on their own. It notes that system-to-administrator ratios range from 2:1 to 2,500:1 and argues that the service design, more than auto-administration tooling, decides that ratio, since about 80% of operations issues originate in design and development. It opens with Bill Hoffman's three tenets: expect failures, keep things simple, automate everything. It then lists basic design tenets (design for failure, redundancy and fault recovery, a commodity hardware slice, single-version software, multi-tenancy) and more specific practices in ten areas: overall application design (zero trust of components, pod isolation, admission control at all levels, partitioning, avoiding single points of failure), automatic management and provisioning, dependency management (timeouts, idempotency, bounded restarts, fail fast, decoupling), release cycle and testing (testing in production, staged rollout, roll-back, frequent shipping), hardware standardisation, operations and capacity planning, auditing, monitoring and alerting, graceful degradation and admission control (a 'big red switch', metered admission, client jitter and backoff), customer and press communication, and customer self-provisioning. The text is converted from the PDF, page by page."
+
+distributed-system-design-aws-timeouts-retries-backoff:
+  kind: link
+  url: https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/
+  ingested: "2026-10-25"
+  license: proprietary
+  tags: [distributed-system-design]
+  abstract: "An Amazon Builders' Library article by Marc Brooker (December 2019) on how Amazon handles transient failures in calls between services without overwhelming struggling ones. It starts from the premise that failures in remote calls are inevitable and that systems must tolerate them without magnifying a small percentage of failures into a complete outage, using three tools: timeouts, retries and backoff, plus jitter. Timeouts: set one on every remote call and every cross-process call, covering connection and request; choose the value from the downstream service's latency percentile matching an acceptable false-timeout rate (for example p99.9 for 0.1%), with care for internet latency, tight latency bounds and timeouts that miss DNS or TLS work. Retries are described as 'selfish' and dangerous under overload; the article recommends capped exponential backoff, limiting the number of retries, retrying at a single point in the stack (independent retries in a five-layer stack can multiply database load 243 times), local retry limiting with a token bucket rather than circuit breakers, retrying only idempotent APIs, and distinguishing retryable from non-retryable errors. Jitter adds randomness to backoff so correlated retries do not collide, and should also be applied to timers and periodic jobs, preferably deterministically per host. It concludes that retries should happen only while the dependency is healthy."
+
+distributed-system-design-aws-challenges-distributed-systems:
+  kind: link
+  url: https://aws.amazon.com/builders-library/challenges-with-distributed-systems/
+  ingested: "2026-10-25"
+  license: proprietary
+  tags: [distributed-systems, distributed-system-design]
+  abstract: "An Amazon Builders' Library article by Jacob Gabrielson (2019) explaining why distributed systems are harder and less intuitive than other computing, the background for AWS's design practices. It attributes the most impactful problems to independent failures and nondeterminism, and to the impossibility of always knowing whether something failed. It places distributed systems on a spectrum of difficulty: offline (batch) systems, soft real-time systems, and hard real-time request/reply services, which are the hardest and the article's focus. Using a networked Pac-Man example, it shows that any request/reply across a network involves eight unavoidable steps (post request, deliver request, validate request, update server state, post reply, deliver reply, validate reply, update client state), each of which can fail independently because client, server and network do not share fate; these are the 'eight failure modes of the apocalypse'. A timeout leaves the outcome UNKNOWN, which code must handle, and which is especially hard with side effects such as withdrawing money. The article shows how these outcomes multiply the testing matrix on both client and server, advises distrusting everything, and explains that the same failure modes recur recursively at every level of grouping (machines, groups, Availability Zones, Regions). It notes that distributed bugs are often latent and spread epidemically, illustrated by an amazon.com outage caused by one catalog server with a full disk, and closes with a summary of why distributed engineering is hard."
+
+distributed-system-design-google-sre-cascading-failures:
+  kind: link
+  url: https://sre.google/sre-book/addressing-cascading-failures/
+  published: "2016-04-01"
+  ingested: "2026-10-25"
+  license: CC-BY-NC-ND-4.0
+  license_url: https://creativecommons.org/licenses/by-nc-nd/4.0/
+  tags: [distributed-system-design]
+  abstract: "Chapter 22 of Google's Site Reliability Engineering book (2017), 'Addressing Cascading Failures', written by Mike Ulrich, using the book's sample Shakespeare search service as its running example. A cascading failure is one that grows over time through positive feedback: part of a system fails and raises the chance that other parts fail, as when an overloaded replica crashes and pushes its load onto the rest. The chapter explains the causes: server overload (the most common), exhaustion of CPU, memory, threads and file descriptors and how these feed each other, and service unavailability through crash loops and health-check failures. It then sets out prevention in rough priority order: load test to and beyond failure, serve degraded results, reject requests early when overloaded, rate limit at higher layers, and plan capacity (for example N+2). Further sections cover queue management, load shedding and graceful degradation, retries (randomised exponential backoff, per-request limits, server-wide retry budgets, avoiding retries at several layers, clear retriable versus non-retriable response codes), deadlines and their propagation, cancellation propagation, bimodal latency and failing fast, slow startup and cold caches, and avoiding intra-layer communication. It lists triggering conditions (process death, updates, rollouts, organic growth, drains, resource limits), testing strategies, and immediate remedies such as adding resources, disabling health-check kills, restarting servers, dropping traffic, entering degraded modes and eliminating batch or bad traffic."
+
+distributed-system-design-brewer-cap-twelve-years-later:
+  kind: link
+  url: https://www.infoq.com/articles/cap-twelve-years-later-how-the-rules-have-changed/
+  published: "2012-05-30"
+  ingested: "2026-10-25"
+  license: proprietary
+  tags: [distributed-system-design]
+  abstract: "Eric Brewer's 2012 retrospective on the CAP theorem (first published in IEEE Computer, republished by InfoQ), by the theorem's originator. CAP says a networked shared-data system can have at most two of consistency (C), availability (A) and partition tolerance (P); Brewer explains why the '2 of 3' formulation, meant to open a wider design space, is misleading: partitions are rare, so there is little reason to give up C or A when there is none; the choice between C and A can be made many times, per subsystem, operation, data item or user; and all three properties are continuous rather than binary. He relates ACID and BASE (basically available, soft state, eventually consistent), noting the C in CAP is only single-copy consistency. Operationally, the CAP choice happens during a timeout: cancel the operation (lose availability) or proceed (risk inconsistency); a partition is a time bound on communication, and retrying via Paxos or two-phase commit only delays the decision. He proposes managing partitions explicitly in three steps: detect a partition, enter a partition mode that limits some operations and records history, and on recovery restore consistency and compensate for mistakes. Tools include deciding per invariant which operations proceed, version vectors to track causal history, commutative operations and CRDTs for automatic convergence, and compensating transactions (sagas); an ATM sidebar shows a bounded stand-in mode. He concludes that designers should not blindly sacrifice C or A. The copy lacks the article's opening paragraphs and figures."
+
+distributed-system-design-ongaro-raft-consensus:
+  kind: link
+  url: https://raft.github.io/raft.pdf
+  published: "2014-06-19"
+  ingested: "2026-10-25"
+  license: proprietary
+  tags: [distributed-system-design]
+  abstract: "Diego Ongaro and John Ousterhout's 'In Search of an Understandable Consensus Algorithm (Extended Version)' (Stanford, 2014; extended from the USENIX ATC 2014 paper), the paper that introduced Raft. Raft is a consensus algorithm for managing a replicated log, equivalent in result and efficiency to (multi-)Paxos but structured for understandability: it separates leader election, log replication and safety, and reduces the states to consider. The introduction says consensus lets a collection of machines work as a coherent group that survives the failures of some members, and so plays a key role in reliable large-scale systems. Section 2 frames consensus within replicated state machines: deterministic state machines on several servers apply the same log of commands in the same order and so compute the same state, appearing as one highly reliable machine; examples are Chubby and ZooKeeper. Practical consensus algorithms are safe under all non-Byzantine conditions (delays, partitions, loss, duplication, reordering), available while any majority of servers is up (five servers tolerate two failures), do not depend on timing for consistency, and complete a command once a majority responds. Section 3 explains why Paxos is hard to understand and to build on. Later sections give Raft's strong leader, randomized election timeouts, log replication, safety argument, joint-consensus membership changes, log compaction, client interaction, a user study (33 of 43 students did better on Raft), correctness and performance evaluation, and related work. The PDF copy has page-level anchors only."
+
+distributed-system-design-lamport-time-clocks:
+  kind: link
+  url: https://lamport.azurewebsites.net/pubs/time-clocks.pdf
+  published: "1978-07-01"
+  ingested: "2026-10-25"
+  license: proprietary
+  tags: [distributed-system-design]
+  abstract: "Leslie Lamport's 'Time, Clocks, and the Ordering of Events in a Distributed System' (Communications of the ACM 21(7), 1978), saved from the author's own site. It examines the concept of one event happening before another in a distributed system, defined as a collection of spatially separated processes communicating by messages, where message delay is not negligible compared with the time between events. Because it is sometimes impossible to say which of two events happened first, the 'happened before' relation is only a partial ordering, defined without physical clocks; problems often arise when people are not aware of this. Lamport introduces logical clocks (counters assigning numbers to events) satisfying a clock condition, gives a distributed algorithm that extends the partial order to a consistent total order, and uses it to solve a mutual-exclusion synchronization problem without a central scheduler. He shows that the total order can disagree with what users perceive outside the system, producing anomalous behaviour, which properly synchronized physical clocks prevent; he gives a method for synchronizing physical clocks and a theorem bounding how far out of synchrony they can drift, proved in an appendix. The conclusion stresses that in a distributed system the order of events is only partial. The PDF copy has page-level anchors only, OCR-like artifacts in the formulas, and its last page also carries the start of an unrelated article (Baker, 'Shallow Binding in Lisp 1.5')."
+
+distributed-system-design-saltzer-end-to-end-arguments:
+  kind: link
+  url: https://deepplum.com/Papers/EndtoEnd.html
+  published: "1984-11-01"
+  ingested: "2026-10-25"
+  license: proprietary
+  tags: [distributed-system-design]
+  abstract: "Saltzer, Reed and Clark's 'End-to-End Arguments in System Design' (ACM Transactions on Computer Systems, 1984; revised from a 1981 conference paper), the classic paper stating a design principle for placing functions among the modules of a distributed system, saved from the copy on co-author David Reed's site. The end-to-end argument: a function can be completely and correctly implemented only with the knowledge and help of the application at the end points, so providing it inside the communication system is not possible; an incomplete low-level version is justified only as a performance enhancement. The case study is careful file transfer: whatever the network does, the application must still check the file end to end; a too-real MIT example tells of a gateway that swapped byte pairs in memory despite per-hop checksums. A performance section argues that the right amount of low-level reliability is an engineering trade-off, since low levels charge every application and know less. Further examples: delivery acknowledgements (what matters is whether the target application acted), encryption (keys, cleartext at the host, authenticity), duplicate message suppression (applications generate their own duplicates on retry, so they must suppress them anyway), FIFO delivery and transaction management. A history section traces the argument in other system areas. The conclusion calls end-to-end arguments a kind of Occam's razor for choosing a communication subsystem's functions and part of a set of rational principles for layered systems."

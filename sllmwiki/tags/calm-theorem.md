@@ -9,6 +9,7 @@ The CALM theorem: consistency as logical monotonicity, which distributed program
 ## Narratives
 
 - [What does "Keeping CALM: When Distributed Consistency is Easy" argue, and is it worth reading in full?](../narratives/what-does-keeping-calm-argue-and-is-it-worth-reading-in-full.md) · 7 min
+- [What are the common design tenets and principles for distributed systems?](../narratives/what-are-the-common-design-tenets-and-principles-for-distributed-systems.md) · 10 min (supporting)
 
 ## Sources
 
