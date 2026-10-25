@@ -26,7 +26,7 @@ graph LR
 
 - [distributed-systems](sllmwiki/tags/distributed-systems.md): Systems of independent networked computers that coordinate by passing messages to appear as one system (2 narratives)
   - [distributed-system-design](sllmwiki/tags/distributed-system-design.md): Design tenets and principles for building distributed systems: failure, consistency, scalability, idempotency, backpressure (2 narratives)
-    - [calm-theorem](sllmwiki/tags/calm-theorem.md): The CALM theorem: consistency as logical monotonicity, which distributed programs need no coordination (1 narrative)
+    - [calm-theorem](sllmwiki/tags/calm-theorem.md): The CALM theorem: consistency as logical monotonicity, which distributed programs need no coordination (2 narratives)
 - [moving-averages](sllmwiki/tags/moving-averages.md): Moving averages for smoothing a series of measurements over time (1 narrative)
   - [ewma](sllmwiki/tags/ewma.md): The exponentially weighted moving average: its recurrence, smoothing factor, and uses in software (2 narratives)
   - [simple-moving-average](sllmwiki/tags/simple-moving-average.md): Simple and weighted windowed moving averages, the alternatives to an EWMA (2 narratives)
