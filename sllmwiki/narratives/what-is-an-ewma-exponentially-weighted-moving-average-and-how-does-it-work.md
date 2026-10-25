@@ -2,211 +2,187 @@
 
 ## 1. Abstract
 
-Anyone turning a noisy stream of measurements, such as round-trip times or latencies, into one steady number needs a cheap average that follows changes. An EWMA is that average: each sample moves the estimate a fixed fraction α of the way toward itself, so past samples keep weights that shrink geometrically with age. It stores one number, and α alone trades smoothness against speed.
+Anyone turning a noisy stream of measurements, such as request latencies, into one steady number needs a cheap average that follows changes. An EWMA is that average: each new sample pulls the estimate part of the way toward itself, so past samples keep weights that shrink exponentially with age. It stores one number, and one parameter, a smoothing factor or a time constant, trades smoothness against speed.
 
 **Key takeaways:**
 
-- The whole algorithm is one line: $s_t = s_{t-1} + \alpha (x_t - s_{t-1})$.
+- The whole algorithm is one line: $s_t = \alpha x_t + (1-\alpha) s_{t-1}$.
 - A sample $j$ steps old carries weight $\alpha (1-\alpha)^j$: older data fades but never drops out.
 - Small α: smooth but slow; large α: fast but noisy. Memory is about $1/\alpha$ samples.
-- The starting value matters, more so for small α.
-- With $\alpha = 1/2^n$ it runs in integer shifts, as in TCP and the Linux kernel.
+- With a time constant τ, the weight comes from the time between samples, so irregular samples work.
+- Peak EWMA, used in load balancing, jumps to spikes and decays slowly.
 
 ## 2. Terminology
 
 | Term | Definition |
 |---|---|
 | **EWMA** | Exponentially weighted moving average, also called the exponential moving average (EMA) or simple exponential smoothing. |
-| **$x_t$** | The sample (observation) at step $t$. |
-| **$s_t$** | The EWMA's state after step $t$: the smoothed value. |
-| **α (smoothing factor, gain)** | The fraction, $0 < \alpha \le 1$, of each prediction error added to the state; NIST writes it λ, Jacobson $g$. |
-| **RTT, SRTT** | Round-trip time; the smoothed RTT a TCP sender keeps. |
-| **RTO** | TCP's retransmission timeout. |
+| **$x_t$, $s_t$** | The sample at step $t$; the EWMA's state, the smoothed value, after it. |
+| **α (smoothing factor)** | The weight, $0 < \alpha \le 1$, of each new sample. |
+| **τ (time constant, decay time)** | The time a step input takes to reach 63.2% of its new level; Finagle calls it `decayTime`. |
+| **RTT** | Round-trip time: how long a request takes to get its response. |
+| **P2C** | Power of two choices: pick two endpoints at random and send to the less loaded. |
 | **SMA** | Simple moving average: the unweighted mean of the last $k$ samples. |
-| **IIR filter** | Infinite impulse response filter: one whose output feeds back into itself, so an input's effect decays but never ends. |
 | **[→]** | Our own reasoning, after a statement or on a section's heading: a conclusion, comparison or example no cited source states. |
 
 ## 3. Background
 
-An EWMA is a way of averaging a time series that gives "less and less weight to data as they are further removed in time" [\[1\]](../sources/ewma-nist-ewma-control-charts.md#6324-ewma-control-charts). You meet it in forecasting, where it is called simple exponential smoothing, [\[2\]](../sources/ewma-wikipedia-exponential-smoothing.md#exponential-smoothing---wikipedia) in quality control charts, [\[1\]](../sources/ewma-nist-ewma-control-charts.md#6324-ewma-control-charts) in signal processing, where it is a first-order IIR low-pass filter, [\[3\]](../sources/moving-averages-wikipedia-moving-average.md#exponential-moving-average) and throughout systems code: TCP's retransmission timer [\[4\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm) and the Linux kernel's `DECLARE_EWMA` helper both use one [\[5\]](../sources/ewma-linux-kernel-average-h-source.md#L10-L27).
+An EWMA is an average that weights each observation by a factor that decreases exponentially with its age; in signal processing it is a first-order infinite impulse response filter [\[1\]](../sources/moving-averages-wikipedia-moving-average.md#exponential-moving-average). You meet it in forecasting, as simple exponential smoothing, [\[2\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing) in quality control, as the EWMA chart, [\[3\]](../sources/ewma-wikipedia-ewma-chart.md#ewma-chart---wikipedia) in electronics, as the discrete form of an RC low-pass filter, [\[4\]](../sources/ewma-wikipedia-low-pass-filter.md#simple-infinite-impulse-response-filter) and in systems code: Unix load averages are EWMAs of the number of runnable processes [\[5\]](../sources/ewma-wikipedia-load-computing.md#load-average).
 
-The running example is a TCP sender. It must decide how long to wait for an acknowledgement before it resends a segment, and it bases that timeout on the round-trip times it measures [\[4\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm). Those samples jitter, and round-trip time and its variation grow quickly with load [\[6\]](../sources/ewma-jacobson-congestion-avoidance.md#conservation-at-equilibrium-round-trip-timing). Using the last sample alone makes the timeout jump with every outlier; averaging all samples equally never forgets an old network path [→]. The original TCP specification already used an EWMA, which it called a low-pass filter, with a gain of 0.9 on the old estimate, and today's standard keeps the same structure with α = 1/8 [\[6\]](../sources/ewma-jacobson-congestion-avoidance.md#conservation-at-equilibrium-round-trip-timing), [\[4\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm).
+**The running example** is a client of a replicated service, which must choose for each request one of several interchangeable servers. In Twitter's Finagle library, the client's load balancer does this in two parts: each server keeps a *load metric*, and a *distributor* uses it to choose [\[6\]](../sources/ewma-finagle-clients-docs.md#load-balancing). The default distributor, P2C, picks two servers at random and sends to the less loaded [\[7\]](../sources/ewma-finagle-clients-docs.md#power-of-two-choices-p2c--least-loaded). To prefer fast servers, the load metric should track each server's latency. Using the last RTT alone makes it jump with every outlier; averaging every RTT equally never forgets that a server was slow an hour ago [→].
 
-A simple moving average over the last $k$ samples is [the usual alternative](when-should-software-use-an-ewma-instead-of-other-moving-averages.md): it must keep those $k$ samples in a buffer, and it weights each of them equally [\[7\]](../sources/moving-averages-wikipedia-moving-average.md#simple-moving-average). The EWMA instead keeps only its last value [\[8\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average).
+A simple moving average over the last $k$ samples is [the usual alternative](when-should-software-use-an-ewma-instead-of-other-moving-averages.md): it keeps $k$ samples and weights them equally [\[8\]](../sources/moving-averages-wikipedia-moving-average.md#simple-moving-average). The EWMA keeps only its last value [\[9\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average).
 
 ## 4. The core idea
 
-Treat the current average as a prediction of the next sample. When a sample arrives, measure how wrong the prediction was and move the prediction a fixed fraction α of the way toward the sample. Jacobson describes exactly this: the new prediction is "the old prediction plus some fraction of the prediction error" [\[9\]](../sources/ewma-jacobson-congestion-avoidance.md#theory). For the TCP sender, each new round-trip time nudges SRTT by one eighth of the surprise [\[4\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm).
+Treat the current average as the best guess, and let each new sample pull it part of the way toward itself: the new state is a weighted average of the sample and the old state, with weight α on the sample [\[2\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing).
 
 $$
-s_t = s_{t-1} + \alpha(x_t - s_{t-1}) = \alpha x_t + (1-\alpha)s_{t-1}
+s_t = \alpha x_t + (1-\alpha) s_{t-1}
 $$
 
-The two forms are the same equation: the second, a weighted average of the new sample and the old state, is how NIST and the forecasting texts write it; the first is Jacobson's faster rearrangement [\[1\]](../sources/ewma-nist-ewma-control-charts.md#6324-ewma-control-charts), [\[9\]](../sources/ewma-jacobson-congestion-avoidance.md#theory), [\[10\]](../sources/ewma-finch-incremental-weighted-mean-variance.md#page-7).
+When samples arrive at irregular times, as requests do, α comes from the time since the last sample: Finagle's `Ema` computes $w = e^{-\Delta t/\tau}$, the weight kept by the old state, and sets the new state to $x(1-w) + s\,w$ [\[10\]](../sources/ewma-finagle-ema-source.md#L29-L43). That $1-w$ is exactly the α that the time-constant formula gives for an interval $\Delta t$ [\[11\]](../sources/ewma-wikipedia-exponential-smoothing.md#time-constant).
 
 ```mermaid
 flowchart LR
-    F["first sample x_0"] -->|"1 seed"| S[("state s")]
-    X["new sample x_t"] -->|"2 subtract s"| E["error e = x_t - s"]
-    S -.-> E
-    E -->|"3 multiply by alpha"| D["step alpha * e"]
-    D -->|"4 add to s"| S
-    S -->|"5 read"| O["smoothed value s_t"]
+    F["first sample x_0"] -->|"1 seed"| S[("state s, time of last sample")]
+    X["new sample x at time t"] -->|"2 elapsed time"| D["dt = t - last time"]
+    D -->|"3 weight"| W["w = exp(-dt / tau)"]
+    W -->|"4 blend"| S
+    S -->|"5 read"| O["smoothed value s"]
     classDef state fill:#dbeafe,stroke:#1e3a8a,color:#111111
     classDef io fill:#f3f4f6,stroke:#374151,color:#111111
     class S state
     class F,X,O io
 ```
 
-*Figure 4-1: One EWMA update. The state (blue) is the only thing stored; each new sample corrects it by a fraction α of the error, and the dotted arrow is the state's value read into the error.*
+*Figure 4-1: One time-decayed EWMA update. Only the state and the time of its last sample (blue) are stored; each sample is blended in with a weight set by the time since the previous one.*
 
 ## 5. How does it work?
 
-Each step below is one arrow of Figure 4-1, worked on the TCP sender with α = 1/8 and the samples 100, 104, 96, 300, 100, 100 ms [→].
+Each step is one arrow of Figure 4-1, worked on one server's latency with τ = 10 s, Finagle's default `decayTime`, [\[12\]](../sources/ewma-finagle-clients-docs.md#power-of-two-choices-p2c--peak-ewma-2) and an RTT sample each second: 100, 104, 96, 300, 100, 100 ms [→].
 
-1. **Seed.** The first sample becomes the state: RFC 6298 sets SRTT to the first measurement, [\[4\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm) and the kernel's helper does the same when its state is still zero [\[11\]](../sources/ewma-linux-kernel-average-h-source.md#L45-L70). Here $s_0 = 100$.
-2. **Subtract.** For each new sample, compute the prediction error $e_t = x_t - s_{t-1}$ [\[9\]](../sources/ewma-jacobson-congestion-avoidance.md#theory).
-3. **Multiply.** Scale it by α [\[9\]](../sources/ewma-jacobson-congestion-avoidance.md#theory).
-4. **Add.** Add the step to the state [\[9\]](../sources/ewma-jacobson-congestion-avoidance.md#theory).
-5. **Read.** The state is the smoothed value, ready after every sample: unlike an SMA, the EWMA needs no minimum number of samples before it produces output [\[12\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing).
+1. **Seed.** The first sample becomes the state [\[13\]](../sources/ewma-finagle-ema-source.md#L29-L33). Here $s_0 = 100$.
+2. **Elapsed time.** For each new sample, take the time since the last one, from a monotonic clock [\[10\]](../sources/ewma-finagle-ema-source.md#L29-L43). Here it is 1 s each time [→].
+3. **Weight.** Compute $w = e^{-\Delta t/\tau}$ [\[10\]](../sources/ewma-finagle-ema-source.md#L29-L43): $e^{-0.1} = 0.905$, so each sample gets weight $1 - w = 0.095$ [→].
+4. **Blend.** The new state is $x(1-w) + s\,w$ [\[10\]](../sources/ewma-finagle-ema-source.md#L29-L43).
+5. **Read.** The state is the smoothed value, ready after every sample [\[14\]](../sources/ewma-finagle-ema-source.md#L45-L50): unlike an SMA, the EWMA needs no minimum number of samples first [\[2\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing).
 
-| Sample $x_t$ (ms) | Error $e_t$ | Step $\alpha e_t$ | State $s_t$ |
-|---|---|---|---|
-| 100 | (seed) | | 100.00 |
-| 104 | +4.00 | +0.50 | 100.50 |
-| 96 | −4.50 | −0.56 | 99.94 |
-| 300 | +200.06 | +25.01 | 124.95 |
-| 100 | −24.95 | −3.12 | 121.83 |
-| 100 | −21.83 | −2.73 | 119.10 |
+| Time (s) | Sample $x$ (ms) | State $s$ (ms) |
+|---|---|---|
+| 0 | 100 | 100.00 (seed) |
+| 1 | 104 | 100.38 |
+| 2 | 96 | 99.96 |
+| 3 | 300 | 119.00 |
+| 4 | 100 | 117.19 |
+| 5 | 100 | 115.56 |
 
-The table follows from the update formula [\[9\]](../sources/ewma-jacobson-congestion-avoidance.md#theory). A 4 ms wobble moves SRTT by half a millisecond, and a single 300 ms outlier lifts it by 25 ms, not to 300. After the spike, each sample of 100 ms removes one eighth of the remaining excess, so the excess decays as $(7/8)^n$: 25.0, 21.8, 19.1 ms [→].
+The table follows from the update [\[10\]](../sources/ewma-finagle-ema-source.md#L29-L43). A 4 ms wobble moves the state by 0.4 ms, and one 300 ms outlier lifts it by 19 ms, not to 300; after the spike, each 100 ms sample removes about a tenth of the excess [→].
 
-**Why it is "exponential".** Substituting the update into itself shows what the state really is: [\[13\]](../sources/ewma-wikipedia-exponential-smoothing.md#exponential-naming), [\[14\]](../sources/ewma-finch-incremental-weighted-mean-variance.md#page-8)
+**Why it is "exponential".** Substituting the update into itself shows that a sample $j$ steps old carries weight $\alpha(1-\alpha)^j$, a geometric series, the discrete form of an exponential, which gives the method its name [\[15\]](../sources/ewma-wikipedia-exponential-smoothing.md#exponential-naming). No weight ever reaches zero [\[1\]](../sources/moving-averages-wikipedia-moving-average.md#exponential-moving-average). The same recurrence is what an RC low-pass filter becomes when sampled at intervals $\Delta_T$, with $\alpha = \Delta_T/(RC + \Delta_T)$ [\[4\]](../sources/ewma-wikipedia-low-pass-filter.md#simple-infinite-impulse-response-filter).
 
-$$
-s_t = \sum_{j=0}^{t-1} \alpha (1-\alpha)^j x_{t-j} + (1-\alpha)^t s_0
-$$
+**How long it remembers.** The time constant τ, the time for a step input to reach 63.2% of its new level, relates to α and the sampling interval by $\alpha = 1 - e^{-\Delta T/\tau}$, about $\Delta T/\tau$ when samples are frequent [\[11\]](../sources/ewma-wikipedia-exponential-smoothing.md#time-constant). Finagle calls τ the mean lifetime, with a half-life of $\tau \ln 2$ [\[16\]](../sources/ewma-finagle-peak-ewma-source.md#L38-L45): about 7 s for the default 10 s [→]. When samples arrive evenly, as the load average's do every 5 seconds, α is a constant chosen once [\[17\]](../sources/ewma-wikipedia-load-computing.md#linux-as-an-example), [\[11\]](../sources/ewma-wikipedia-exponential-smoothing.md#time-constant).
 
-A sample $j$ steps old carries weight $\alpha(1-\alpha)^j$, a geometric series, the discrete form of an exponential, which gives the method its name [\[13\]](../sources/ewma-wikipedia-exponential-smoothing.md#exponential-naming). The weights, including the seed's $(1-\alpha)^t$, always sum to exactly one, so the EWMA is a true weighted mean that renormalises itself at every step [\[14\]](../sources/ewma-finch-incremental-weighted-mean-variance.md#page-8). No weight ever reaches zero [\[3\]](../sources/moving-averages-wikipedia-moving-average.md#exponential-moving-average). In signal-processing terms this is the single-pole low-pass recursive filter $y[n] = a_0 x[n] + b_1 y[n-1]$ with $a_0 = 1 - x$ and $b_1 = x$, where $x$ is the decay between adjacent samples; [\[15\]](../sources/ewma-smith-dspguide-recursive-filters.md#page-5) an EWMA is that filter with $x = 1 - \alpha$ [→]. Such recursive filters get a long, exponentially decaying impulse response from a few coefficients, without a long convolution [\[16\]](../sources/ewma-smith-dspguide-recursive-filters.md#page-2).
-
-**How long it remembers.** The time constant τ, the time a step input takes to reach 63.2% of its new level, relates to α and the sampling interval ΔT by: [\[17\]](../sources/ewma-wikipedia-exponential-smoothing.md#time-constant)
-
-$$
-\alpha = 1 - e^{-\Delta T/\tau} \approx \frac{\Delta T}{\tau}
-$$
-
-So the memory is about $1/\alpha$ samples: [\[17\]](../sources/ewma-wikipedia-exponential-smoothing.md#time-constant) Jacobson gives the same time constant, $1/g$ [\[9\]](../sources/ewma-jacobson-congestion-avoidance.md#theory). A constant signal takes about $3/\alpha$ samples to reach 95% of its value [\[12\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing). For the TCP sender that is about 8 samples to 63% and 24 to 95% [\[17\]](../sources/ewma-wikipedia-exponential-smoothing.md#time-constant), [\[12\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing).
-
-**How it runs in integers.** Jacobson picks $g = 1/2^n$ so that the scaling is a shift, and keeps the state scaled by $2^n$ to limit round-off; with $g = 1/8$ the average update is two lines of C, a shift, a subtract and an add [\[18\]](../sources/ewma-jacobson-congestion-avoidance.md#practice). The Linux kernel goes one step further: its state holds the average with `precision` fractional bits, the weight reciprocal must be a power of two, and the update is [\[5\]](../sources/ewma-linux-kernel-average-h-source.md#L10-L27), [\[11\]](../sources/ewma-linux-kernel-average-h-source.md#L45-L70)
-
-```text
-on add(x):
-    if state == 0:                       # nothing seen yet: seed
-        state = x << precision
-    else:                                # state * (1 - 1/2^k) + x / 2^k
-        state = ((state << k) - state + (x << precision)) >> k
-on read():
-    return state >> precision            # drop the fractional bits
-```
-
-With $k = 3$ (α = 1/8) and 4 fractional bits, the first sample 100 seeds the state at 1600, and 104 gives $(12800 - 1600 + 1664) \gg 3 = 1608$, which is 100.5 in fixed point; a read returns 100 [\[11\]](../sources/ewma-linux-kernel-average-h-source.md#L45-L70).
+**How it runs in integers.** The Linux kernel updates its load averages every 5 seconds in fixed point with 11 fractional bits, keeping $e^{-5\text{s}/1\text{min}}$ as the constant 1884, and the 5- and 15-minute averages as 2014 and 2037 [\[17\]](../sources/ewma-wikipedia-load-computing.md#linux-as-an-example). That is a weight of about 0.08 per update on each new value for the 1-minute average [→].
 
 ## 6. Variants
 
-**An EWMA of the spread.** A mean alone can't set a timeout: RFC 793's rule of a fixed multiple of the mean breaks above about 30% load, when delayed packets get retransmitted [\[6\]](../sources/ewma-jacobson-congestion-avoidance.md#conservation-at-equilibrium-round-trip-timing). Jacobson's fix runs a second EWMA, of the absolute error $|x_t - s_{t-1}|$, the mean deviation, which needs no multiply or square root and approximates the standard deviation well [\[9\]](../sources/ewma-jacobson-congestion-avoidance.md#theory). RFC 6298 makes it the rule: RTTVAR is updated with β = 1/4 before SRTT, and RTO = SRTT + 4·RTTVAR (or the clock granularity, if larger) [\[4\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm). When you need the variance itself, Finch derives a one-pass exponentially weighted variance that updates alongside the mean [\[14\]](../sources/ewma-finch-incremental-weighted-mean-variance.md#page-8).
+**Peak EWMA.** Finagle's load metric for P2C is an EWMA of RTT that is "hyper-sensitive to latent endpoints": it reacts quickly to latency spikes and recovers only cautiously [\[18\]](../sources/ewma-finagle-peak-ewma-source.md#L11-L18). Any sample above the current average resets the average to that sample, and the load reported to the distributor is the average times one more than the requests still outstanding [\[19\]](../sources/ewma-finagle-peak-ewma-source.md#L54-L67), [\[20\]](../sources/ewma-finagle-peak-ewma-source.md#L69-L79). On the example, the 104 ms sample resets the state to 104 at once, the 300 ms spike to 300, and the two 100 ms samples then bring it down only to 281 and 264 ms [→]. The docs say it reacts to slow servers faster than counting outstanding requests alone [\[12\]](../sources/ewma-finagle-clients-docs.md#power-of-two-choices-p2c--peak-ewma-2).
 
-**Time-based α.** When samples arrive at known intervals ΔT, choose the time constant τ you want and derive α from it with the formula above [\[17\]](../sources/ewma-wikipedia-exponential-smoothing.md#time-constant). For irregular arrivals, recomputing α from each sample's own ΔT is our extension [→].
 
 ## 7. Design decisions and trade-offs
 
-**The smoothing factor α.** A large α corrects estimation error quickly but lets measurement noise through; a small α is steadier but slower to reach the true level [\[9\]](../sources/ewma-jacobson-congestion-avoidance.md#theory). Because the error correction happens whatever the gain, a gain that is too small is almost always better than one that is too large [\[9\]](../sources/ewma-jacobson-congestion-avoidance.md#theory). Typical values differ by field: 0.1–0.2 for an RTT estimator, [\[9\]](../sources/ewma-jacobson-congestion-avoidance.md#theory) 1/8 for TCP's SRTT, [\[4\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm) and 0.2–0.3 for a control chart, where α = 1 turns the chart back into a Shewhart chart that sees only the latest point [\[1\]](../sources/ewma-nist-ewma-control-charts.md#6324-ewma-control-charts). When you have history, choose α by minimising the squared one-step forecast errors, by grid search or a nonlinear optimiser [\[19\]](../sources/ewma-nist-single-exponential-smoothing.md#6431-single-exponential-smoothing), [\[20\]](../sources/ewma-fpp3-simple-exponential-smoothing.md#optimisation), [\[12\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing).
+**The time constant or smoothing factor.** A larger τ, or smaller α, is smoother but slower to follow a real change; a smaller one follows quickly but passes noise through [→]. Finagle defaults to a 10 s `decayTime` and its docs show 100 s [\[12\]](../sources/ewma-finagle-clients-docs.md#power-of-two-choices-p2c--peak-ewma-2). Control charts use λ between 0.05 and 0.25 [\[3\]](../sources/ewma-wikipedia-ewma-chart.md#ewma-chart---wikipedia). With history, estimate α by minimizing the sum of squared one-step forecast errors [\[21\]](../sources/ewma-wikipedia-exponential-smoothing.md#optimization).
 
-**The starting value.** The seed's weight is $(1-\alpha)^t$, so it lingers [\[14\]](../sources/ewma-finch-incremental-weighted-mean-variance.md#page-8). Options are the first sample (TCP, the kernel), [\[4\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm), [\[11\]](../sources/ewma-linux-kernel-average-h-source.md#L45-L70) a known target or historical mean (control charts), [\[1\]](../sources/ewma-nist-ewma-control-charts.md#6324-ewma-control-charts) or the average of the first few samples, [\[19\]](../sources/ewma-nist-single-exponential-smoothing.md#6431-single-exponential-smoothing) or estimating it with α [\[20\]](../sources/ewma-fpp3-simple-exponential-smoothing.md#optimisation). The smaller α, the more the choice matters [\[19\]](../sources/ewma-nist-single-exponential-smoothing.md#6431-single-exponential-smoothing), [\[21\]](../sources/ewma-wikipedia-exponential-smoothing.md#choosing-the-initial-smoothed-value).
+**Time-based or per-sample weights.** Finagle derives each weight from the time since the last sample, because observations of a server arrive unevenly [\[22\]](../sources/ewma-finagle-peak-ewma-source.md#L47-L53). A fixed α counts memory in samples, so a server that answers more often would forget faster [→].
 
-**The arithmetic.** Fixed point with $\alpha = 1/2^k$ needs only shifts and adds, [\[18\]](../sources/ewma-jacobson-congestion-avoidance.md#practice), [\[11\]](../sources/ewma-linux-kernel-average-h-source.md#L45-L70) and its truncation leaves a small bias, which Jacobson folds into TCP's timer rounding [\[18\]](../sources/ewma-jacobson-congestion-avoidance.md#practice). The price is that α can only be 1/2, 1/4, 1/8 and so on; floating point lets you pick any α, at a multiply per sample [→].
+**The starting value.** Seeding with the first sample is common; the smaller α, the longer the choice matters [\[23\]](../sources/ewma-wikipedia-exponential-smoothing.md#choosing-the-initial-smoothed-value). Finagle seeds with the first sample, and treats a server it has no latency history for, with requests pending, as heavily loaded [\[13\]](../sources/ewma-finagle-ema-source.md#L29-L33), [\[20\]](../sources/ewma-finagle-peak-ewma-source.md#L69-L79).
 
 ## 8. Limitations and failure modes
 
-- **Lag.** An EWMA trails a changing input, like a moving average, but unlike a symmetric moving average its lag can't be undone by shifting the output a fixed number of samples, because its delay varies with frequency [\[8\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average). In the example, two samples after the network returned to 100 ms, SRTT still reads 119 ms [→].
-- **Trends.** Simple exponential smoothing suits data with no clear trend or seasonality and forecasts a flat line; [\[22\]](../sources/ewma-fpp3-simple-exponential-smoothing.md#81-simple-exponential-smoothing) on trending data it does poorly, which is what Holt's double exponential smoothing adds a trend term for [\[23\]](../sources/ewma-wikipedia-exponential-smoothing.md#double-exponential-smoothing-holt-linear).
-- **α is per sample, not per second.** Its memory is measured in samples, so sampling faster shortens it in time: when TCP takes many RTT samples per round trip, the standard α and β may keep an inadequate RTT history, and how to adjust them is an open research question [\[24\]](../sources/ewma-rfc6298-tcp-retransmission-timer.md#3-taking-rtt-samples).
+- **Lag.** An EWMA trails a changing input, and unlike a symmetric moving average its lag can't be removed by shifting the output a fixed number of samples [\[9\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average). Two seconds after the spike, the example still reads 116 ms [→].
+- **Trends.** Simple exponential smoothing does poorly on data with a trend, which Holt's double exponential smoothing adds a term for [\[24\]](../sources/ewma-wikipedia-exponential-smoothing.md#double-exponential-smoothing-holt-linear).
+- **Peak EWMA's assumption.** It assumes a loaded server takes time to recover, so history is a fair guide; with long-polling clients that assumption breaks down [\[12\]](../sources/ewma-finagle-clients-docs.md#power-of-two-choices-p2c--peak-ewma-2). A footnote in Finagle's docs calls the configuration experimental, its API subject to change [\[25\]](../sources/ewma-finagle-clients-docs.md#partition-aware-client).
 
-## 9. Misconceptions
 
-- **Old samples drop out after a while?** They never do; their weight only shrinks [\[3\]](../sources/moving-averages-wikipedia-moving-average.md#exponential-moving-average). To reconstruct the input you would need every past stage [\[12\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing).
-- **An EWMA with α = 2/(k+1) is a k-sample moving average?** Not quite: the two have about the same forecast error distribution then, but the EWMA still weights all past data and the SMA only the last $k$ [\[8\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average).
+## 9. Where to go next
 
-## 10. Where to go next
+- [When should software use an EWMA instead of other moving averages?](when-should-software-use-an-ewma-instead-of-other-moving-averages.md)
+- How does power-of-two-choices load balancing work? (not yet a narrative)
+- What do Unix load averages measure? (not yet a narrative)
 
-- How does TCP compute its retransmission timeout? (not yet a narrative)
-- How do Holt and Holt-Winters exponential smoothing handle trends and seasons? (not yet a narrative)
-- How does peak-EWMA load balancing pick a backend? (not yet a narrative)
-- What do Linux load averages measure? (not yet a narrative)
+## 10. References
 
-## 11. References
+### 10.1 Sources read
 
-### 11.1 Sources read
+- [ewma-finagle-ema-source](../sources/ewma-finagle-ema-source.md): the time-decayed EWMA update, seeding and reading.
+- [ewma-finagle-peak-ewma-source](../sources/ewma-finagle-peak-ewma-source.md): peak EWMA, its time constant and the load it reports.
+- [ewma-finagle-clients-docs](../sources/ewma-finagle-clients-docs.md): load metrics and distributors, P2C, peak EWMA's defaults and limits.
+- [ewma-wikipedia-exponential-smoothing](../sources/ewma-wikipedia-exponential-smoothing.md): the definition, the time constant, initialisation, optimisation, the naming and the comparison with moving averages.
+- [moving-averages-wikipedia-moving-average](../sources/moving-averages-wikipedia-moving-average.md): the EMA as an IIR filter, and the SMA.
+- [ewma-wikipedia-low-pass-filter](../sources/ewma-wikipedia-low-pass-filter.md): the EWMA as a discretized RC filter.
+- [ewma-wikipedia-load-computing](../sources/ewma-wikipedia-load-computing.md): load averages and Linux's fixed-point update.
+- [ewma-wikipedia-ewma-chart](../sources/ewma-wikipedia-ewma-chart.md): EWMA control charts.
 
-- [ewma-wikipedia-exponential-smoothing](../sources/ewma-wikipedia-exponential-smoothing.md): the definition, the time constant, initialisation, the naming and the comparison with moving averages.
-- [ewma-nist-ewma-control-charts](../sources/ewma-nist-ewma-control-charts.md): the EWMA statistic, its weighting factor and its use in control charts.
-- [ewma-nist-single-exponential-smoothing](../sources/ewma-nist-single-exponential-smoothing.md): initialisation and choosing α by minimising the mean squared error.
-- [ewma-finch-incremental-weighted-mean-variance](../sources/ewma-finch-incremental-weighted-mean-variance.md): the EWMA as a normalised weighted mean, its explicit weights and its variance.
-- [ewma-jacobson-congestion-avoidance](../sources/ewma-jacobson-congestion-avoidance.md): the prediction-error view, the gain trade-off, the mean deviation and the integer implementation.
-- [ewma-rfc6298-tcp-retransmission-timer](../sources/ewma-rfc6298-tcp-retransmission-timer.md): SRTT and RTTVAR, their constants and the sampling caveat.
-- [ewma-linux-kernel-average-h-source](../sources/ewma-linux-kernel-average-h-source.md): a fixed-point EWMA in production code.
-- [ewma-smith-dspguide-recursive-filters](../sources/ewma-smith-dspguide-recursive-filters.md): the EWMA as a single-pole recursive low-pass filter.
-- [ewma-fpp3-simple-exponential-smoothing](../sources/ewma-fpp3-simple-exponential-smoothing.md): simple exponential smoothing, its scope and its parameter estimation.
-- [moving-averages-wikipedia-moving-average](../sources/moving-averages-wikipedia-moving-average.md): the simple moving average and the EWMA as an IIR filter.
+### 10.2 Citations
 
-### 11.2 Citations
+1. [moving-averages-wikipedia-moving-average: Exponential moving average](../sources/moving-averages-wikipedia-moving-average.md#exponential-moving-average)
+2. [ewma-wikipedia-exponential-smoothing: Basic (simple) exponential smoothing](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing)
+3. [ewma-wikipedia-ewma-chart: EWMA chart - Wikipedia](../sources/ewma-wikipedia-ewma-chart.md#ewma-chart---wikipedia)
+4. [ewma-wikipedia-low-pass-filter: Simple infinite impulse response filter](../sources/ewma-wikipedia-low-pass-filter.md#simple-infinite-impulse-response-filter)
+5. [ewma-wikipedia-load-computing: Load average](../sources/ewma-wikipedia-load-computing.md#load-average)
+6. [ewma-finagle-clients-docs: Load Balancing¶](../sources/ewma-finagle-clients-docs.md#load-balancing)
+7. [ewma-finagle-clients-docs: Power of Two Choices (P2C) + Least Loaded¶](../sources/ewma-finagle-clients-docs.md#power-of-two-choices-p2c--least-loaded)
+8. [moving-averages-wikipedia-moving-average: Simple moving average](../sources/moving-averages-wikipedia-moving-average.md#simple-moving-average)
+9. [ewma-wikipedia-exponential-smoothing: Comparison with moving average](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average)
+10. [ewma-finagle-ema-source: L29-L43](../sources/ewma-finagle-ema-source.md#L29-L43)
+11. [ewma-wikipedia-exponential-smoothing: Time constant](../sources/ewma-wikipedia-exponential-smoothing.md#time-constant)
+12. [ewma-finagle-clients-docs: Power of Two Choices (P2C) + Peak EWMA 2¶](../sources/ewma-finagle-clients-docs.md#power-of-two-choices-p2c--peak-ewma-2)
+13. [ewma-finagle-ema-source: L29-L33](../sources/ewma-finagle-ema-source.md#L29-L33)
+14. [ewma-finagle-ema-source: L45-L50](../sources/ewma-finagle-ema-source.md#L45-L50)
+15. [ewma-wikipedia-exponential-smoothing: "Exponential" naming](../sources/ewma-wikipedia-exponential-smoothing.md#exponential-naming)
+16. [ewma-finagle-peak-ewma-source: L38-L45](../sources/ewma-finagle-peak-ewma-source.md#L38-L45)
+17. [ewma-wikipedia-load-computing: Linux as an example](../sources/ewma-wikipedia-load-computing.md#linux-as-an-example)
+18. [ewma-finagle-peak-ewma-source: L11-L18](../sources/ewma-finagle-peak-ewma-source.md#L11-L18)
+19. [ewma-finagle-peak-ewma-source: L54-L67](../sources/ewma-finagle-peak-ewma-source.md#L54-L67)
+20. [ewma-finagle-peak-ewma-source: L69-L79](../sources/ewma-finagle-peak-ewma-source.md#L69-L79)
+21. [ewma-wikipedia-exponential-smoothing: Optimization](../sources/ewma-wikipedia-exponential-smoothing.md#optimization)
+22. [ewma-finagle-peak-ewma-source: L47-L53](../sources/ewma-finagle-peak-ewma-source.md#L47-L53)
+23. [ewma-wikipedia-exponential-smoothing: Choosing the initial smoothed value](../sources/ewma-wikipedia-exponential-smoothing.md#choosing-the-initial-smoothed-value)
+24. [ewma-wikipedia-exponential-smoothing: Double exponential smoothing (Holt linear)](../sources/ewma-wikipedia-exponential-smoothing.md#double-exponential-smoothing-holt-linear)
+25. [ewma-finagle-clients-docs: Partition Aware Client¶](../sources/ewma-finagle-clients-docs.md#partition-aware-client)
 
-1. [ewma-nist-ewma-control-charts: 6324-ewma-control-charts](../sources/ewma-nist-ewma-control-charts.md#6324-ewma-control-charts)
-2. [ewma-wikipedia-exponential-smoothing: exponential-smoothing---wikipedia](../sources/ewma-wikipedia-exponential-smoothing.md#exponential-smoothing---wikipedia)
-3. [moving-averages-wikipedia-moving-average: exponential-moving-average](../sources/moving-averages-wikipedia-moving-average.md#exponential-moving-average)
-4. [ewma-rfc6298-tcp-retransmission-timer: 2-the-basic-algorithm](../sources/ewma-rfc6298-tcp-retransmission-timer.md#2-the-basic-algorithm)
-5. [ewma-linux-kernel-average-h-source: L10-L27](../sources/ewma-linux-kernel-average-h-source.md#L10-L27)
-6. [ewma-jacobson-congestion-avoidance: conservation-at-equilibrium-round-trip-timing](../sources/ewma-jacobson-congestion-avoidance.md#conservation-at-equilibrium-round-trip-timing)
-7. [moving-averages-wikipedia-moving-average: simple-moving-average](../sources/moving-averages-wikipedia-moving-average.md#simple-moving-average)
-8. [ewma-wikipedia-exponential-smoothing: comparison-with-moving-average](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average)
-9. [ewma-jacobson-congestion-avoidance: theory](../sources/ewma-jacobson-congestion-avoidance.md#theory)
-10. [ewma-finch-incremental-weighted-mean-variance: page-7](../sources/ewma-finch-incremental-weighted-mean-variance.md#page-7)
-11. [ewma-linux-kernel-average-h-source: L45-L70](../sources/ewma-linux-kernel-average-h-source.md#L45-L70)
-12. [ewma-wikipedia-exponential-smoothing: basic-simple-exponential-smoothing](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing)
-13. [ewma-wikipedia-exponential-smoothing: exponential-naming](../sources/ewma-wikipedia-exponential-smoothing.md#exponential-naming)
-14. [ewma-finch-incremental-weighted-mean-variance: page-8](../sources/ewma-finch-incremental-weighted-mean-variance.md#page-8)
-15. [ewma-smith-dspguide-recursive-filters: page-5](../sources/ewma-smith-dspguide-recursive-filters.md#page-5)
-16. [ewma-smith-dspguide-recursive-filters: page-2](../sources/ewma-smith-dspguide-recursive-filters.md#page-2)
-17. [ewma-wikipedia-exponential-smoothing: time-constant](../sources/ewma-wikipedia-exponential-smoothing.md#time-constant)
-18. [ewma-jacobson-congestion-avoidance: practice](../sources/ewma-jacobson-congestion-avoidance.md#practice)
-19. [ewma-nist-single-exponential-smoothing: 6431-single-exponential-smoothing](../sources/ewma-nist-single-exponential-smoothing.md#6431-single-exponential-smoothing)
-20. [ewma-fpp3-simple-exponential-smoothing: optimisation](../sources/ewma-fpp3-simple-exponential-smoothing.md#optimisation)
-21. [ewma-wikipedia-exponential-smoothing: choosing-the-initial-smoothed-value](../sources/ewma-wikipedia-exponential-smoothing.md#choosing-the-initial-smoothed-value)
-22. [ewma-fpp3-simple-exponential-smoothing: 81-simple-exponential-smoothing](../sources/ewma-fpp3-simple-exponential-smoothing.md#81-simple-exponential-smoothing)
-23. [ewma-wikipedia-exponential-smoothing: double-exponential-smoothing-holt-linear](../sources/ewma-wikipedia-exponential-smoothing.md#double-exponential-smoothing-holt-linear)
-24. [ewma-rfc6298-tcp-retransmission-timer: 3-taking-rtt-samples](../sources/ewma-rfc6298-tcp-retransmission-timer.md#3-taking-rtt-samples)
+## 11. Metadata
 
-## 12. Metadata
-
-- **Version:** 1.0
+- **Version:** 2.0
 - **Template:** technical_brief_overview
 - **Language:** en
+- **Model:** claude-opus-5-5
 - **Created:** 2026-10-23
 - **Last modified:** 2026-10-25
-- **Words:** 1,962 (about 9 min)
+- **Words:** 1,508 (about 7 min)
 - **History:**
+  - 2.0 (2026-10-25): Rebuilt on openly licensed sources only, for a public demo: the running example is now a load balancer smoothing each backend's latency (Finagle's time-decayed EWMA, from its Apache-2.0 code), with peak EWMA as the variant; TCP's estimator, Jacobson, the Linux kernel helper, NIST, FPP3, Finch and the DSP Guide (now links) replaced by Finagle's code and docs and Wikipedia on exponential smoothing, low-pass filters, load averages and EWMA charts
   - 1.0 (2026-10-23): First version.
 - **Reading plan:**
-  1. `moving-averages-wikipedia-moving-average`, in full: medium relevance, authority B, undated
-  2. `ewma-fpp3-simple-exponential-smoothing`, in full: medium relevance, authority A, undated
-  3. `ewma-linux-kernel-average-h-source`, in full: medium relevance, authority A, undated
-  4. `ewma-jacobson-congestion-avoidance`, in full: medium relevance, authority A, 1988-11-01
-  5. `ewma-smith-dspguide-recursive-filters`, in full: medium relevance, authority A, 1997-01-01
-  6. `ewma-rfc6298-tcp-retransmission-timer`, in full: medium relevance, authority A, 2011-06-01
-  7. `ewma-wikipedia-exponential-smoothing`, in full: high relevance, authority B, undated
-  8. `ewma-finch-incremental-weighted-mean-variance`, in full: high relevance, authority B, 2009-02-01
-  9. `ewma-nist-ewma-control-charts`, in full: high relevance, authority A, undated
-  10. `ewma-nist-single-exponential-smoothing`, in full: high relevance, authority A, undated
-  11. `moving-averages-nist-single-moving-average`, abstract only: low relevance
-  12. `ewma-linkerd-beyond-round-robin`, abstract only: low relevance
-  13. `ewma-brendan-gregg-linux-load-averages`, abstract only: low relevance
-  14. `moving-averages-smith-dspguide-moving-average-filters`, abstract only: low relevance
+  1. `when-should-software-use-an-ewma-instead-of-other-moving-averages`, in full: existing narrative, medium relevance
+  2. `moving-averages-wikipedia-moving-average`, in full: medium relevance, authority B, undated
+  3. `ewma-wikipedia-load-computing`, in full: medium relevance, authority B, undated
+  4. `ewma-wikipedia-ewma-chart`, in full: medium relevance, authority B, undated
+  5. `ewma-wikipedia-low-pass-filter`, in full: medium relevance, authority B, undated
+  6. `ewma-wikipedia-exponential-smoothing`, in full: high relevance, authority B, undated
+  7. `ewma-finagle-ema-source`, in full: high relevance, authority A, undated
+  8. `ewma-finagle-peak-ewma-source`, in full: high relevance, authority A, undated
+  9. `ewma-finagle-clients-docs`, in full: high relevance, authority A, undated
+  10. `ewma-nist-ewma-control-charts`, not read: a link, no saved copy
+  11. `ewma-nist-single-exponential-smoothing`, not read: a link, no saved copy
+  12. `moving-averages-nist-single-moving-average`, not read: a link, no saved copy
+  13. `ewma-rfc6298-tcp-retransmission-timer`, not read: a link, no saved copy
+  14. `ewma-linkerd-beyond-round-robin`, not read: a link, no saved copy
+  15. `ewma-brendan-gregg-linux-load-averages`, not read: a link, no saved copy
+  16. `ewma-fpp3-simple-exponential-smoothing`, not read: a link, no saved copy
+  17. `ewma-jacobson-congestion-avoidance`, not read: a link, no saved copy
+  18. `ewma-finch-incremental-weighted-mean-variance`, not read: a link, no saved copy
+  19. `ewma-smith-dspguide-recursive-filters`, not read: a link, no saved copy
+  20. `ewma-linux-kernel-average-h-source`, not read: a link, no saved copy
+  21. `moving-averages-smith-dspguide-moving-average-filters`, not read: a link, no saved copy

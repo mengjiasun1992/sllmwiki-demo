@@ -8,7 +8,7 @@ The exponentially weighted moving average: its recurrence, smoothing factor, and
 
 ## Narratives
 
-- [What is an EWMA (exponentially weighted moving average), and how does it work?](../narratives/what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work.md) · 9 min
+- [What is an EWMA (exponentially weighted moving average), and how does it work?](../narratives/what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work.md) · 7 min
 - [When should software use an EWMA instead of other moving averages?](../narratives/when-should-software-use-an-ewma-instead-of-other-moving-averages.md) · 7 min
 
 ## Sources

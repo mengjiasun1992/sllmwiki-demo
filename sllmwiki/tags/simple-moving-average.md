@@ -9,7 +9,7 @@ Simple and weighted windowed moving averages, the alternatives to an EWMA
 ## Narratives
 
 - [When should software use an EWMA instead of other moving averages?](../narratives/when-should-software-use-an-ewma-instead-of-other-moving-averages.md) · 7 min
-- [What is an EWMA (exponentially weighted moving average), and how does it work?](../narratives/what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work.md) · 9 min (supporting)
+- [What is an EWMA (exponentially weighted moving average), and how does it work?](../narratives/what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work.md) · 7 min (supporting)
 
 ## Sources
 

@@ -138,59 +138,41 @@ what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work:
     primary: [ewma]
     supporting: [simple-moving-average]
   read:
+    ewma-finagle-ema-source: df13bfd349d72d954c17a77caa753566
+    ewma-finagle-peak-ewma-source: 8ebef8c5c4b629ce8a38d2ad8cc9eaeb
+    ewma-finagle-clients-docs: b776d524e0c2f963ea2b74ede526344f
     ewma-wikipedia-exponential-smoothing: 0fcb850ab987581d8dad64506e6de66e
-    ewma-nist-ewma-control-charts: 751aecb3cd947c0702ab27a26dc314f1
-    ewma-nist-single-exponential-smoothing: ac60767f01c33040fdac1b713e229fa0
-    ewma-finch-incremental-weighted-mean-variance: 9b23fd57716bba726bd5d7acd20df2e1
-    ewma-jacobson-congestion-avoidance: ed22e00c5925ef31eae5dc0da1f1af23
-    ewma-rfc6298-tcp-retransmission-timer: c5cbe420c9cd68b1575fa80ae07324d9
-    ewma-linux-kernel-average-h-source: bd3b56afca59a2033a3f6bc97d2807f3
-    ewma-smith-dspguide-recursive-filters: 79c4813ab5bef686018e4f92c86f1541
-    ewma-fpp3-simple-exponential-smoothing: 964e95fa7e97eb3f0874401fea890a28
     moving-averages-wikipedia-moving-average: fbc27d5b9aec0196d3eb9db9bfd09727
+    ewma-wikipedia-low-pass-filter: ab7b49ddefa81c449f570ef4d629b8a9
+    ewma-wikipedia-load-computing: da3a745fd8accb2000235c07ba01377e
+    ewma-wikipedia-ewma-chart: 1bbb73fc8131a75ffbe00f7fc623b71f
   grades:
-    ewma-nist-ewma-control-charts:
-      relevance: high
-      authority: A
-    ewma-nist-single-exponential-smoothing:
-      relevance: high
-      authority: A
-    moving-averages-nist-single-moving-average:
-      relevance: low
-      authority: A
-    ewma-rfc6298-tcp-retransmission-timer:
-      relevance: medium
-      authority: A
     moving-averages-wikipedia-moving-average:
       relevance: medium
       authority: B
     ewma-wikipedia-exponential-smoothing:
       relevance: high
       authority: B
-    ewma-linkerd-beyond-round-robin:
-      relevance: low
-      authority: B
-    ewma-brendan-gregg-linux-load-averages:
-      relevance: low
-      authority: B
-    ewma-fpp3-simple-exponential-smoothing:
-      relevance: medium
-      authority: A
-    ewma-jacobson-congestion-avoidance:
-      relevance: medium
-      authority: A
-    ewma-finch-incremental-weighted-mean-variance:
+    ewma-finagle-ema-source:
       relevance: high
+      authority: A
+    ewma-finagle-peak-ewma-source:
+      relevance: high
+      authority: A
+    ewma-wikipedia-load-computing:
+      relevance: medium
       authority: B
-    ewma-smith-dspguide-recursive-filters:
+    ewma-wikipedia-ewma-chart:
       relevance: medium
-      authority: A
-    ewma-linux-kernel-average-h-source:
+      authority: B
+    ewma-wikipedia-low-pass-filter:
       relevance: medium
+      authority: B
+    ewma-finagle-clients-docs:
+      relevance: high
       authority: A
-    moving-averages-smith-dspguide-moving-average-filters:
-      relevance: low
-      authority: A
+  models:
+    2.0: claude-opus-5-5
 
 when-should-software-use-an-ewma-instead-of-other-moving-averages:
   template: comparison
@@ -200,59 +182,39 @@ when-should-software-use-an-ewma-instead-of-other-moving-averages:
   read:
     moving-averages-wikipedia-moving-average: fbc27d5b9aec0196d3eb9db9bfd09727
     ewma-wikipedia-exponential-smoothing: 0fcb850ab987581d8dad64506e6de66e
-    moving-averages-smith-dspguide-moving-average-filters: db872b37b363d25dfdfae1f6f6b6147e
-    ewma-smith-dspguide-recursive-filters: 79c4813ab5bef686018e4f92c86f1541
-    moving-averages-nist-single-moving-average: 15fd5bbea83b801d30a7e8e5d9859f78
-    ewma-nist-ewma-control-charts: 751aecb3cd947c0702ab27a26dc314f1
-    ewma-fpp3-simple-exponential-smoothing: 964e95fa7e97eb3f0874401fea890a28
-    ewma-jacobson-congestion-avoidance: ed22e00c5925ef31eae5dc0da1f1af23
-    ewma-linux-kernel-average-h-source: bd3b56afca59a2033a3f6bc97d2807f3
-    ewma-brendan-gregg-linux-load-averages: 510007f404a093e93f0a36186b2ae6a4
+    ewma-wikipedia-ewma-chart: 1bbb73fc8131a75ffbe00f7fc623b71f
+    ewma-wikipedia-load-computing: da3a745fd8accb2000235c07ba01377e
+    ewma-finagle-clients-docs: b776d524e0c2f963ea2b74ede526344f
+    ewma-finagle-peak-ewma-source: 8ebef8c5c4b629ce8a38d2ad8cc9eaeb
   grades:
-    ewma-nist-ewma-control-charts:
-      relevance: medium
-      authority: A
-    ewma-nist-single-exponential-smoothing:
-      relevance: low
-      authority: A
-    moving-averages-nist-single-moving-average:
-      relevance: medium
-      authority: A
-    ewma-rfc6298-tcp-retransmission-timer:
-      relevance: low
-      authority: A
     moving-averages-wikipedia-moving-average:
       relevance: high
       authority: B
     ewma-wikipedia-exponential-smoothing:
       relevance: high
       authority: B
-    ewma-linkerd-beyond-round-robin:
-      relevance: low
-      authority: B
-    ewma-brendan-gregg-linux-load-averages:
-      relevance: medium
-      authority: B
-    ewma-fpp3-simple-exponential-smoothing:
-      relevance: medium
-      authority: A
-    ewma-jacobson-congestion-avoidance:
-      relevance: medium
-      authority: A
-    ewma-finch-incremental-weighted-mean-variance:
+    ewma-finagle-ema-source:
       relevance: low
       authority: A
-    ewma-smith-dspguide-recursive-filters:
+    ewma-finagle-peak-ewma-source:
       relevance: medium
       authority: A
-    ewma-linux-kernel-average-h-source:
+    ewma-wikipedia-load-computing:
+      relevance: medium
+      authority: B
+    ewma-wikipedia-ewma-chart:
+      relevance: medium
+      authority: B
+    ewma-wikipedia-low-pass-filter:
+      relevance: low
+      authority: B
+    ewma-finagle-clients-docs:
       relevance: medium
       authority: A
-    moving-averages-smith-dspguide-moving-average-filters:
-      relevance: high
-      authority: A
+  models:
+    1.1: claude-opus-5-5
   built_on:
-    what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work: 3d99f2e9bab03ff36b619156f4ccbbe5
+    what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work: 722f7fdf659d9d7f971a05453b1b4ee8
 
 what-does-keeping-calm-argue-and-is-it-worth-reading-in-full:
   template: skim_read
