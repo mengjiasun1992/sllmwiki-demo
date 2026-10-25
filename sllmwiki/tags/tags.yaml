@@ -20,3 +20,7 @@ ewma:
 simple-moving-average:
   description: Simple and weighted windowed moving averages, the alternatives to an EWMA
   parent: moving-averages
+
+calm-theorem:
+  description: "The CALM theorem: consistency as logical monotonicity, which distributed programs need no coordination"
+  parent: distributed-system-design

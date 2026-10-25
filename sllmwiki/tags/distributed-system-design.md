@@ -6,6 +6,10 @@ Design tenets and principles for building distributed systems: failure, consiste
 
 **Path:** [distributed-systems](distributed-systems.md) / distributed-system-design
 
+## Subtopics
+
+- [calm-theorem](calm-theorem.md): The CALM theorem: consistency as logical monotonicity, which distributed programs need no coordination
+
 ## Narratives
 
 - [What are the common design tenets and principles for distributed systems?](../narratives/what-are-the-common-design-tenets-and-principles-for-distributed-systems.md) · 10 min
