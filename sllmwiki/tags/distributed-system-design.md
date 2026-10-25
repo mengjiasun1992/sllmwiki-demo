@@ -8,8 +8,8 @@ Design tenets and principles for building distributed systems: failure, consiste
 
 ## Narratives
 
-- [What are the common design tenets and principles for distributed systems?](../narratives/what-are-the-common-design-tenets-and-principles-for-distributed-systems.md)
-- [What is a distributed system?](../narratives/what-is-a-distributed-system.md) (supporting)
+- [What are the common design tenets and principles for distributed systems?](../narratives/what-are-the-common-design-tenets-and-principles-for-distributed-systems.md) · 10 min
+- [What is a distributed system?](../narratives/what-is-a-distributed-system.md) · 5 min (supporting)
 
 ## Sources
 

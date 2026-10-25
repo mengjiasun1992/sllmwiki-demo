@@ -11,4 +11,4 @@ Moving averages for smoothing a series of measurements over time
 
 ## Narratives
 
-- [When should software use an EWMA instead of other moving averages?](../narratives/when-should-software-use-an-ewma-instead-of-other-moving-averages.md) (supporting)
+- [When should software use an EWMA instead of other moving averages?](../narratives/when-should-software-use-an-ewma-instead-of-other-moving-averages.md) · 7 min (supporting)
