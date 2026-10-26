@@ -2,7 +2,7 @@
 # attaches it to a release when one is published; "Run workflow" builds a
 # preview from any branch, kept as a workflow artifact for 90 days. Which
 # formats are built is Config.toml's [structural-llm-wiki-release]. Run from
-# the sllmwiki repository at v1.0.0; /sllmwiki:init moves the ref when the
+# the sllmwiki repository at v1.1.0; /sllmwiki:init moves the ref when the
 # plugin updates.
 name: Book
 
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4.4.0
-      - uses: mengjiasun1992/structural-llm-wiki/src/actions/release-book@v1.0.0
+      - uses: mengjiasun1992/structural-llm-wiki/src/actions/release-book@v1.1.0
         with:
           version: ${{ github.event.release.tag_name || 'preview' }}
           release: ${{ github.event.release.tag_name }}
