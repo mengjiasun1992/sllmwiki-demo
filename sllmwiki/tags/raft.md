@@ -6,6 +6,10 @@ The Raft consensus algorithm: leader election, log replication and safety for a 
 
 **Path:** [distributed-systems](distributed-systems.md) / [consensus](consensus.md) / raft
 
+## Narratives
+
+- [How does Raft elect a leader and keep every server's log consistent through crashes and network partitions?](../narratives/how-does-raft-elect-a-leader-and-keep-every-servers-log-consistent.md) · 9 min
+
 ## Sources
 
 - [distributed-systems-kleppmann-cambridge-notes](../sources/distributed-systems-kleppmann-cambridge-notes.md): Martin Kleppmann, lecture notes for the University of Cambridge Part IB course 'Concurrent and Distributed Systems', distributed half, 2021/22 (CC BY-SA).

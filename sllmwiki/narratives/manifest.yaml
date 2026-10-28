@@ -231,3 +231,65 @@ what-does-keeping-calm-argue-and-is-it-worth-reading-in-full:
   models:
     1.0: claude-opus-5-5
     1.1: claude-opus-5-5
+
+how-does-raft-elect-a-leader-and-keep-every-servers-log-consistent:
+  template: technical_brief_overview
+  tags:
+    primary: [raft]
+    supporting: [distributed-system-design]
+  read:
+    raft-ongaro-dissertation-ch3-basic-raft: 15f11105458bfc155d085ad59f50c2a9
+    raft-ongaro-dissertation-ch9-leader-election: 4e3ce69bad14696b9b30c512523c3fbe
+    distributed-systems-kleppmann-cambridge-notes: 7df7ddc48dcd93c6900e0e9b58b1daeb
+    raft-etcd-raft-readme: ec2288bf0a232938235d5cd07312da33
+  grades:
+    distributed-systems-kleppmann-cambridge-notes:
+      relevance: high
+      authority: B
+    raft-ongaro-dissertation-ch3-basic-raft:
+      relevance: high
+      authority: A
+    raft-ongaro-dissertation-ch9-leader-election:
+      relevance: high
+      authority: A
+    raft-etcd-raft-readme:
+      relevance: medium
+      authority: A
+    distributed-systems-van-steen-tanenbaum-brief-intro:
+      relevance: low
+      authority: B
+    distributed-system-design-wikipedia-fallacies:
+      relevance: low
+      authority: C
+    distributed-system-design-aws-well-architected-reliability-principles:
+      relevance: low
+      authority: C
+    distributed-system-design-azure-design-principles:
+      relevance: low
+      authority: C
+    distributed-system-design-azure-retry-pattern:
+      relevance: low
+      authority: C
+    distributed-system-design-azure-circuit-breaker-pattern:
+      relevance: low
+      authority: C
+    distributed-system-design-azure-bulkhead-pattern:
+      relevance: low
+      authority: C
+    distributed-system-design-azure-throttling-pattern:
+      relevance: low
+      authority: C
+    distributed-system-design-azure-transient-fault-handling:
+      relevance: low
+      authority: C
+    distributed-system-design-wikipedia-cap-theorem:
+      relevance: low
+      authority: C
+    distributed-system-design-wikipedia-end-to-end-principle:
+      relevance: low
+      authority: C
+    distributed-system-design-wikipedia-cascading-failure:
+      relevance: low
+      authority: C
+  models:
+    1.0: claude-opus-5-5
