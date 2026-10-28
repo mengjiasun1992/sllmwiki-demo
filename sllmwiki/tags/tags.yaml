@@ -36,3 +36,23 @@ raft:
 failure-modes:
   description: Classic failure modes of large-scale distributed systems (crashes, partitions, overload, cascading and metastable failures, retry storms, bad changes) and how to prevent or mitigate them
   parent: distributed-system-design
+
+machine-learning:
+  description: "Machine learning: models that learn their behaviour from data"
+  parent: null
+
+transformer-architecture:
+  description: "Transformer models: the attention-based network design behind modern language models"
+  parent: machine-learning
+
+attention-mechanism:
+  description: "Attention: how a transformer weighs other tokens when it builds each token's representation"
+  parent: transformer-architecture
+
+llm-serving:
+  description: "Serving large language models: running inference for many requests on limited accelerator memory"
+  parent: machine-learning
+
+paged-attention:
+  description: "Paged attention: storing the attention key-value cache in fixed-size blocks, as an operating system pages memory"
+  parent: llm-serving
