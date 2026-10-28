@@ -190,6 +190,7 @@ Learn the groups in the map's order. Then ask of a design:
 - [What is a distributed system?](what-is-a-distributed-system.md): why these principles are needed.
 - [What does "Keeping CALM: When Distributed Consistency is Easy" argue, and is it worth reading in full?](what-does-keeping-calm-argue-and-is-it-worth-reading-in-full.md): when coordination can be avoided altogether.
 - [How does Raft elect a leader and keep every server's log consistent through crashes and network partitions?](how-does-raft-elect-a-leader-and-keep-every-servers-log-consistent.md): how a consensus algorithm keeps replicas consistent, choosing consistency during a partition.
+- [Can you walk me through the classic failure modes in large scale distributed system and what are the common solutions to prevent or mitigate each one?](what-are-the-classic-failure-modes-of-large-scale-distributed-systems-and-their-mitigations.md): the same defences, organized by the failure each one prevents.
 - Not yet narratives: How should timeouts, retries and backoff be set? How do services avoid cascading failures? How are partitions managed under CAP? How do logical clocks order events?
 
 ## 10. References
@@ -248,14 +249,15 @@ Learn the groups in the map's order. Then ask of a design:
 
 ## 11. Metadata
 
-- **Version:** 2.1
+- **Version:** 2.2
 - **Template:** survey
 - **Language:** en
 - **Model:** claude-opus-5-5
 - **Created:** 2026-10-23
 - **Last modified:** 2026-10-27
-- **Words:** 2,361 (about 10 min)
+- **Words:** 2,398 (about 10 min)
 - **History:**
+  - 2.2 (2026-10-27): Lint: Where to go next links the new failure-modes survey.
   - 2.1 (2026-10-27): Lint: Where to go next links the new Raft narrative instead of listing it as not yet written.
   - 2.0 (2026-10-25): Rebuilt on openly licensed sources only, for a public demo: Hamilton, the AWS Builders' Library, Google SRE, Brewer, Saltzer, Raft and Lamport (now links) replaced by Microsoft's resilience patterns, Wikipedia on CAP, the end-to-end principle and cascading failures, Kleppmann's notes and the CALM paper; Keep it simple dropped (no open source states it); new case studies: Gmail 2012, the ARPANET, Dynamo's cart
   - 1.0 (2026-10-23): First version.
