@@ -295,3 +295,84 @@ how-does-raft-elect-a-leader-and-keep-every-servers-log-consistent:
   models:
     1.0: claude-opus-5-5
     1.1: claude-opus-5-5
+
+what-are-the-classic-failure-modes-of-large-scale-distributed-systems-and-their-mitigations:
+  template: survey
+  tags:
+    primary: [failure-modes]
+    supporting: [raft]
+  read:
+    distributed-systems-kleppmann-cambridge-notes: 7df7ddc48dcd93c6900e0e9b58b1daeb
+    distributed-system-design-wikipedia-fallacies: c58295fbc71293f2053a509c7aac57b8
+    distributed-system-design-azure-design-principles: c94159586f29b96b12ac3a430aca409e
+    distributed-system-design-aws-well-architected-reliability-principles: 55a55ff8b937387083e5f6bcfd0dd72b
+    distributed-system-design-azure-transient-fault-handling: f0331e72be439dc53e2646ec274c9abd
+    distributed-system-design-azure-retry-pattern: 5b80094a3a1a73c3b38d3b122b794eca
+    failure-modes-azure-retry-storm-antipattern: 5dc3708a8fb4b2bee6c196cbe59951b0
+    distributed-system-design-azure-circuit-breaker-pattern: c1f36d8b1d47d98354582a7ae83d0594
+    distributed-system-design-azure-bulkhead-pattern: ad11e72c87f657162d99d4dcc21d8fed
+    distributed-system-design-azure-throttling-pattern: 63dc3dbad9f9184bbd28e5456d5a1759
+    failure-modes-azure-queue-based-load-leveling: bb6227ddf53ac389963b3b609b881f16
+    distributed-system-design-wikipedia-cascading-failure: 58f9cd08501bd53cbe6ceeaecd3cbc90
+    failure-modes-wikipedia-thundering-herd: 5a6524848abd5edfa8c33ca61f71e01b
+    failure-modes-wikipedia-split-brain: a6d8333b7e71d4968b330371980c8149
+    distributed-system-design-wikipedia-cap-theorem: b937d6aa3678db4b207b8adf763974fb
+  grades:
+    distributed-system-design-wikipedia-fallacies:
+      relevance: high
+      authority: C
+    distributed-system-design-aws-well-architected-reliability-principles:
+      relevance: medium
+      authority: A
+    distributed-system-design-azure-design-principles:
+      relevance: medium
+      authority: A
+    distributed-system-design-azure-retry-pattern:
+      relevance: high
+      authority: A
+    distributed-system-design-azure-circuit-breaker-pattern:
+      relevance: high
+      authority: A
+    distributed-system-design-azure-bulkhead-pattern:
+      relevance: high
+      authority: A
+    distributed-system-design-azure-throttling-pattern:
+      relevance: high
+      authority: A
+    distributed-system-design-azure-transient-fault-handling:
+      relevance: high
+      authority: A
+    distributed-system-design-wikipedia-cap-theorem:
+      relevance: medium
+      authority: C
+    distributed-system-design-wikipedia-cascading-failure:
+      relevance: high
+      authority: C
+    failure-modes-azure-retry-storm-antipattern:
+      relevance: high
+      authority: A
+    failure-modes-azure-queue-based-load-leveling:
+      relevance: high
+      authority: A
+    failure-modes-wikipedia-thundering-herd:
+      relevance: high
+      authority: C
+    failure-modes-wikipedia-split-brain:
+      relevance: high
+      authority: C
+    distributed-systems-kleppmann-cambridge-notes:
+      relevance: high
+      authority: B
+    raft-ongaro-dissertation-ch3-basic-raft:
+      relevance: low
+      authority: A
+    raft-ongaro-dissertation-ch9-leader-election:
+      relevance: low
+      authority: A
+    raft-etcd-raft-readme:
+      relevance: low
+      authority: A
+  models:
+    1.0: claude-opus-5-5
+  built_on:
+    how-does-raft-elect-a-leader-and-keep-every-servers-log-consistent: 1a1e4e83619230677da2d36ba2df43de

@@ -6,6 +6,10 @@ Classic failure modes of large-scale distributed systems (crashes, partitions, o
 
 **Path:** [distributed-systems](distributed-systems.md) / [distributed-system-design](distributed-system-design.md) / failure-modes
 
+## Narratives
+
+- [Can you walk me through the classic failure modes in large scale distributed system and what are the common solutions to prevent or mitigate each one?](../narratives/what-are-the-classic-failure-modes-of-large-scale-distributed-systems-and-their-mitigations.md) · 9 min
+
 ## Sources
 
 - [distributed-system-design-wikipedia-fallacies](../sources/distributed-system-design-wikipedia-fallacies.md): The Wikipedia article on the fallacies of distributed computing: a set of false assumptions, set out by L.
