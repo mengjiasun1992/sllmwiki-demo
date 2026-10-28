@@ -7,6 +7,7 @@ Systems of independent networked computers that coordinate by passing messages t
 ## Subtopics
 
 - [distributed-system-design](distributed-system-design.md): Design tenets and principles for building distributed systems: failure, consistency, scalability, idempotency, backpressure
+- [consensus](consensus.md): Consensus: getting a group of servers to agree on values despite failures, the core of replicated state machines
 
 ## Narratives
 

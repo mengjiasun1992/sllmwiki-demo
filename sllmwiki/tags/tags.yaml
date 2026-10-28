@@ -24,3 +24,11 @@ simple-moving-average:
 calm-theorem:
   description: "The CALM theorem: consistency as logical monotonicity, which distributed programs need no coordination"
   parent: distributed-system-design
+
+consensus:
+  description: "Consensus: getting a group of servers to agree on values despite failures, the core of replicated state machines"
+  parent: distributed-systems
+
+raft:
+  description: "The Raft consensus algorithm: leader election, log replication and safety for a replicated log"
+  parent: consensus
