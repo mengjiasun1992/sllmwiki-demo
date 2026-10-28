@@ -6,6 +6,10 @@ Paged attention: storing the attention key-value cache in fixed-size blocks, as 
 
 **Path:** [machine-learning](machine-learning.md) / [llm-serving](llm-serving.md) / paged-attention
 
+## Narratives
+
+- [Can you compare the classic attention mechanism and paged attention mechanism for transformer model architecture?](../narratives/how-does-classic-attention-compare-with-paged-attention-in-transformers.md) · 5 min
+
 ## Sources
 
 - [paged-attention-kwon-sosp2023](../sources/paged-attention-kwon-sosp2023.md): Kwon and colleagues (SOSP 2023) introduce PagedAttention and vLLM, an LLM serving system built on it.

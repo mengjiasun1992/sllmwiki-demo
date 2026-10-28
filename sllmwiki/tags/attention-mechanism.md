@@ -6,6 +6,10 @@ Attention: how a transformer weighs other tokens when it builds each token's rep
 
 **Path:** [machine-learning](machine-learning.md) / [transformer-architecture](transformer-architecture.md) / attention-mechanism
 
+## Narratives
+
+- [Can you compare the classic attention mechanism and paged attention mechanism for transformer model architecture?](../narratives/how-does-classic-attention-compare-with-paged-attention-in-transformers.md) · 5 min
+
 ## Sources
 
 - [attention-wikipedia-machine-learning](../sources/attention-wikipedia-machine-learning.md): Wikipedia's article on attention in machine learning, an encyclopedia overview.
