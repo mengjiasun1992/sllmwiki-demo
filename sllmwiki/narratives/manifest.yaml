@@ -130,6 +130,7 @@ what-are-the-common-design-tenets-and-principles-for-distributed-systems:
   models:
     2.0: claude-opus-5-5
     2.1: claude-opus-5-5
+    2.2: claude-opus-5-5
   built_on:
     what-is-a-distributed-system: e5bfa41e0d6c4583394ac43eff1687a7
 
@@ -374,5 +375,6 @@ what-are-the-classic-failure-modes-of-large-scale-distributed-systems-and-their-
       authority: A
   models:
     1.0: claude-opus-5-5
+    1.1: claude-opus-5-5
   built_on:
     how-does-raft-elect-a-leader-and-keep-every-servers-log-consistent: 1a1e4e83619230677da2d36ba2df43de
