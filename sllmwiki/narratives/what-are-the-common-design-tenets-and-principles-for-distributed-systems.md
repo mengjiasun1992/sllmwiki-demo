@@ -189,7 +189,8 @@ Learn the groups in the map's order. Then ask of a design:
 
 - [What is a distributed system?](what-is-a-distributed-system.md): why these principles are needed.
 - [What does "Keeping CALM: When Distributed Consistency is Easy" argue, and is it worth reading in full?](what-does-keeping-calm-argue-and-is-it-worth-reading-in-full.md): when coordination can be avoided altogether.
-- Not yet narratives: How should timeouts, retries and backoff be set? How do services avoid cascading failures? How are partitions managed under CAP? How does Raft reach consensus? How do logical clocks order events?
+- [How does Raft elect a leader and keep every server's log consistent through crashes and network partitions?](how-does-raft-elect-a-leader-and-keep-every-servers-log-consistent.md): how a consensus algorithm keeps replicas consistent, choosing consistency during a partition.
+- Not yet narratives: How should timeouts, retries and backoff be set? How do services avoid cascading failures? How are partitions managed under CAP? How do logical clocks order events?
 
 ## 10. References
 
@@ -247,14 +248,15 @@ Learn the groups in the map's order. Then ask of a design:
 
 ## 11. Metadata
 
-- **Version:** 2.0
+- **Version:** 2.1
 - **Template:** survey
 - **Language:** en
 - **Model:** claude-opus-5-5
 - **Created:** 2026-10-23
-- **Last modified:** 2026-10-25
-- **Words:** 2,336 (about 10 min)
+- **Last modified:** 2026-10-27
+- **Words:** 2,361 (about 10 min)
 - **History:**
+  - 2.1 (2026-10-27): Lint: Where to go next links the new Raft narrative instead of listing it as not yet written.
   - 2.0 (2026-10-25): Rebuilt on openly licensed sources only, for a public demo: Hamilton, the AWS Builders' Library, Google SRE, Brewer, Saltzer, Raft and Lamport (now links) replaced by Microsoft's resilience patterns, Wikipedia on CAP, the end-to-end principle and cascading failures, Kleppmann's notes and the CALM paper; Keep it simple dropped (no open source states it); new case studies: Gmail 2012, the ARPANET, Dynamo's cart
   - 1.0 (2026-10-23): First version.
 - **Reading plan:**
