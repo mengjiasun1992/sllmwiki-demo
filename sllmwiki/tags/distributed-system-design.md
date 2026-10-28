@@ -9,6 +9,7 @@ Design tenets and principles for building distributed systems: failure, consiste
 ## Subtopics
 
 - [calm-theorem](calm-theorem.md): The CALM theorem: consistency as logical monotonicity, which distributed programs need no coordination
+- [failure-modes](failure-modes.md): Classic failure modes of large-scale distributed systems (crashes, partitions, overload, cascading and metastable failures, retry storms, bad changes) and how to prevent or mitigate them
 
 ## Narratives
 

@@ -32,3 +32,7 @@ consensus:
 raft:
   description: "The Raft consensus algorithm: leader election, log replication and safety for a replicated log"
   parent: consensus
+
+failure-modes:
+  description: Classic failure modes of large-scale distributed systems (crashes, partitions, overload, cascading and metastable failures, retry storms, bad changes) and how to prevent or mitigate them
+  parent: distributed-system-design

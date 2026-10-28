@@ -27,7 +27,7 @@ distributed-system-design-wikipedia-fallacies:
   ingested: "2026-10-20"
   license: CC-BY-SA-4.0
   license_url: https://creativecommons.org/licenses/by-sa/4.0/
-  tags: [distributed-system-design]
+  tags: [distributed-system-design, failure-modes]
   abstract: "The Wikipedia article on the fallacies of distributed computing: a set of false assumptions, set out by L. Peter Deutsch and others at Sun Microsystems, that programmers new to distributed applications invariably make. It lists the eight original fallacies: the network is reliable; latency is zero; bandwidth is infinite; the network is secure; topology doesn't change; there is one administrator; transport cost is zero; the network is homogeneous. For each it gives an effect of believing it, such as applications with little handling of network errors that stall, wait forever or never retry; unbounded traffic that increases dropped packets; bottlenecks; being blindsided by malicious users; conflicting policies of multiple administrators; and unbudgeted hidden network costs. Its history section says Deutsch first listed seven fallacies in 1994, incorporating four that Bill Joy and Dave Lyon had already identified in 'The Fallacies of Networked Computing', and that James Gosling added the eighth around 1997. It also records a ninth fallacy Deutsch later proposed on Software Engineering Radio (2021), that the party you are communicating with is trustworthy, and three further fallacies added by Mark Richards and Neal Ford in 2020: versioning is simple, compensating updates always work, and observability is optional. It links to the CAP theorem and PACELC as related topics."
 
 distributed-system-design-aws-well-architected-reliability-principles:
@@ -36,7 +36,7 @@ distributed-system-design-aws-well-architected-reliability-principles:
   url: https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/design-principles.html
   ingested: "2026-10-20"
   license: CC-BY-SA-4.0
-  tags: [distributed-system-design]
+  tags: [distributed-system-design, failure-modes]
   abstract: "The design principles page of the Reliability Pillar of the AWS Well-Architected Framework, a short list of five principles that help increase the reliability of workloads in the cloud. Automatically recover from failure: monitor key performance indicators that measure business value rather than technical aspects, and run automation when a threshold is breached, so failures are notified, tracked and worked around or repaired automatically, and with more sophisticated automation anticipated before they occur. Test recovery procedures: rather than only proving a workload works in a scenario, test how it fails and validate recovery, using automation to simulate failures or recreate past ones so failure pathways are found and fixed before a real failure. Scale horizontally to increase aggregate workload availability: replace one large resource with multiple small ones and distribute requests across them so they do not share a common point of failure and a single failure has less impact. Stop guessing capacity: resource saturation is a common cause of failure on premises, while in the cloud demand and utilisation can be monitored and resources added or removed automatically, within service quotas. Manage change through automation: make infrastructure changes with automation, including changes to the automation itself, so that they can be tracked and reviewed. The page is brief and gives no examples beyond these statements."
 
 ewma-nist-ewma-control-charts:
@@ -135,7 +135,7 @@ distributed-system-design-azure-design-principles:
   ingested: "2026-10-21"
   license: CC-BY-4.0
   license_url: https://github.com/MicrosoftDocs/architecture-center/blob/main/LICENSE
-  tags: [distributed-system-design]
+  tags: [distributed-system-design, failure-modes]
   abstract: "The index page of the Azure Architecture Center's design principles for Azure applications (Microsoft Learn), an official vendor list of principles for building cloud applications that withstand failures, scale with demand and evolve with business needs. It groups eleven principles. Core: design for self-healing (detect failures, respond gracefully, recover automatically, with retries, health endpoint monitoring, circuit breakers and bulkheads, because in distributed systems failures are inevitable); make all things redundant (load balancers, multiple instances, database replicas, multi-zone or multi-region deployment, sized to business risk); minimize coordination (decoupled, asynchronous components, eventual consistency where appropriate, domain events); design to scale out (horizontal scaling, no session stickiness, find bottlenecks, autoscale on live metrics); partition around limits (horizontal, vertical or functional partitioning, partition keys that avoid hotspots). Operational: design for operations (logging, distributed tracing, standard metrics, automated management); use managed services (PaaS over IaaS); use an identity service. Strategic: design for evolution (loose coupling, encapsulated domain knowledge, asynchronous messaging, versioned APIs); build for the needs of business (RTOs, SLAs, SLOs, domain models); perform failure mode analysis during design. A closing list says how they combine: start from business requirements, design for failure, plan for scale, use managed services, support operations, build for change. Each principle links to its own article, which this copy does not include."
 
 ewma-jacobson-congestion-avoidance:
@@ -213,7 +213,7 @@ distributed-system-design-azure-retry-pattern:
   ingested: "2026-10-25"
   license: CC-BY-4.0
   license_url: https://github.com/MicrosoftDocs/architecture-center/blob/main/LICENSE
-  tags: [distributed-system-design]
+  tags: [distributed-system-design, failure-modes]
   abstract: "Microsoft's Retry pattern from the Azure Architecture Center (Microsoft Learn). Its context: applications in the cloud meet transient faults, such as a momentary loss of network connectivity, a service that is temporarily unavailable, or timeouts when a service is busy, and these usually correct themselves, so an operation repeated after a suitable delay is likely to succeed; a busy database may throttle requests, for example. The solution is a retry mechanism: retry an unsuccessful request a predefined number of times, then treat the fault as an exception. It describes retry strategies (cancel, retry immediately, retry after a delay, with growing delays) and the issues to weigh: the effect of retries on performance, idempotency (a service may process a request but fail to send its response, so a retried non-idempotent operation runs twice), which exception types to retry, and transaction consistency. It notes that many client libraries and cloud services now include built-in retry mechanisms, and says when to use the pattern and when not to, with links to related guidance on transient fault handling and the Circuit Breaker pattern."
 
 distributed-system-design-azure-circuit-breaker-pattern:
@@ -223,7 +223,7 @@ distributed-system-design-azure-circuit-breaker-pattern:
   ingested: "2026-10-25"
   license: CC-BY-4.0
   license_url: https://github.com/MicrosoftDocs/architecture-center/blob/main/LICENSE
-  tags: [distributed-system-design]
+  tags: [distributed-system-design, failure-modes]
   abstract: "Microsoft's Circuit Breaker pattern from the Azure Architecture Center. It starts from faults that take longer to fix than transient ones: an application shouldn't keep retrying an operation unlikely to succeed, and requests blocked on a slow service until their timeout hold memory, threads and database connections, which can exhaust resources and fail unrelated parts of the system, a cascading failure. A circuit breaker is a proxy that counts recent failures to an operation and works as a state machine: closed (calls pass and failures are counted), open (past a threshold within a period, calls fail immediately and a timer starts) and half-open (a limited number of trial calls test whether the fault is fixed, closing the breaker on success). It explains how the pattern differs from Retry, which expects success, and how the two combine, then covers problems and considerations (exception handling, types of exceptions, monitoring, recoverability, testing failed operations, manual override, concurrency, resource differentiation, accelerated breaking, multiregion deployments, service-mesh circuit breakers, replaying failed requests, inappropriate timeouts on external services), when to use it, workload design, and an example with the three flows."
 
 distributed-system-design-azure-bulkhead-pattern:
@@ -233,7 +233,7 @@ distributed-system-design-azure-bulkhead-pattern:
   ingested: "2026-10-25"
   license: CC-BY-4.0
   license_url: https://github.com/MicrosoftDocs/architecture-center/blob/main/LICENSE
-  tags: [distributed-system-design]
+  tags: [distributed-system-design, failure-modes]
   abstract: "Microsoft's Bulkhead pattern from the Azure Architecture Center, named after the partitioned sections of a ship's hull. Its problem: excessive load or failure in a service affects all its consumers, and a consumer calling an unresponsive service can exhaust its own resources, such as a connection pool, so its calls to other services fail too, a cascading failure. The solution partitions service instances into groups by consumer load and availability needs, and lets a consumer partition its resources, for example one connection pool per downstream service, so a failing service affects only the pool assigned to it. Benefits listed: consumers and services are isolated from cascading failures, some functionality survives a failure, and different quality-of-service levels can be offered. Diagrams show bulkheads around connection pools and around service instances per client. It discusses problems and considerations (granularity, combining with retry, circuit breaker and throttling, isolation in processes, containers or virtual machines, monitoring each partition), when to use it, workload design, and an example using Kubernetes resource limits."
 
 distributed-system-design-azure-throttling-pattern:
@@ -243,7 +243,7 @@ distributed-system-design-azure-throttling-pattern:
   ingested: "2026-10-25"
   license: CC-BY-4.0
   license_url: https://github.com/MicrosoftDocs/architecture-center/blob/main/LICENSE
-  tags: [distributed-system-design]
+  tags: [distributed-system-design, failure-modes]
   abstract: "Microsoft's Throttling pattern from the Azure Architecture Center. Load on a cloud application varies by time of day, month-end jobs and sudden bursts, and when demand exceeds capacity the system slows or fails and misses its service-level objectives; autoscaling helps but takes time and money, so demand can outrun it. The pattern caps resource use and throttles requests above the cap so the system keeps functioning and meeting its SLOs. It frames throttling as a control loop with signals at the infrastructure, application and per-principal levels, and lists strategies: per-principal rate limits, graceful feature degradation (turn off nonessential features so essential ones keep resources, trading completeness for availability), load leveling through a queue, priority-based deferral of lower-priority work, and outbound rate limits toward a failing dependency. A chart shows features throttled as resource use nears a soft limit. It covers problems and considerations (deciding early, responding quickly, returning a specific error such as HTTP 429 with Retry-After, combining with autoscaling), when to use the pattern, workload design, and a multitenant example."
 
 distributed-system-design-azure-transient-fault-handling:
@@ -253,7 +253,7 @@ distributed-system-design-azure-transient-fault-handling:
   ingested: "2026-10-25"
   license: CC-BY-4.0
   license_url: https://github.com/MicrosoftDocs/architecture-center/blob/main/LICENSE
-  tags: [distributed-system-design]
+  tags: [distributed-system-design, failure-modes]
   abstract: "Microsoft's best practices for transient fault handling, from the Azure Architecture Center. Transient faults happen in the cloud because it runs on many commodity hardware units that are recycled and replaced automatically, resources are shared and throttled, and the network between client and service has many components. General guidelines: check whether a built-in retry mechanism exists; check whether retrying suits the operation; choose retry count and interval (exponential back-off with jitter, incremental, regular, immediate or randomized intervals; exponential back-off for background work, short retries for interactive work); keep the total time, timeouts and delays included, within the latency objective; set timeouts on every outbound call before adding retries; follow Retry-After headers. Antipatterns: duplicated or cascading retries at every layer (three retries at each of two layers make nine attempts), endless retries, aggressive retries that keep a service from recovering, and retries without a budget; a retry budget, such as 60 retries a minute, keeps a local capacity problem from becoming a cascading failure. It adds testing retries, managing retry policy configuration, logging transient faults as warnings and alerting on rising retry counts, using a circuit breaker for operations that keep failing, and designing each step as idempotent."
 
 distributed-system-design-wikipedia-cap-theorem:
@@ -263,7 +263,7 @@ distributed-system-design-wikipedia-cap-theorem:
   ingested: "2026-10-25"
   license: CC-BY-SA-4.0
   license_url: https://creativecommons.org/licenses/by-sa/4.0/
-  tags: [distributed-system-design]
+  tags: [distributed-system-design, failure-modes]
   abstract: "Wikipedia's article on the CAP theorem. It states that any distributed data store can provide at most two of three guarantees: consistency (every read receives the most recent write or an error), availability (every request receives a non-error response, without the guarantee that it contains the most recent write) and partition tolerance (the system keeps operating despite messages dropped or delayed between nodes). Its Explanation section says network partitions have to be tolerated, so during one a system chooses consistency, returning an error or a timeout when it cannot guarantee up-to-date data, or availability, answering with the most recent version it has; without a partition both can be satisfied. Traditional ACID databases choose consistency; BASE systems, common in NoSQL, choose availability. Its History traces the idea from Eric Brewer in 1998 and 2000 to Gilbert and Lynch's 2002 proof; notes Brewer's 2012 clarification that the 'two out of three' framing is misleading, since consistency or availability is sacrificed only during partitions and partitions can be managed and recovered from; mentions Birman and Friedman's 1996 result; and describes PACELC, which adds that without a partition a system trades latency against consistency."
 
 distributed-system-design-wikipedia-end-to-end-principle:
@@ -283,7 +283,7 @@ distributed-system-design-wikipedia-cascading-failure:
   ingested: "2026-10-25"
   license: CC-BY-SA-4.0
   license_url: https://creativecommons.org/licenses/by-sa/4.0/
-  tags: [distributed-system-design]
+  tags: [distributed-system-design, failure-modes]
   abstract: "Wikipedia's article on cascading failure: a failure in a system of interconnected parts in which the failure of one or a few parts triggers the failure of others, and so on. It covers power transmission, where an overloaded line or failed component shifts load onto others until they fail too, with examples of large blackouts; computer networks, where a cascade failure usually starts with the overload or maintenance of a crucial router or node, its traffic routed through an alternative path that becomes overloaded in turn, with symptoms of packet loss and high latency across whole sections of a network, congestion collapse, and walking failures that ripple through the same sections several times; an example of an ISP rerouting traffic over a longer path, DNS failures spreading to unrelated systems, and Gmail's December 2012 global partial outage (40% for 18 minutes) caused by faulty load-balancing logic and fixed by fully updating a single node instead of partially updating all nodes at once. It also covers cascading structural failure and fracture cascades, examples in biology, electronics and finance, interdependent networks, and a model for overload cascading failures."
 
 distributed-systems-lamport-definition-email:
@@ -309,7 +309,7 @@ distributed-system-design-aws-timeouts-retries-backoff:
   url: https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/
   ingested: "2026-10-25"
   license: proprietary
-  tags: [distributed-system-design]
+  tags: [distributed-system-design, failure-modes]
   abstract: "An Amazon Builders' Library article by Marc Brooker (December 2019) on how Amazon handles transient failures in calls between services without overwhelming struggling ones. It starts from the premise that failures in remote calls are inevitable and that systems must tolerate them without magnifying a small percentage of failures into a complete outage, using three tools: timeouts, retries and backoff, plus jitter. Timeouts: set one on every remote call and every cross-process call, covering connection and request; choose the value from the downstream service's latency percentile matching an acceptable false-timeout rate (for example p99.9 for 0.1%), with care for internet latency, tight latency bounds and timeouts that miss DNS or TLS work. Retries are described as 'selfish' and dangerous under overload; the article recommends capped exponential backoff, limiting the number of retries, retrying at a single point in the stack (independent retries in a five-layer stack can multiply database load 243 times), local retry limiting with a token bucket rather than circuit breakers, retrying only idempotent APIs, and distinguishing retryable from non-retryable errors. Jitter adds randomness to backoff so correlated retries do not collide, and should also be applied to timers and periodic jobs, preferably deterministically per host. It concludes that retries should happen only while the dependency is healthy."
 
 distributed-system-design-aws-challenges-distributed-systems:
@@ -327,7 +327,7 @@ distributed-system-design-google-sre-cascading-failures:
   ingested: "2026-10-25"
   license: CC-BY-NC-ND-4.0
   license_url: https://creativecommons.org/licenses/by-nc-nd/4.0/
-  tags: [distributed-system-design]
+  tags: [distributed-system-design, failure-modes]
   abstract: "Chapter 22 of Google's Site Reliability Engineering book (2017), 'Addressing Cascading Failures', written by Mike Ulrich, using the book's sample Shakespeare search service as its running example. A cascading failure is one that grows over time through positive feedback: part of a system fails and raises the chance that other parts fail, as when an overloaded replica crashes and pushes its load onto the rest. The chapter explains the causes: server overload (the most common), exhaustion of CPU, memory, threads and file descriptors and how these feed each other, and service unavailability through crash loops and health-check failures. It then sets out prevention in rough priority order: load test to and beyond failure, serve degraded results, reject requests early when overloaded, rate limit at higher layers, and plan capacity (for example N+2). Further sections cover queue management, load shedding and graceful degradation, retries (randomised exponential backoff, per-request limits, server-wide retry budgets, avoiding retries at several layers, clear retriable versus non-retriable response codes), deadlines and their propagation, cancellation propagation, bimodal latency and failing fast, slow startup and cold caches, and avoiding intra-layer communication. It lists triggering conditions (process death, updates, rollouts, organic growth, drains, resource limits), testing strategies, and immediate remedies such as adding resources, disabling health-check kills, restarting servers, dropping traffic, entering degraded modes and eliminating batch or bad traffic."
 
 distributed-system-design-brewer-cap-twelve-years-later:
@@ -457,3 +457,61 @@ raft-etcd-raft-readme:
   license_url: https://github.com/etcd-io/raft/blob/main/LICENSE
   tags: [raft]
   abstract: "The README of etcd-io/raft (Apache-2.0), the Go Raft library used by etcd, Kubernetes, CockroachDB, TiKV, Docker Swarm and others, and described as the most widely used Raft library in production. It cites Ongaro and Ousterhout's Raft paper and says the library is up to date with Ongaro's final thesis. Its design is minimal: it implements only the core algorithm as a deterministic state machine whose input is a message (a local tick or a peer's message) and whose output is messages, log entries and state changes; network transport and persistent storage are left to the application. Features: leader election, log replication, log compaction, membership changes, leadership transfer, linearizable read-only queries (ReadIndex with a quorum check, or lease-based reads that rely on clocks), plus optional enhancements including pipelining, flow control, batching, parallel leader disk writes, proposal forwarding from followers, automatic stepping down when the leader loses quorum, and protection against unbounded log growth when quorum is lost. The usage section shows starting and restarting nodes and the Ready loop: persist entries and HardState before sending messages that depend on them, discard persisted entries at or after a newly written index, send messages, apply committed entries and configuration changes, then Advance, and call Tick for the heartbeat and election timeouts. It notes proposals may need re-proposing after a timeout, node IDs must never be reused, and its one-at-a-time membership changes take effect when applied, so three or more nodes are recommended."
+
+failure-modes-azure-retry-storm-antipattern:
+  file: sources/failure-modes-azure-retry-storm-antipattern.md
+  kind: html
+  url: https://learn.microsoft.com/en-us/azure/architecture/antipatterns/retry-storm/
+  ingested: "2026-10-27"
+  license: CC-BY-4.0
+  license_url: https://github.com/MicrosoftDocs/architecture-center/blob/main/LICENSE
+  tags: [failure-modes]
+  abstract: "Microsoft's Retry Storm antipattern page in the Azure Architecture Center (CC BY 4.0). When a service becomes unavailable or busy, frequent client retries can keep it from recovering and worsen the problem, a situation it also calls a thundering herd; retrying forever is pointless because requests are only valid for a limited time. It shows a client that retries immediately in an endless loop. Client-side remedies: limit the number and duration of retries (most applications need seconds or minutes), pause between attempts with growing waits such as exponential backoff, handle faults gracefully by returning an error, use the Circuit Breaker pattern, honor retry-after headers, rely on SDKs, libraries or a service mesh with built-in retry policies, and batch or pool requests. Service-side remedies: a gateway that can block connections during incidents (the Bulkhead pattern), throttling at the gateway, and sending retry-after signals. It warns not to retry errors such as 400 Bad Request that signal an invalid request, and to align retry duration with business needs. Symptoms: long response times and repeated retries in client telemetry; many requests from one client, slow recovery, or cascading failures right after a fault is repaired on the service side. It closes with example diagnoses from client and gateway telemetry."
+
+failure-modes-azure-queue-based-load-leveling:
+  file: sources/failure-modes-azure-queue-based-load-leveling.md
+  kind: html
+  url: https://learn.microsoft.com/en-us/azure/architecture/patterns/queue-based-load-leveling
+  ingested: "2026-10-27"
+  license: CC-BY-4.0
+  license_url: https://github.com/MicrosoftDocs/architecture-center/blob/main/LICENSE
+  tags: [failure-modes]
+  abstract: "Microsoft's Queue-Based Load Leveling pattern from the Azure Architecture Center (CC BY 4.0). Intermittent heavy loads from many concurrent tasks can overload a shared service such as a cache or data store, making it slow or causing it to fail under contention. The pattern places a queue between the tasks and the service so they run asynchronously: the queue buffers messages and the service consumes them at its own pace, so demand peaks don't reach it directly and tasks aren't delayed while it is unavailable. Benefits: availability, scalability, and sizing for average rather than peak load; it notes throttling as an alternative that reduces functionality. Considerations: control the consumer rate so spikes aren't passed downstream; autoscaling consumers without bounding their aggregate downstream rate only moves overload to dependencies; if producers outpace consumers on average the queue and latency grow, so monitor depth and shed work at the producer; queues need durability; at-least-once delivery requires idempotent consumers; poison messages go to a dead-letter queue; ordering isn't preserved by default. It is unsuitable when callers need a low-latency synchronous response. An example levels writes from several web app instances to a data store through Service Bus and Azure Functions."
+
+failure-modes-wikipedia-thundering-herd:
+  file: sources/failure-modes-wikipedia-thundering-herd.md
+  kind: html
+  url: https://en.wikipedia.org/wiki/Thundering_herd_problem
+  ingested: "2026-10-27"
+  license: CC-BY-SA-4.0
+  license_url: https://creativecommons.org/licenses/by-sa/4.0/
+  tags: [failure-modes]
+  abstract: "The Wikipedia article on the thundering herd problem (CC BY-SA 4.0). It defines it as a performance-degrading phenomenon in which many processes or threads are woken at once by an event or a newly available resource, but only one can handle it, so the rest fail and go back to sleep, wasting CPU and slowing the one that succeeds. When it happens on a cache it is often called a cache stampede. Mitigations: the Linux kernel serializes responses for requests on a single file descriptor so only one waiter wakes, and epoll gained an EPOLLEXCLUSIVE flag in Linux 4.5; Windows I/O completion ports can be configured to wake only one waiting thread. In systems that retry with a backoff mechanism such as exponential backoff, jitter, randomness added to the wait between retries, breaks the synchronization between clients so their retries no longer collide. It links related problems: lock convoys, TCP global synchronization and cache stampedes. The article is short and mostly sourced to practitioner material."
+
+failure-modes-wikipedia-split-brain:
+  file: sources/failure-modes-wikipedia-split-brain.md
+  kind: html
+  url: https://en.wikipedia.org/wiki/Split-brain_(computing)
+  ingested: "2026-10-27"
+  license: CC-BY-SA-4.0
+  license_url: https://creativecommons.org/licenses/by-sa/4.0/
+  tags: [failure-modes]
+  abstract: "The Wikipedia article on split-brain in computing (CC BY-SA 4.0), flagged by Wikipedia for possible original synthesis and missing citations. Split-brain is a state of data or availability inconsistency from maintaining two separate data sets that overlap in scope, typically because servers stop communicating and synchronizing, a network partition. In high-availability clusters that monitor each other over a private heartbeat network, losing all those links while nodes keep running can leave each node believing it is the only one running and serving clients with its own uncoordinated updates, which can corrupt data and require operator cleanup. Following Davidson, Garcia-Molina and Skeen's survey, approaches are optimistic or pessimistic. Optimistic ones keep all partitions working, trading correctness for availability, and reconcile afterwards (Hazelcast). Pessimistic ones trade availability for consistency: typically a quorum-consensus approach lets the sub-partition with a majority of votes stay available while the others fence themselves (MongoDB replica sets, Galera). Commercial HA clusters combine heartbeat links with quorum witness storage; a two-node cluster without a witness cannot tell which node should be active and may fail entirely until a human intervenes. It also notes split-horizon DNS as a deliberate use of the term."
+
+failure-modes-bronson-metastable-failures:
+  kind: link
+  url: https://sigops.org/s/conferences/hotos/2021/papers/hotos21-s11-bronson.pdf
+  published: "2021-06-01"
+  ingested: "2026-10-27"
+  license: proprietary
+  tags: [failure-modes]
+  abstract: "Nathan Bronson, Abutalib Aghayev, Aleksey Charapko and Timothy Zhu, 'Metastable Failures in Distributed Systems', HotOS 2021, 7 pages (ACM; the authors' PDF on the SIGOPS site carries ACM's standard copyright notice, so the wiki keeps a link). From a decade of operating hyperscale distributed systems, the authors identify metastable failures, a class of failures that can disrupt such systems even when there are no hardware failures or configuration errors. Today they appear as black swan events: outliers that nothing in the past points to, with severe impact, and much easier to explain in hindsight than to predict. Instances look different on the surface, but the paper argues they fit one framework, which it introduces and applies to examples observed in production: request retries, a look-aside cache, slow error handling, and link imbalance (Section 2). Section 3 surveys the ad hoc techniques developed after the fact to make systems resilient to known metastable failures, and Section 4 discusses research directions; a systematic way to build systems robust against unknown metastable failures remains, the authors say, an open problem. Only the abstract and outline were read when this link was recorded."
+
+failure-modes-huang-gray-failure:
+  kind: link
+  url: https://www.microsoft.com/en-us/research/wp-content/uploads/2017/06/paper-1.pdf
+  published: "2017-05-08"
+  ingested: "2026-10-27"
+  license: proprietary
+  tags: [failure-modes]
+  abstract: "Peng Huang, Chuanxiong Guo, Lidong Zhou, Jacob R. Lorch, Yingnong Dang, Murali Chintalapati and Randolph Yao (Microsoft Research and Microsoft Azure), 'Gray Failure: The Achilles' Heel of Cloud-Scale Systems', HotOS 2017, 6 pages (ACM; kept as a link). Cloud scale provides the resources to replace failed components, but only if failures can be detected; the paper argues that the major availability breakdowns and performance anomalies in cloud environments tend to come from gray failure, subtle underlying faults, rather than fail-stop failure. Its examples include severe performance degradation, random packet loss, flaky I/O, memory thrashing, capacity pressure and non-fatal exceptions. Section 2 draws on production experience under the headings high redundancy hurts, under the radar of failure detectors, recovery that kills rather than heals, and the blame game. Section 3 models gray failure, whose key feature is differential observability: the system's failure detectors may not notice problems even when applications are afflicted by them. Section 4 discusses closing the observation gap, approximating application views, leveraging scale and harnessing temporal patterns, toward bridging the gap between components' perceptions of what constitutes failure. Only the abstract and outline were read when this link was recorded."
