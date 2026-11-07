@@ -378,3 +378,30 @@ what-are-the-classic-failure-modes-of-large-scale-distributed-systems-and-their-
     1.1: claude-opus-5-5
   built_on:
     how-does-raft-elect-a-leader-and-keep-every-servers-log-consistent: 1a1e4e83619230677da2d36ba2df43de
+
+how-does-classic-attention-compare-with-paged-attention-in-transformers:
+  template: comparison
+  tags:
+    primary: [paged-attention, attention-mechanism]
+    supporting: [transformer-architecture, llm-serving, machine-learning]
+  read:
+    paged-attention-kwon-sosp2023: 815a196421d6537e6bd4c1f34403e86f
+    paged-attention-vllm-design-doc: 42d41de843c3bdd0951be57819d7bda2
+    attention-wikipedia-machine-learning: a3207063caca893493c1fd5f3fe1c2f6
+    transformer-wikipedia-deep-learning-architecture: 5433111ba10188c780485352195589af
+  grades:
+    paged-attention-kwon-sosp2023:
+      relevance: high
+      authority: A
+    paged-attention-vllm-design-doc:
+      relevance: high
+      authority: A
+    attention-wikipedia-machine-learning:
+      relevance: high
+      authority: C
+    transformer-wikipedia-deep-learning-architecture:
+      relevance: medium
+      authority: C
+  models:
+    1.0: claude-haiku-5-5
+    1.1: claude-haiku-5-5

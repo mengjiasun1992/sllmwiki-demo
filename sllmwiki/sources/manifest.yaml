@@ -515,3 +515,52 @@ failure-modes-huang-gray-failure:
   license: proprietary
   tags: [failure-modes]
   abstract: "Peng Huang, Chuanxiong Guo, Lidong Zhou, Jacob R. Lorch, Yingnong Dang, Murali Chintalapati and Randolph Yao (Microsoft Research and Microsoft Azure), 'Gray Failure: The Achilles' Heel of Cloud-Scale Systems', HotOS 2017, 6 pages (ACM; kept as a link). Cloud scale provides the resources to replace failed components, but only if failures can be detected; the paper argues that the major availability breakdowns and performance anomalies in cloud environments tend to come from gray failure, subtle underlying faults, rather than fail-stop failure. Its examples include severe performance degradation, random packet loss, flaky I/O, memory thrashing, capacity pressure and non-fatal exceptions. Section 2 draws on production experience under the headings high redundancy hurts, under the radar of failure detectors, recovery that kills rather than heals, and the blame game. Section 3 models gray failure, whose key feature is differential observability: the system's failure detectors may not notice problems even when applications are afflicted by them. Section 4 discusses closing the observation gap, approximating application views, leveraging scale and harnessing temporal patterns, toward bridging the gap between components' perceptions of what constitutes failure. Only the abstract and outline were read when this link was recorded."
+
+paged-attention-kwon-sosp2023:
+  file: sources/paged-attention-kwon-sosp2023.md
+  kind: pdf
+  url: https://arxiv.org/pdf/2309.06180
+  published: "2023-09-12"
+  ingested: "2026-10-27"
+  license: CC-BY-4.0
+  license_url: https://creativecommons.org/licenses/by/4.0/
+  tags: [paged-attention, llm-serving]
+  abstract: "Kwon and colleagues (SOSP 2023) introduce PagedAttention and vLLM, an LLM serving system built on it. Serving large language models is limited by GPU memory for the key-value (KV) cache, which grows with each request and is wasted by reservation and fragmentation: existing systems reserve one contiguous chunk per request for its maximum length, and the paper measures effective memory as low as 20.4 percent. PagedAttention splits each request's KV cache into fixed-size blocks that need not be contiguous in GPU memory, mapped by a block table, as operating-system paging maps virtual pages to physical ones. The paper's sections cover the memory challenges (section 3), the PagedAttention algorithm and KV cache manager (sections 4.1 and 4.2), decoding, scheduling and preemption, and evaluation, where vLLM is reported to improve throughput 2 to 4 times over FasterTransformer and Orca at similar latency. Sharing of prompt and beam-search cache blocks is the main source of the savings. Only the abstract and sections 3, 4.1 and 4.2 were read for the wiki; the other sections are outline only."
+
+paged-attention-vllm-design-doc:
+  file: sources/paged-attention-vllm-design-doc.md
+  kind: text
+  url: https://raw.githubusercontent.com/vllm-project/vllm/main/docs/design/paged_attention.md
+  ingested: "2026-10-27"
+  license: Apache-2.0
+  license_url: https://www.apache.org/licenses/LICENSE-2.0
+  tags: [paged-attention, llm-serving]
+  abstract: "The vLLM project's design document for its PagedAttention kernel, the GPU code that computes attention when the KV cache is stored in blocks. It defines the terms the kernel needs. A sequence is one client request. Each sequence's key and value cache is split into blocks, each holding a fixed number of tokens (BLOCK_SIZE) for one attention head. Threads, warps and thread blocks, arranged in a grid of heads, sequences and partitions, process one block at a time. The document then follows the calculation: inputs, query, key, the query-key product, softmax (with its qk_max and exp_sum steps), value, and output. It is an implementation source: it explains how the blocked layout is computed rather than the memory argument for it, which is in the paper. Only the Concepts section was read for the wiki; the calculation sections are outline only."
+
+attention-wikipedia-machine-learning:
+  file: sources/attention-wikipedia-machine-learning.md
+  kind: html
+  url: https://en.wikipedia.org/wiki/Attention_(machine_learning)
+  ingested: "2026-10-27"
+  license: CC-BY-SA-4.0
+  license_url: https://creativecommons.org/licenses/by-sa/4.0/
+  tags: [attention-mechanism, transformer-architecture]
+  abstract: "Wikipedia's article on attention in machine learning, an encyclopedia overview. Attention lets a model build, for each query, a weighted combination of values, with the weights set by how well the query matches each key. The article gives standard scaled dot-product attention, softmax(QK^T / sqrt(d_k)) V, and notes its permutation properties: it is equivariant to reordering the queries and invariant to reordering the key-value pairs. Multi-head attention runs several attention heads with their own learned projections and concatenates their outputs before a final projection. The headings also cover masked attention, self-attention, and optimizations such as FlashAttention. Only the standard scaled dot-product attention and multi-head attention sections were read for the wiki; the rest is outline only."
+
+transformer-wikipedia-deep-learning-architecture:
+  file: sources/transformer-wikipedia-deep-learning-architecture.md
+  kind: html
+  url: https://en.wikipedia.org/wiki/Transformer_(deep_learning_architecture)
+  ingested: "2026-10-27"
+  license: CC-BY-SA-4.0
+  license_url: https://creativecommons.org/licenses/by-sa/4.0/
+  tags: [transformer-architecture, attention-mechanism]
+  abstract: "Wikipedia's article on the transformer, an encyclopedia overview of the architecture and its history. The architecture stacks tokenization, embeddings, positional encoding, attention blocks, feedforward networks, an encoder and a decoder. Its attention is scaled dot-product attention, used in several heads (multihead attention) and with masking in the decoder. A later section covers efficient inference. It explains KV caching: the key and value vectors already computed for earlier tokens are saved and not recomputed at each new token. It separates prefilling, which computes the cache for the prompt, from decoding, which generates tokens one at a time, and notes that PagedAttention applies memory paging to KV caching. Only the KV caching section was read for the wiki; the other sections are outline only."
+
+attention-vaswani-2017-attention-is-all-you-need:
+  kind: link
+  url: https://arxiv.org/abs/1706.03762
+  ingested: "2026-10-27"
+  license: unknown
+  tags: [attention-mechanism, transformer-architecture]
+  abstract: "The abstract of Vaswani and colleagues' 2017 paper that introduced the Transformer, as shown on its arXiv abstract page. The dominant sequence transduction models use recurrent or convolutional networks in an encoder-decoder configuration, and the best ones connect encoder and decoder through an attention mechanism. The paper proposes the Transformer, a network built only from attention, with no recurrence and no convolutions. It reports higher translation quality, more parallel computation and much shorter training time: 28.4 BLEU on WMT 2014 English-to-German, and a single-model 41.8 BLEU on English-to-French. It also reports good generalization to English constituency parsing. Only the abstract page was read; the paper itself was not read, and this link is not cited for any claim."
