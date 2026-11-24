@@ -2,7 +2,7 @@
 
 ## 1. Abstract
 
-Software that turns a noisy stream of measurements, such as a server's request latencies, into one steady number needs an average that is cheap and follows change. An EWMA is that average: each new sample moves the average a fixed fraction of the way toward itself. Older samples therefore keep weights that shrink exponentially with age, and the EWMA stores only one number. One parameter, the smoothing factor or a time constant, trades smoothness against speed.
+Software that turns a noisy stream of measurements, such as a server's request latencies, into one steady number needs an average that is cheap and follows change. An EWMA is that average: each new sample moves the average a fraction of the way toward itself. Older samples therefore keep weights that shrink exponentially with age, and the EWMA stores only one number. One parameter, the smoothing factor or a time constant, trades smoothness against speed.
 
 **Key takeaways:**
 
@@ -32,7 +32,7 @@ An EWMA is an average whose weights fall exponentially with each observation's a
 
 ### 3.1 A load balancer must rank servers by recent latency
 
-The running example is a client of a replicated service, built with Twitter's Finagle library. For each request, the client picks one of several interchangeable servers. Finagle's load balancer splits this job into two parts: each server keeps a *load metric*, and a *distributor* uses the metrics to choose [\[11\]](../sources/ewma-finagle-clients-docs.md#load-balancing). The default distributor, P2C, picks two servers at random and sends to the less loaded [\[7\]](../sources/ewma-finagle-clients-docs.md#power-of-two-choices-p2c--least-loaded). Latency is an effective feedback signal for these metrics [\[11\]](../sources/ewma-finagle-clients-docs.md#load-balancing).
+The running example is a client of a replicated service, built with Twitter's Finagle library. For each request, the client picks one of several interchangeable servers. Finagle's load balancer splits this job into two parts: each server keeps a *load metric*, and a *distributor* uses the metrics to choose [\[11\]](../sources/ewma-finagle-clients-docs.md#load-balancing). The default distributor, P2C, picks two servers at random and sends to the less loaded [\[7\]](../sources/ewma-finagle-clients-docs.md#power-of-two-choices-p2c--least-loaded). Latency is an effective feedback signal for these metrics [\[11\]](../sources/ewma-finagle-clients-docs.md#load-balancing). P2C's default metric is least loaded [\[7\]](../sources/ewma-finagle-clients-docs.md#power-of-two-choices-p2c--least-loaded); our client opts into `Balancers.p2cPeakEwma`, whose metric is an EWMA of each server's RTT [\[6\]](../sources/ewma-finagle-clients-docs.md#power-of-two-choices-p2c--peak-ewma-2).
 
 We follow one server, which we call server A. Its six RTT samples, one per second, are set by hand to teach [→]:
 
@@ -64,8 +64,9 @@ The same formula links the smoothing factor and the time constant in exponential
 flowchart LR
     F["first sample"] -->|"1 seed"| S[("state s, time of last sample")]
     X["new sample x"] -->|"2 elapsed time"| D["dt since last sample"]
+    S -.->|"stored time"| D
     D -->|"3 weight"| A["alpha = 1 - exp(-dt/tau)"]
-    A -->|"4 blend"| S
+    A -->|"4 blend x into s"| S
     S -->|"5 read"| O["smoothed value s"]
     classDef state fill:#dbeafe,stroke:#1e3a8a,color:#111111
     class S state
@@ -90,17 +91,17 @@ The toy has $\alpha = 0.5$, chosen to teach, and samples 10, 20, 20, 20, one per
 | 2 | 20 | $0.5 \cdot 20 + 0.5 \cdot 15 = 17.5$ |
 | 3 | 20 | $0.5 \cdot 20 + 0.5 \cdot 17.5 = 18.75$ |
 
-Each step closes half of the remaining gap to 20: 10, then 5, then 2.5 [\[1\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing).
+Each step closes half of the remaining gap to 20, which shrinks from 10 to 5, 2.5 and 1.25 [\[1\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing).
 
 ### 5.2 Old samples fade by a constant factor
 
-Why call this average exponential? Substitute the update into itself [\[17\]](../sources/ewma-wikipedia-exponential-smoothing.md#exponential-naming). One hop gives $s_3 = 0.5 x_3 + 0.5 (0.5 x_2 + 0.5 s_1)$. Unrolled to the seed, it gives:
+Why call this average exponential? Substitute the update into itself [\[17\]](../sources/ewma-wikipedia-exponential-smoothing.md#exponential-naming). One hop gives $s_3 = 0.5 x_3 + 0.5 (0.5 x_2 + 0.5 s_1)$. One more, with $s_1 = 0.5 x_1 + 0.5 x_0$, reaches the seed:
 
 $$
 s_3 = 0.5 x_3 + 0.25 x_2 + 0.125 x_1 + 0.125 x_0
 $$
 
-Check: $0.5 \cdot 20 + 0.25 \cdot 20 + 0.125 \cdot 20 + 0.125 \cdot 10 = 10 + 5 + 2.5 + 1.25 = 18.75$, as in the table. In general a sample $j$ steps old weighs $\alpha(1-\alpha)^j$ [\[17\]](../sources/ewma-wikipedia-exponential-smoothing.md#exponential-naming). These weights form a geometric progression, the discrete form of an exponential, hence the name [\[17\]](../sources/ewma-wikipedia-exponential-smoothing.md#exponential-naming). No weight ever reaches zero [\[2\]](../sources/moving-averages-wikipedia-moving-average.md#exponential-moving-average).
+Check: $0.5 \cdot 20 + 0.25 \cdot 20 + 0.125 \cdot 20 + 0.125 \cdot 10 = 10 + 5 + 2.5 + 1.25 = 18.75$, as in the table. In general a sample $j$ steps old weighs $\alpha(1-\alpha)^j$, and the seed keeps the rest, $(1-\alpha)^t$: here $0.5^3 = 0.125$ [\[17\]](../sources/ewma-wikipedia-exponential-smoothing.md#exponential-naming). These weights form a geometric progression, the discrete form of an exponential, hence the name [\[17\]](../sources/ewma-wikipedia-exponential-smoothing.md#exponential-naming). No weight ever reaches zero [\[2\]](../sources/moving-averages-wikipedia-moving-average.md#exponential-moving-average).
 
 ### 5.3 The time constant measures memory in seconds
 
@@ -108,7 +109,7 @@ A smoothing factor counts memory in samples; a time constant counts it in second
 
 ### 5.4 Uneven gaps set each weight from the elapsed time
 
-Suppose the toy's sample at step 2 came 2 s after step 1, not 1 s [→]. The weight becomes $\alpha = 1 - e^{-2/1.44} = 1 - 0.25 = 0.75$ [\[3\]](../sources/ewma-wikipedia-exponential-smoothing.md#time-constant). The state is then $0.75 \cdot 20 + 0.25 \cdot 15 = 18.75$. That equals two 1-second steps toward 20, as at step 3 of the table. So the state's memory fades with time, not with the number of samples [→]. Finagle uses this rule because a server's samples form an unevenly spaced time series [\[13\]](../sources/ewma-finagle-peak-ewma-source.md#L47-L53).
+Suppose the toy's sample at step 2 came 2 s after step 1, not 1 s [→]. The weight becomes $\alpha = 1 - e^{-2/1.44} = 1 - 0.25 = 0.75$ [\[3\]](../sources/ewma-wikipedia-exponential-smoothing.md#time-constant), {ewma-finagle-ema-source#L29-L43}. The state is then $0.75 \cdot 20 + 0.25 \cdot 15 = 18.75$. That equals two 1-second steps toward 20, as at step 3 of the table. So the state's memory fades with time, not with the number of samples [→]. Finagle uses this rule because a server's samples form an unevenly spaced time series [\[13\]](../sources/ewma-finagle-peak-ewma-source.md#L47-L53).
 
 ### 5.5 From the toy to server A
 
@@ -116,7 +117,7 @@ Suppose the toy's sample at step 2 came 2 s after step 1, not 1 s [→]. The wei
 |---|---|---|
 | Samples | 10, 20, 20, 20 | RTTs of 100 to 300 ms |
 | Time constant $\tau$ | 1.44 s | 10 s [\[6\]](../sources/ewma-finagle-clients-docs.md#power-of-two-choices-p2c--peak-ewma-2) |
-| Gap $\Delta t$ | 1 s, or 2 s | measured on a monotonic clock [\[18\]](../sources/ewma-finagle-ema-source.md#L63-L91) |
+| Gap $\Delta t$ | 1 s, or 2 s | read from peak EWMA's `nanoTime`, held monotonic {ewma-finagle-peak-ewma-source#L54-L67} |
 | Smoothing factor $\alpha$ | 0.5, then 0.75 | $1 - e^{-1/10} = 0.095$ per 1 s gap [\[3\]](../sources/ewma-wikipedia-exponential-smoothing.md#time-constant) |
 
 With $\alpha = 0.095$, the newest of server A's samples weighs 0.095 and one 10 s old weighs $0.095 \cdot 0.905^{10} = 0.035$ [\[17\]](../sources/ewma-wikipedia-exponential-smoothing.md#exponential-naming). Finagle's comment calls $\tau$ the mean lifetime and puts the half-life at $\tau \ln 2$ [\[4\]](../sources/ewma-finagle-peak-ewma-source.md#L38-L45): $10 \cdot 0.693 = 6.9$ s. An SMA of $k$ samples has about the same forecast error when $\alpha = 2/(k+1)$ [\[12\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average). For server A, $k = 2/0.095 - 1 = 20$ samples [\[12\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average).
@@ -127,13 +128,13 @@ With $\alpha = 0.095$, the newest of server A's samples weighs 0.095 and one 10 
 
 ### 5.6 The update runs on server A, one arrow at a time
 
-Each step is one arrow of Figure 4-1, run by Finagle's `Ema` for server A.
+Each step is one arrow of Figure 4-1, run by Finagle's `Ema` class on server A's samples. Finagle's balancer wraps this `Ema` in peak EWMA (6.1); here it runs alone, to show the basic form [→].
 
-1. **Seed.** `Ema` receives server A's first RTT and its timestamp, finds no earlier time, and stores both: $s_0 = 100$ ms [\[19\]](../sources/ewma-finagle-ema-source.md#L29-L33).
-2. **Elapsed time.** At the next sample, `Ema` subtracts the stored time from the new timestamp: $\Delta t = 1$ s. The timestamps must come from a monotonic clock, and a backwards step fails an assertion [\[20\]](../sources/ewma-finagle-ema-source.md#L1-L15), [\[14\]](../sources/ewma-finagle-ema-source.md#L29-L43).
-3. **Weight.** From $\Delta t$, `Ema` computes $e^{-\Delta t/\tau} = e^{-0.1} = 0.905$, the weight the old state keeps [\[21\]](../sources/ewma-finagle-ema-source.md#L35-L41). The new sample gets $\alpha = 1 - 0.905 = 0.095$.
-4. **Blend.** `Ema` sets the state to $0.095 x_t + 0.905 s_{t-1}$ and stores the new time [\[21\]](../sources/ewma-finagle-ema-source.md#L35-L41). At 1 s: $0.095 \cdot 104 + 0.905 \cdot 100 = 100.38$ ms.
-5. **Read.** The load balancer reads the state whenever it wants, without locking [\[15\]](../sources/ewma-finagle-ema-source.md#L45-L50). A value exists from the first sample on; an SMA must first fill its window [\[1\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing).
+1. **Seed.** `Ema` receives server A's first RTT and its timestamp, finds no earlier time, and stores both: $s_0 = 100$ ms [\[18\]](../sources/ewma-finagle-ema-source.md#L29-L33).
+2. **Elapsed time.** At the next sample, `Ema` subtracts the stored time from the new timestamp: $\Delta t = 1$ s. The timestamps must come from a monotonic clock, and a backwards step fails an assertion [\[19\]](../sources/ewma-finagle-ema-source.md#L1-L15), [\[14\]](../sources/ewma-finagle-ema-source.md#L29-L43).
+3. **Weight.** From $\Delta t$, `Ema` computes $e^{-\Delta t/\tau} = e^{-0.1} = 0.905$, the weight the old state keeps [\[20\]](../sources/ewma-finagle-ema-source.md#L35-L41). The new sample gets $\alpha = 1 - 0.905 = 0.095$.
+4. **Blend.** `Ema` sets the state to $0.095 x_t + 0.905 s_{t-1}$ and stores the new time [\[20\]](../sources/ewma-finagle-ema-source.md#L35-L41). At 1 s: $0.095 \cdot 104 + 0.905 \cdot 100 = 100.38$ ms.
+5. **Read.** `Ema.last` returns the state without locking {ewma-finagle-ema-source#L45-L50}. Finagle's balancer reads it through peak EWMA's `get()`, which locks and updates the state first (6.1) {ewma-finagle-peak-ewma-source#L69-L79}.
 
 Steps 2 to 4 repeat for each sample [\[14\]](../sources/ewma-finagle-ema-source.md#L29-L43):
 
@@ -146,7 +147,7 @@ Steps 2 to 4 repeat for each sample [\[14\]](../sources/ewma-finagle-ema-source.
 | 4 | 100 | 117.19 | −1.81 |
 | 5 | 100 | 115.56 | −1.63 |
 
-A 4 ms wobble moves the state by 0.4 ms. The 300 ms outlier lifts it by 19 ms, not to 300 ms. Afterwards each 100 ms sample removes 9.5% of the excess: at 4 s, $0.095 \cdot 19.00 = 1.81$ ms [\[21\]](../sources/ewma-finagle-ema-source.md#L35-L41).
+A 4 ms wobble moves the state by 0.4 ms. The 300 ms outlier lifts it by 19 ms, not to 300 ms. Afterwards each 100 ms sample removes 9.5% of the excess: at 4 s, $0.095 \cdot 19.00 = 1.81$ ms [\[20\]](../sources/ewma-finagle-ema-source.md#L35-L41).
 
 | In the story | Field term |
 |---|---|
@@ -159,42 +160,38 @@ A 4 ms wobble moves the state by 0.4 ms. The 300 ms outlier lifts it by 19 ms, n
 
 ### 6.1 Peak EWMA jumps to spikes and recovers slowly
 
-Finagle's latency-aware load metric, peak EWMA, is an EWMA of RTT that reacts quickly to latency spikes and recovers only cautiously [\[22\]](../sources/ewma-finagle-peak-ewma-source.md#L11-L18). Two changes make it so [\[23\]](../sources/ewma-finagle-peak-ewma-source.md#L54-L67), [\[24\]](../sources/ewma-finagle-peak-ewma-source.md#L69-L79):
+Finagle's latency-aware load metric, peak EWMA, is an EWMA of RTT that reacts quickly to latency spikes and recovers only cautiously [\[21\]](../sources/ewma-finagle-peak-ewma-source.md#L11-L18). Two changes make it so [\[22\]](../sources/ewma-finagle-peak-ewma-source.md#L54-L67), [\[23\]](../sources/ewma-finagle-peak-ewma-source.md#L69-L79):
 
 - Any sample above the current state resets the EWMA, so the sample becomes the new state.
 - The load it reports is the state times one more than the requests outstanding.
 
-On server A, 104 ms resets the state to 104 [\[23\]](../sources/ewma-finagle-peak-ewma-source.md#L54-L67). The 96 ms sample blends normally, to $0.095 \cdot 96 + 0.905 \cdot 104 = 103.24$ ms [\[21\]](../sources/ewma-finagle-ema-source.md#L35-L41). The 300 ms sample resets it to 300 ms, and the two 100 ms samples bring it down only to 280.97 and then 263.75 ms [\[23\]](../sources/ewma-finagle-peak-ewma-source.md#L54-L67), [\[21\]](../sources/ewma-finagle-ema-source.md#L35-L41). With two requests outstanding at 5 s, the reported load is $263.75 \cdot 3 = 791$ [\[24\]](../sources/ewma-finagle-peak-ewma-source.md#L69-L79). These numbers assume no load reads between samples [→]. Each read first blends in a zero-RTT sample for the time elapsed [\[24\]](../sources/ewma-finagle-peak-ewma-source.md#L69-L79). An idle server's cost therefore decays toward zero between requests [→]. A server with no RTT yet and requests pending gets a large penalty [\[24\]](../sources/ewma-finagle-peak-ewma-source.md#L69-L79). The docs say peak EWMA reacts to slow servers faster than counting outstanding requests [\[6\]](../sources/ewma-finagle-clients-docs.md#power-of-two-choices-p2c--peak-ewma-2).
+On server A, 104 ms resets the state to 104 [\[22\]](../sources/ewma-finagle-peak-ewma-source.md#L54-L67). The 96 ms sample blends normally, to $0.095 \cdot 96 + 0.905 \cdot 104 = 103.24$ ms [\[20\]](../sources/ewma-finagle-ema-source.md#L35-L41). The 300 ms sample resets it to 300 ms, and the two 100 ms samples bring it down only to 280.97 and then 263.75 ms [\[22\]](../sources/ewma-finagle-peak-ewma-source.md#L54-L67), [\[20\]](../sources/ewma-finagle-ema-source.md#L35-L41). With two requests outstanding at 5 s, the reported load is $263.75 \cdot 3 = 791$ [\[23\]](../sources/ewma-finagle-peak-ewma-source.md#L69-L79). These numbers assume no load reads between samples [→]. Yet P2C reads a server's load whenever it is one of the two candidates, and each read first blends in a zero-RTT sample for the time elapsed {ewma-finagle-peak-ewma-source#L69-L79}. So between samples the cost decays toward zero, and a later sample below it counts for almost nothing, because little time has passed since the last read [→]. With frequent reads, the worked numbers above overstate how long the peak lingers [→]. A server with no RTT yet and requests pending gets a large penalty [\[23\]](../sources/ewma-finagle-peak-ewma-source.md#L69-L79). The docs say peak EWMA is designed to react to slow servers faster than least loaded [\[6\]](../sources/ewma-finagle-clients-docs.md#power-of-two-choices-p2c--peak-ewma-2).
 
 ![Line chart over 0 to 5 s: server A's raw round-trip times as squares (100, 104, 96, 300, 100, 100 ms), the EWMA as a solid line rising to 119 ms, and the peak EWMA as a dashed line jumping to 300 ms and falling to 264 ms](figures/what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work/ewma-vs-peak.svg)
 
-*Figure 6-1: On the same samples, the EWMA rises 19 ms on the outlier and the peak EWMA jumps to it and keeps most of it [\[14\]](../sources/ewma-finagle-ema-source.md#L29-L43), [\[23\]](../sources/ewma-finagle-peak-ewma-source.md#L54-L67).*
-
-### 6.2 A fixed sampling interval lets α be a constant
-
-When samples arrive evenly, $\alpha$ is computed once [\[3\]](../sources/ewma-wikipedia-exponential-smoothing.md#time-constant). Linux updates its load averages about every 5 s, in fixed point with 11 fractional bits, so 1.0 is 2048 [\[25\]](../sources/ewma-wikipedia-load-computing.md#linux-as-an-example). It keeps $e^{-5/60}$, the old state's weight for the 1-minute average, as 1884 [\[25\]](../sources/ewma-wikipedia-load-computing.md#linux-as-an-example). Check: $e^{-5/60} = 0.920$, and $0.920 \cdot 2048 = 1884$. The new sample's weight is $1 - 1884/2048 = 0.08$. The 5- and 15-minute averages use 2014 and 2037 [\[25\]](../sources/ewma-wikipedia-load-computing.md#linux-as-an-example).
+*Figure 6-1: On the same samples, the EWMA rises 19 ms on the outlier and the peak EWMA jumps to it and keeps most of it [\[14\]](../sources/ewma-finagle-ema-source.md#L29-L43), [\[22\]](../sources/ewma-finagle-peak-ewma-source.md#L54-L67).*
 
 ## 7. Design decisions and trade-offs
 
 **The time constant, or smoothing factor.** A larger $\alpha$, or smaller $\tau$, follows recent changes faster and smooths less; a smaller $\alpha$ smooths more and responds less [\[1\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing).
 
-- *Typical values:* Finagle's `decayTime` defaults to 10 s [\[6\]](../sources/ewma-finagle-clients-docs.md#power-of-two-choices-p2c--peak-ewma-2); its docs' 100 s only demonstrates the API [\[26\]](../sources/ewma-finagle-clients-docs.md#partition-aware-client). Control charts use $\alpha$ (written $\lambda$) of 0.05 to 0.25 per one textbook, 0.1 to 0.3 per one journal article [\[8\]](../sources/ewma-wikipedia-ewma-chart.md#ewma-chart---wikipedia).
-- *How to choose:* a constant input takes about $3/\alpha$ samples to reach 95% [\[1\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing). For server A that is $3 / 0.095 \approx 32$ samples, about 32 s [\[1\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing). With past data, choose $\alpha$ to minimize the sum of squared one-step forecast errors [\[27\]](../sources/ewma-wikipedia-exponential-smoothing.md#optimization). How to tune `decayTime` for a given service, the sources don't say [?].
+- *Typical values:* Finagle's `decayTime` defaults to 10 s [\[6\]](../sources/ewma-finagle-clients-docs.md#power-of-two-choices-p2c--peak-ewma-2); its docs' 100 s only demonstrates the API [\[24\]](../sources/ewma-finagle-clients-docs.md#partition-aware-client). Control charts use $\alpha$ (written $\lambda$) of 0.05 to 0.25 per one textbook, 0.1 to 0.3 per one journal article [\[8\]](../sources/ewma-wikipedia-ewma-chart.md#ewma-chart---wikipedia).
+- *How to choose:* a constant input takes about $3/\alpha$ samples to reach 95% [\[1\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing). For server A that is $3 / 0.095 \approx 32$ samples; exactly, $\tau \ln 20 = 30$ s [\[3\]](../sources/ewma-wikipedia-exponential-smoothing.md#time-constant). With past data, choose $\alpha$ to minimize the sum of squared one-step forecast errors [\[25\]](../sources/ewma-wikipedia-exponential-smoothing.md#optimization). How to tune `decayTime` for a given service, the sources don't say [?].
 - *Too small a $\tau$:* the metric chases jitter, and P2C ranks servers by noise [→]. *Too large:* a server that slowed down a minute ago still looks fast [→].
 
-**Time-based or per-sample weights.** A fixed $\alpha$ counts memory in samples. A busy server would then forget faster than a quiet one [→]. Finagle weighs by elapsed time for that reason [\[13\]](../sources/ewma-finagle-peak-ewma-source.md#L47-L53). The cost is a clock read per sample, with a monotonic clock [\[18\]](../sources/ewma-finagle-ema-source.md#L63-L91).
+**Time-based or per-sample weights.** A fixed $\alpha$ counts memory in samples. A busy server would then forget faster than a quiet one [→]. Finagle weighs by elapsed time for that reason [\[13\]](../sources/ewma-finagle-peak-ewma-source.md#L47-L53). The cost is a clock read per sample, kept monotonic {ewma-finagle-peak-ewma-source#L54-L67}.
 
-**The starting value.** Seeding with the first sample gives that sample a large effect on early values; the smaller $\alpha$, the longer it lasts [\[16\]](../sources/ewma-wikipedia-exponential-smoothing.md#choosing-the-initial-smoothed-value). One remedy averages the first 10 or more samples instead [\[16\]](../sources/ewma-wikipedia-exponential-smoothing.md#choosing-the-initial-smoothed-value). Finagle seeds with the first sample [\[19\]](../sources/ewma-finagle-ema-source.md#L29-L33).
+**The starting value.** Seeding with the first sample gives that sample a large effect on early values; the smaller $\alpha$, the longer it lasts [\[16\]](../sources/ewma-wikipedia-exponential-smoothing.md#choosing-the-initial-smoothed-value). One remedy averages the first 10 or more samples instead [\[16\]](../sources/ewma-wikipedia-exponential-smoothing.md#choosing-the-initial-smoothed-value). Finagle seeds with the first sample [\[18\]](../sources/ewma-finagle-ema-source.md#L29-L33).
 
 ## 8. Limitations and failure modes
 
 - **Lag.** An EWMA trails a changing input. Unlike a symmetric moving average, no fixed shift in samples removes its lag [\[12\]](../sources/ewma-wikipedia-exponential-smoothing.md#comparison-with-moving-average). Two seconds after server A's outlier, the state still reads 115.56 ms [\[14\]](../sources/ewma-finagle-ema-source.md#L29-L43).
-- **Trends.** Simple exponential smoothing does poorly on data with a trend. Holt's double exponential smoothing adds a trend term for it [\[28\]](../sources/ewma-wikipedia-exponential-smoothing.md#double-exponential-smoothing-holt-linear).
-- **Outliers still count.** Server A's single outlier holds the EWMA 15.6 ms high at 5 s [\[14\]](../sources/ewma-finagle-ema-source.md#L29-L43). Peak EWMA assumes a loaded server takes time to recover, which breaks with long-polling clients [\[6\]](../sources/ewma-finagle-clients-docs.md#power-of-two-choices-p2c--peak-ewma-2). Finagle calls the configuration experimental, its API subject to change [\[26\]](../sources/ewma-finagle-clients-docs.md#partition-aware-client).
+- **Trends.** Simple exponential smoothing does poorly on data with a trend. Holt's double exponential smoothing adds a trend term for it [\[26\]](../sources/ewma-wikipedia-exponential-smoothing.md#double-exponential-smoothing-holt-linear).
+- **Outliers still count.** Server A's single outlier holds the EWMA 15.6 ms high at 5 s [\[14\]](../sources/ewma-finagle-ema-source.md#L29-L43). Peak EWMA assumes a loaded server takes time to recover, which breaks with long-polling clients [\[6\]](../sources/ewma-finagle-clients-docs.md#power-of-two-choices-p2c--peak-ewma-2). Finagle calls the configuration experimental, its API subject to change [\[24\]](../sources/ewma-finagle-clients-docs.md#partition-aware-client).
 
 ## 9. Misconceptions
 
-- **Larger is not smoother.** A larger smoothing factor smooths less, so the name is something of a misnomer; $\alpha = 1$ just returns the latest sample [\[1\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing).
+- **Larger is not smoother.** A larger smoothing factor smooths less; $\alpha = 1$ just returns the latest sample [\[1\]](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing).
 - **A 1-minute load average is not a 1-minute window.** It covers all data since start; the last minute contributes about 63% [\[10\]](../sources/ewma-wikipedia-load-computing.md#load-average).
 
 ## 10. Where to go next
@@ -203,9 +200,15 @@ When samples arrive evenly, $\alpha$ is computed once [\[3\]](../sources/ewma-wi
 - How does power-of-two-choices load balancing work? (not yet a narrative)
 - How do EWMA control charts set their limits? (not yet a narrative)
 
-## 11. References
+## 11. Appendix
 
-### 11.1 Sources read
+### 11.1 Linux keeps α as a fixed-point constant
+
+When samples arrive evenly, $\alpha$ is computed once [\[3\]](../sources/ewma-wikipedia-exponential-smoothing.md#time-constant). Linux updates its load averages about every 5 s, in fixed point with 11 fractional bits, so 1.0 is 2048 [\[27\]](../sources/ewma-wikipedia-load-computing.md#linux-as-an-example). It keeps $e^{-5/60}$, the old state's weight for the 1-minute average, as 1884 [\[27\]](../sources/ewma-wikipedia-load-computing.md#linux-as-an-example). Check: $e^{-5/60} = 0.920$, and $0.920 \cdot 2048 = 1884$. The new sample's weight is $1 - 1884/2048 = 0.08$. The 5- and 15-minute averages use 2014 and 2037 [\[27\]](../sources/ewma-wikipedia-load-computing.md#linux-as-an-example).
+
+## 12. References
+
+### 12.1 Sources read
 
 - [ewma-finagle-ema-source](../sources/ewma-finagle-ema-source.md): the time-decayed update, seeding, reading and the monotonic clock.
 - [ewma-finagle-peak-ewma-source](../sources/ewma-finagle-peak-ewma-source.md): peak EWMA, its time constant and half-life, and the load it reports.
@@ -216,7 +219,7 @@ When samples arrive evenly, $\alpha$ is computed once [\[3\]](../sources/ewma-wi
 - [ewma-wikipedia-load-computing](../sources/ewma-wikipedia-load-computing.md): load averages and Linux's fixed-point update.
 - [ewma-wikipedia-ewma-chart](../sources/ewma-wikipedia-ewma-chart.md): EWMA control charts and their typical smoothing factors.
 
-### 11.2 Citations
+### 12.2 Citations
 
 1. [ewma-wikipedia-exponential-smoothing: Basic (simple) exponential smoothing](../sources/ewma-wikipedia-exponential-smoothing.md#basic-simple-exponential-smoothing)
 2. [moving-averages-wikipedia-moving-average: Exponential moving average](../sources/moving-averages-wikipedia-moving-average.md#exponential-moving-average)
@@ -235,28 +238,28 @@ When samples arrive evenly, $\alpha$ is computed once [\[3\]](../sources/ewma-wi
 15. [ewma-finagle-ema-source: L45-L50](../sources/ewma-finagle-ema-source.md#L45-L50)
 16. [ewma-wikipedia-exponential-smoothing: Choosing the initial smoothed value](../sources/ewma-wikipedia-exponential-smoothing.md#choosing-the-initial-smoothed-value)
 17. [ewma-wikipedia-exponential-smoothing: "Exponential" naming](../sources/ewma-wikipedia-exponential-smoothing.md#exponential-naming)
-18. [ewma-finagle-ema-source: L63-L91](../sources/ewma-finagle-ema-source.md#L63-L91)
-19. [ewma-finagle-ema-source: L29-L33](../sources/ewma-finagle-ema-source.md#L29-L33)
-20. [ewma-finagle-ema-source: L1-L15](../sources/ewma-finagle-ema-source.md#L1-L15)
-21. [ewma-finagle-ema-source: L35-L41](../sources/ewma-finagle-ema-source.md#L35-L41)
-22. [ewma-finagle-peak-ewma-source: L11-L18](../sources/ewma-finagle-peak-ewma-source.md#L11-L18)
-23. [ewma-finagle-peak-ewma-source: L54-L67](../sources/ewma-finagle-peak-ewma-source.md#L54-L67)
-24. [ewma-finagle-peak-ewma-source: L69-L79](../sources/ewma-finagle-peak-ewma-source.md#L69-L79)
-25. [ewma-wikipedia-load-computing: Linux as an example](../sources/ewma-wikipedia-load-computing.md#linux-as-an-example)
-26. [ewma-finagle-clients-docs: Partition Aware Client¶](../sources/ewma-finagle-clients-docs.md#partition-aware-client)
-27. [ewma-wikipedia-exponential-smoothing: Optimization](../sources/ewma-wikipedia-exponential-smoothing.md#optimization)
-28. [ewma-wikipedia-exponential-smoothing: Double exponential smoothing (Holt linear)](../sources/ewma-wikipedia-exponential-smoothing.md#double-exponential-smoothing-holt-linear)
+18. [ewma-finagle-ema-source: L29-L33](../sources/ewma-finagle-ema-source.md#L29-L33)
+19. [ewma-finagle-ema-source: L1-L15](../sources/ewma-finagle-ema-source.md#L1-L15)
+20. [ewma-finagle-ema-source: L35-L41](../sources/ewma-finagle-ema-source.md#L35-L41)
+21. [ewma-finagle-peak-ewma-source: L11-L18](../sources/ewma-finagle-peak-ewma-source.md#L11-L18)
+22. [ewma-finagle-peak-ewma-source: L54-L67](../sources/ewma-finagle-peak-ewma-source.md#L54-L67)
+23. [ewma-finagle-peak-ewma-source: L69-L79](../sources/ewma-finagle-peak-ewma-source.md#L69-L79)
+24. [ewma-finagle-clients-docs: Partition Aware Client¶](../sources/ewma-finagle-clients-docs.md#partition-aware-client)
+25. [ewma-wikipedia-exponential-smoothing: Optimization](../sources/ewma-wikipedia-exponential-smoothing.md#optimization)
+26. [ewma-wikipedia-exponential-smoothing: Double exponential smoothing (Holt linear)](../sources/ewma-wikipedia-exponential-smoothing.md#double-exponential-smoothing-holt-linear)
+27. [ewma-wikipedia-load-computing: Linux as an example](../sources/ewma-wikipedia-load-computing.md#linux-as-an-example)
 
-## 12. Metadata
+## 13. Metadata
 
-- **Version:** 3.0
+- **Version:** 3.1
 - **Template:** technical_brief_overview
 - **Language:** en
 - **Model:** claude-opus-5-5
 - **Created:** 2026-10-23
 - **Last modified:** 2026-11-24
-- **Words:** 2,679 (about 12 min)
+- **Words:** 2,796 (about 12 min)
 - **History:**
+  - 3.1 (2026-11-24): Lint: the walkthrough is the basic Ema run alone, and Finagle's balancer reads it through peak EWMA's locked get(); the client opts into p2cPeakEwma; peak EWMA's numbers caveated for P2C's reads between samples; the seed's weight and a skipped hop written out; the monotonic clock cited to peak EWMA's own code; the Linux fixed-point variant moved to the Appendix
   - 3.0 (2026-11-24): Regenerated under sllmwiki 1.4.0's guides: a new spine on one load balancer ranking servers by latency; a hand-computed toy before server A; the time constant and uneven gaps worked out; Peak EWMA with the code's zero-RTT blend on each read; two SVG charts of the weights and of an outlier
   - 2.1 (2026-10-25): Lint: the control-chart range of λ is one textbook's recommendation, not a rule
   - 2.0 (2026-10-25): Rebuilt on openly licensed sources only, for a public demo: the running example is now a load balancer smoothing each backend's latency (Finagle's time-decayed EWMA, from its Apache-2.0 code), with peak EWMA as the variant; TCP's estimator, Jacobson, the Linux kernel helper, NIST, FPP3, Finch and the DSP Guide (now links) replaced by Finagle's code and docs and Wikipedia on exponential smoothing, low-pass filters, load averages and EWMA charts
