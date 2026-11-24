@@ -110,7 +110,12 @@ A cascading failure spreads from one overloaded part to the next. In networks, a
 
 #### 5.3.3 Retries pile onto a struggling service
 
-Retries meant to ride out transient faults can stop a struggling service from recovering: clients that retry too often or too long overwhelm it [\[25\]](../sources/failure-modes-azure-retry-storm-antipattern.md#context-and-problem). Retries also multiply through layers: when a component tries a call three times and the component it calls also tries three times, the service receives up to 3 × 3 = 9 attempts [\[26\]](../sources/distributed-system-design-azure-transient-fault-handling.md#avoid-antipatterns). A thundering herd is the synchronized form: many waiters wake at once for something only one can use, called a cache stampede when it hits a cache [\[27\]](../sources/failure-modes-wikipedia-thundering-herd.md#thundering-herd-problem---wikipedia). In the shop, every checkout retrying payment at once would keep payment down [→]. The remedies are to cap retry count and duration, back off exponentially, honour the server's `Retry-After`, and use a circuit breaker [\[28\]](../sources/failure-modes-azure-retry-storm-antipattern.md#solution); to add jitter, so clients stop retrying in lockstep [\[6\]](../sources/failure-modes-wikipedia-thundering-herd.md#mitigation); and to give each dependency a retry budget [\[26\]](../sources/distributed-system-design-azure-transient-fault-handling.md#avoid-antipatterns). Failures in which such load keeps a system down after the trigger is gone, called metastable, are not covered by the wiki's saved sources [?].
+![Bar chart of attempts reaching a service when each layer tries a call 3 times: 3 for 1 layer, 9 for 2 layers, 27 for 3, 81 for 4](figures/what-are-the-classic-failure-modes-of-large-scale-distributed-systems-and-their-mitigations/retry-amplification.svg)
+
+*Figure 5-1: Retries multiply through layers: each layer that tries a call 3 times triples the attempts, 3 × 3 = 9 for two layers (red), 3 × 3 × 3 = 27 for three [\[25\]](../sources/distributed-system-design-azure-transient-fault-handling.md#avoid-antipatterns).*
+
+
+Retries meant to ride out transient faults can stop a struggling service from recovering: clients that retry too often or too long overwhelm it [\[26\]](../sources/failure-modes-azure-retry-storm-antipattern.md#context-and-problem). Retries also multiply through layers: when a component tries a call three times and the component it calls also tries three times, the service receives up to 3 × 3 = 9 attempts [\[25\]](../sources/distributed-system-design-azure-transient-fault-handling.md#avoid-antipatterns). A thundering herd is the synchronized form: many waiters wake at once for something only one can use, called a cache stampede when it hits a cache [\[27\]](../sources/failure-modes-wikipedia-thundering-herd.md#thundering-herd-problem---wikipedia). In the shop, every checkout retrying payment at once would keep payment down [→]. The remedies are to cap retry count and duration, back off exponentially, honour the server's `Retry-After`, and use a circuit breaker [\[28\]](../sources/failure-modes-azure-retry-storm-antipattern.md#solution); to add jitter, so clients stop retrying in lockstep [\[6\]](../sources/failure-modes-wikipedia-thundering-herd.md#mitigation); and to give each dependency a retry budget [\[25\]](../sources/distributed-system-design-azure-transient-fault-handling.md#avoid-antipatterns). Failures in which such load keeps a system down after the trigger is gone, called metastable, are not covered by the wiki's saved sources [?].
 
 ### 5.4 People change it
 
@@ -122,7 +127,7 @@ In December 2012, a routine update to Gmail's load-balancing software used "all"
 
 ## 6. Tensions and trade-offs
 
-**Retries against overload.** Retries fix transient faults, but an aggressive retry policy degrades a busy service further [\[30\]](../sources/distributed-system-design-azure-retry-pattern.md#impact-on-performance). The balance is bounded retries with backoff and jitter, a retry budget, and a circuit breaker for faults that persist [\[26\]](../sources/distributed-system-design-azure-transient-fault-handling.md#avoid-antipatterns), [\[31\]](../sources/distributed-system-design-azure-transient-fault-handling.md#manage-operations-that-continually-fail).
+**Retries against overload.** Retries fix transient faults, but an aggressive retry policy degrades a busy service further [\[30\]](../sources/distributed-system-design-azure-retry-pattern.md#impact-on-performance). The balance is bounded retries with backoff and jitter, a retry budget, and a circuit breaker for faults that persist [\[25\]](../sources/distributed-system-design-azure-transient-fault-handling.md#avoid-antipatterns), [\[31\]](../sources/distributed-system-design-azure-transient-fault-handling.md#manage-operations-that-continually-fail).
 
 **Timeouts that are too short or too long.** Long timeouts let threads and connections pile up during an outage; short ones fail calls that would have succeeded [\[10\]](../sources/distributed-system-design-azure-transient-fault-handling.md#determine-an-appropriate-retry-count-and-interval).
 
@@ -194,8 +199,8 @@ Ask these questions of each remote call in a design like the shop's checkout:
 22. [distributed-system-design-azure-circuit-breaker-pattern: Context and problem](../sources/distributed-system-design-azure-circuit-breaker-pattern.md#context-and-problem)
 23. [distributed-system-design-azure-bulkhead-pattern: Solution](../sources/distributed-system-design-azure-bulkhead-pattern.md#solution)
 24. [distributed-system-design-azure-circuit-breaker-pattern: Solution](../sources/distributed-system-design-azure-circuit-breaker-pattern.md#solution)
-25. [failure-modes-azure-retry-storm-antipattern: Context and problem](../sources/failure-modes-azure-retry-storm-antipattern.md#context-and-problem)
-26. [distributed-system-design-azure-transient-fault-handling: Avoid antipatterns](../sources/distributed-system-design-azure-transient-fault-handling.md#avoid-antipatterns)
+25. [distributed-system-design-azure-transient-fault-handling: Avoid antipatterns](../sources/distributed-system-design-azure-transient-fault-handling.md#avoid-antipatterns)
+26. [failure-modes-azure-retry-storm-antipattern: Context and problem](../sources/failure-modes-azure-retry-storm-antipattern.md#context-and-problem)
 27. [failure-modes-wikipedia-thundering-herd: Thundering herd problem](../sources/failure-modes-wikipedia-thundering-herd.md#thundering-herd-problem---wikipedia)
 28. [failure-modes-azure-retry-storm-antipattern: Solution](../sources/failure-modes-azure-retry-storm-antipattern.md#solution)
 29. [distributed-system-design-wikipedia-cascading-failure: Example](../sources/distributed-system-design-wikipedia-cascading-failure.md#example)
@@ -204,14 +209,15 @@ Ask these questions of each remote call in a design like the shop's checkout:
 
 ## 11. Metadata
 
-- **Version:** 2.1
+- **Version:** 2.2
 - **Template:** survey
 - **Language:** en
 - **Model:** claude-opus-5-5
 - **Created:** 2026-10-27
 - **Last modified:** 2026-11-24
-- **Words:** 2,424 (about 11 min)
+- **Words:** 2,484 (about 11 min)
 - **History:**
+  - 2.2 (2026-11-24): An SVG figure drawn from the narrative's own cited numbers, where a chart shows what a diagram can't
   - 2.1 (2026-11-24): Lint: the retry arithmetic (3 × 3 tries), the majority bound, failure detectors as the source states them, split brain consistent with the Raft narrative and linked to its walkthrough, the shop example completed and the Gmail case told once, left-out fallacies named, and smaller wording fixes
   - 2.0 (2026-11-24): Regenerated under sllmwiki 1.4.0's guides: a new spine and outline, the shop example set up once in the Overview and shown in each item, statement headings for every item, and terms cited where defined
   - 1.1 (2026-10-27): Lint: cited the slow-node remedies, corrected the majority bound to more than half, and named clock skew and event ordering as left out.

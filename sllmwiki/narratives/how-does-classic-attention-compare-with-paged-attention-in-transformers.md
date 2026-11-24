@@ -84,6 +84,10 @@ This dimension rules out a worry: both give the same outputs. Paged attention re
 
 Memory decides the batch size (see The choices). Classic attention's contiguous cache wastes memory three ways: slots reserved for future tokens, internal fragmentation from reserving the maximum length, and external fragmentation from the allocator [\[5\]](../sources/paged-attention-kwon-sosp2023.md#3-memory-challenges-in-llm-serving). Paged attention reserves only the last block's unfilled positions, which removes most of that waste [\[4\]](../sources/paged-attention-kwon-sosp2023.md#42-kv-cache-manager). At 16 tokens a block, a request wastes at most 15 token slots: 15 × 800 KB = 12 MB for OPT-13B [\[4\]](../sources/paged-attention-kwon-sosp2023.md#42-kv-cache-manager), [\[12\]](../sources/paged-attention-kwon-sosp2023.md#73-comparing-recomputation-and-swapping), [\[5\]](../sources/paged-attention-kwon-sosp2023.md#3-memory-challenges-in-llm-serving). A contiguous cache can reserve up to 2,048 × 800 KB ≈ 1,638 MB per request, so the paged waste is under 1% of that: 12 ÷ 1,638 ≈ 0.7% [\[5\]](../sources/paged-attention-kwon-sosp2023.md#3-memory-challenges-in-llm-serving).
 
+![Line chart of KV cache memory one OPT-13B request holds against tokens so far: a dashed flat line at 1,638 MB for the contiguous cache, and a line rising from 0 to 1,638 MB at 2,048 tokens for 16-token blocks](figures/how-does-classic-attention-compare-with-paged-attention-in-transformers/memory-per-request.svg)
+
+*Figure 6-1: A contiguous cache holds 2,048 × 800 KB = 1,638 MB from the first token (dashed); blocks hold only what the request has used, in 16-token steps of 12.8 MB, so a request that stops early frees the difference [\[5\]](../sources/paged-attention-kwon-sosp2023.md#3-memory-challenges-in-llm-serving), [\[4\]](../sources/paged-attention-kwon-sosp2023.md#42-kv-cache-manager), [\[12\]](../sources/paged-attention-kwon-sosp2023.md#73-comparing-recomputation-and-swapping).*
+
 ### 6.3 Sharing
 
 Sharing matters when requests repeat a prompt, because each copy of its cache takes memory that could hold another request [→]. Parallel samples from one prompt can share the prompt's cache, which was 12% of cache memory in the paper's experiment [\[5\]](../sources/paged-attention-kwon-sosp2023.md#3-memory-challenges-in-llm-serving). Beam search can save up to 55% through sharing [\[5\]](../sources/paged-attention-kwon-sosp2023.md#3-memory-challenges-in-llm-serving), at beam width 6 for OPT-13B on Alpaca [\[7\]](../sources/paged-attention-kwon-sosp2023.md#62-basic-sampling). Blocks make this sharing possible within and across requests [\[9\]](../sources/paged-attention-kwon-sosp2023.md#abstract); a contiguous reservation prevents it [\[5\]](../sources/paged-attention-kwon-sosp2023.md#3-memory-challenges-in-llm-serving).
@@ -138,14 +142,15 @@ A setting matters because a wrong value costs throughput on the workload it was 
 
 ## 10. Metadata
 
-- **Version:** 2.1
+- **Version:** 2.2
 - **Template:** comparison
 - **Language:** en
 - **Model:** claude-opus-5-5
 - **Created:** 2026-10-27
 - **Last modified:** 2026-11-24
-- **Words:** 1,725 (about 8 min)
+- **Words:** 1,813 (about 8 min)
 - **History:**
+  - 2.2 (2026-11-24): An SVG figure drawn from the narrative's own cited numbers, where a chart shows what a diagram can't
   - 2.1 (2026-11-24): Lint: classic attention comes closest rather than wins when memory is plentiful; Orca (Oracle) as an upper bound and the Orca (Max) and FasterTransformer gaps; the baselines introduced; the default block size cited to its section; one name per candidate; why each dimension matters
   - 2.0 (2026-11-24): Regenerated under sllmwiki 1.4.0's guides: a new spine and outline on the paper's OPT-13B scenario; the decision rule now rests on the paper's measurements (memory-bound against compute-bound workloads, the kernel's 20 to 26% overhead) instead of known output lengths; new dimensions for running out of memory and the block size; read sections 4.5, 6.2 and 7.1 to 7.3
   - 1.1 (2026-10-27): Lint: corrected two overstated claims (waste, sharing), split statements that were both cited and marked, cited the Q, K, V definition
