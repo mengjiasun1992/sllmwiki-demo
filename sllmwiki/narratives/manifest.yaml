@@ -82,13 +82,10 @@ what-are-the-common-design-tenets-and-principles-for-distributed-systems:
       authority: A
     distributed-system-design-wikipedia-fallacies:
       relevance: high
-      authority: B
+      authority: C
     distributed-system-design-aws-well-architected-reliability-principles:
       relevance: high
       authority: A
-    ewma-linkerd-beyond-round-robin:
-      relevance: low
-      authority: C
     distributed-system-design-azure-design-principles:
       relevance: high
       authority: A
@@ -109,16 +106,16 @@ what-are-the-common-design-tenets-and-principles-for-distributed-systems:
       authority: A
     distributed-system-design-wikipedia-cap-theorem:
       relevance: high
-      authority: B
+      authority: C
     distributed-system-design-wikipedia-end-to-end-principle:
       relevance: high
-      authority: B
+      authority: C
     distributed-system-design-wikipedia-cascading-failure:
       relevance: high
-      authority: B
+      authority: C
     distributed-systems-wikipedia-distributed-computing:
       relevance: low
-      authority: B
+      authority: C
     distributed-systems-kleppmann-cambridge-notes:
       relevance: high
       authority: A
@@ -129,8 +126,7 @@ what-are-the-common-design-tenets-and-principles-for-distributed-systems:
     2.0: claude-opus-5-5
     2.1: claude-opus-5-5
     2.2: claude-opus-5-5
-  built_on:
-    what-is-a-distributed-system: e5bfa41e0d6c4583394ac43eff1687a7
+    3.0: claude-opus-5-5
 
 what-is-an-ewma-exponentially-weighted-moving-average-and-how-does-it-work:
   template: technical_brief_overview

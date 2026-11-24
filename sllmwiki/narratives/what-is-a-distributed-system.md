@@ -111,7 +111,7 @@ Three cases test the edge of the definition.
 ## 7. Where to go next
 
 - [Can a timeout tell a slow node from a dead one?](what-are-the-classic-failure-modes-of-large-scale-distributed-systems-and-their-mitigations.md#512-a-slow-node-looks-like-a-dead-one)
-- [How can a resent payment avoid charging twice?](what-are-the-common-design-tenets-and-principles-for-distributed-systems.md#523-make-operations-idempotent)
+- [How can a resent payment avoid charging twice?](what-are-the-common-design-tenets-and-principles-for-distributed-systems.md#522-make-operations-idempotent)
 - [How do nodes order events without a global clock?](what-are-the-common-design-tenets-and-principles-for-distributed-systems.md#542-order-events-without-a-global-clock)
 - [How do nodes agree on one history despite faults?](how-does-raft-elect-a-leader-and-keep-every-servers-log-consistent.md)
 - [What does a system give up when a partition splits it?](what-are-the-common-design-tenets-and-principles-for-distributed-systems.md#541-choose-consistency-deliberately)
