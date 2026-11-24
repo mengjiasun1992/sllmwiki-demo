@@ -2,61 +2,60 @@
 
 ## 1. Abstract
 
-Engineers who build or run services spread over many machines need to know how such systems fail and what the standard defences are. The classic failure modes fall into four groups: parts break (crashes, slow or misbehaving nodes), the network misbehaves (lost or delayed messages, partitions that split the system), load turns a small fault into a collapse (overload, cascading failures, retry storms), and people break it with changes. Each has a well-known remedy: redundancy and failure detection, timeouts with bounded retries, quorums, throttling and isolation, and automated, gradual change.
+Engineers who build or run services across many machines need to know how such systems fail and what the standard defences are. The classic failure modes fall into four groups: parts break, the network misbehaves, load turns a small fault into a collapse, and people break the system with changes. Each has a well-known remedy: redundancy and failure detection, timeouts with bounded retries, majorities, throttling and isolation, and gradual, automated change.
 
 **Key takeaways:**
 
 - Faults are certain; design so the whole survives some broken parts.
-- A timeout can't tell a dead node from a slow one.
-- Retries cure transient faults but can cause overload: bound them, back off, add jitter.
-- Isolate and shed load so one failure doesn't spread.
+- A timeout cannot tell a dead node from a slow one.
+- Retries cure transient faults but can cause overload: bound them, back off and add jitter.
+- Isolate and shed load, so one failure does not spread.
 - Roll changes out gradually and automatically.
 
 ## 2. Terminology
 
 | Term | Definition |
 |---|---|
-| **Fault** | One part of the system not working: a node or a network link. |
-| **Failure** | The system as a whole not working. |
-| **Fault tolerance** | The system keeps working despite up to some number of faults. |
-| **SPOF** | Single point of failure: a part whose fault takes the whole system down. |
-| **Partition** | A network fault that splits nodes into groups that cannot reach each other for a while. |
-| **Transient fault** | A fault that corrects itself after a short time, such as a dropped connection or a busy service. |
-| **Quorum** | A majority of nodes whose agreement is needed to act. |
-| **Backoff, jitter** | Waiting longer between successive retries; adding a random amount to each wait. |
+| **Fault** | One part of the system not working, such as a node or a network link [\[1\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability). |
+| **Failure** | The system as a whole not working [\[1\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability). |
+| **Single point of failure** | A part whose fault takes the whole system down [\[1\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability). |
+| **Partition** | A network fault that cuts groups of nodes off from each other for an extended time [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#describing-nodes-and-network-behaviour). |
+| **Transient fault** | A fault that corrects itself after a short time, such as a dropped connection or a busy service [\[3\]](../sources/distributed-system-design-azure-transient-fault-handling.md#why-do-transient-faults-occur-in-the-cloud). |
+| **Majority** | More than half of the nodes, whose agreement an algorithm needs before it acts [\[4\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction-to-consensus). |
+| **Backoff, jitter** | Waiting longer before each successive retry; adding a random amount to each wait [\[5\]](../sources/distributed-system-design-azure-retry-pattern.md#retry-strategies), [\[6\]](../sources/failure-modes-wikipedia-thundering-herd.md#mitigation). |
 | **[→]** | Our own reasoning, after a statement or on a section's heading: a conclusion, comparison or example no cited source states. |
 | **[?]** | A gap, after a statement or on a heading: something the question needs that the sources don't answer. |
 
 ## 3. Overview
 
-A large-scale distributed system is many independent machines cooperating over a network, so faults in its parts are a routine cause of downtime, and what matters is whether a fault in one part becomes a failure of the whole [\[1\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability). The running example is an online shop that wants to sell around the clock [\[1\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability): a checkout service calls payment and inventory services, which share a replicated database.
+A large-scale distributed system is many machines cooperating over a network. Faults in its parts are a routine cause of downtime, and what matters is whether one part's fault becomes a failure of the whole [\[1\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability).
 
-The items here are the failure modes the wiki's saved sources treat as standard. They were checked against three lists: Kleppmann's system model of what can go wrong with networks, nodes and timing [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#describing-nodes-and-network-behaviour); the fallacies of distributed computing [\[3\]](../sources/distributed-system-design-wikipedia-fallacies.md#the-fallacies); and the cloud vendors' reliability principles and resilience patterns [\[4\]](../sources/distributed-system-design-azure-design-principles.md#core-principles), [\[5\]](../sources/distributed-system-design-aws-well-architected-reliability-principles.md#design-principles). Two failure modes named in research, gray failure and metastable failure, are noted under the items they extend, since the wiki holds their papers only as links. Left out: security attacks, except where they look like overload, and clock skew and event ordering, which corrupt results rather than take systems down and are covered under [ordering events without a global clock](what-are-the-common-design-tenets-and-principles-for-distributed-systems.md#542-order-events-without-a-global-clock) [→].
+The running example is an online shop that wants to sell around the clock [\[1\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability). Its checkout service calls a payment service and an inventory service over the network. The two services share a replicated database. Each item below says in a sentence how it would hit this shop [→].
 
-The map comes first, then each group and its items, then where the remedies pull against each other, two classic cases, and questions to ask of a design.
+The items are the failure modes the wiki's saved sources treat as standard. They were checked against three lists: Kleppmann's model of what can go wrong with networks, nodes and timing [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#describing-nodes-and-network-behaviour); the fallacies of distributed computing [\[7\]](../sources/distributed-system-design-wikipedia-fallacies.md#the-fallacies); and the cloud vendors' reliability principles [\[8\]](../sources/distributed-system-design-azure-design-principles.md#core-principles), [\[9\]](../sources/distributed-system-design-aws-well-architected-reliability-principles.md#design-principles). Two modes named in research, gray failure and metastable failure, are noted under the items they extend, because the wiki holds their papers only as links. Left out: security attacks, except where they look like overload; and clock skew and event ordering, which corrupt results rather than take systems down, covered under [ordering events without a global clock](what-are-the-common-design-tenets-and-principles-for-distributed-systems.md#542-order-events-without-a-global-clock) [→].
+
+The map comes first, then each group and its items, then the tensions between the remedies, two classic cases, and questions to ask of a design.
 
 ## 4. The map
-
-Each failure mode lands in one of four groups by where it starts: in a component, in the network, in the load, or in a change [→].
 
 ```mermaid
 flowchart LR
     subgraph A["Parts break"]
-        A1["Crash and hardware failure"]
-        A2["Slow or paused nodes"]
-        A3["Byzantine faults and bugs"]
+        A1["Crashes"]
+        A2["Slow nodes"]
+        A3["Byzantine faults, bugs"]
     end
     subgraph B["The network misbehaves"]
-        B1["Lost and delayed messages"]
-        B2["Partitions and split brain"]
+        B1["Lost, delayed messages"]
+        B2["Partitions, split brain"]
     end
     subgraph C["Load turns faults into collapse"]
         C1["Overload"]
         C2["Cascading failure"]
-        C3["Retry storms and thundering herds"]
+        C3["Retry storms"]
     end
     subgraph D["People change it"]
-        D1["Bad changes and deployments"]
+        D1["Bad changes"]
     end
     A --> C
     B --> C
@@ -65,83 +64,85 @@ flowchart LR
     class C amp
 ```
 
-*Figure 4-1: The failure modes in four groups. Arrows show which groups commonly feed others: a broken part, a slow network or a bad change sets off the load-driven failures, shaded, which spread it [→].*
+*Figure 4-1: Nine failure modes in four groups, by where each starts: a part, the network, the load or a change. Arrows show which groups commonly set off others; the load group, shaded, spreads a fault [→].*
 
 ## 5. The main items
 
 ### 5.1 Parts break
 
-Single machines crash, stall or misbehave; the defences are to have more than one of everything and to notice quickly when one stops working [→].
+Single machines crash, stall or misbehave. The defences are to have more than one of everything and to notice quickly when one stops [→].
 
-#### 5.1.1 Crash and hardware failure
+#### 5.1.1 A crash stops a node
 
-A node crashes and stops, perhaps restarting later with only what it stored on disk [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#describing-nodes-and-network-behaviour). If that node is a single point of failure, the whole service goes down [\[1\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability). The remedy is redundancy: multiple instances behind load balancers, database replicas, several zones or regions, sized to the business's risk tolerance [\[4\]](../sources/distributed-system-design-azure-design-principles.md#core-principles); many small resources instead of one large one, so one loss matters less [\[5\]](../sources/distributed-system-design-aws-well-architected-reliability-principles.md#design-principles); and automatic recovery driven by monitoring [\[5\]](../sources/distributed-system-design-aws-well-architected-reliability-principles.md#design-principles). Tolerance is always bounded: an algorithm that needs a majority stops once more than half the nodes are gone [\[1\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability).
+A node crashes and stops, and may restart later with only what it stored on disk [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#describing-nodes-and-network-behaviour). If that node is a single point of failure, the whole service goes down [\[1\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability). In the shop, a lone payment server would take checkout down with it [→]. The remedy is redundancy: several instances behind load balancers, database replicas, and several zones or regions, sized to the business's tolerance for risk [\[8\]](../sources/distributed-system-design-azure-design-principles.md#core-principles). Many small resources replace one large one, so one loss matters less, and monitoring drives automatic recovery [\[9\]](../sources/distributed-system-design-aws-well-architected-reliability-principles.md#design-principles). Tolerance is always bounded: an algorithm that needs a majority stops working once more than half the nodes crash [\[1\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability).
 
-#### 5.1.2 Slow or paused nodes
+#### 5.1.2 A slow node looks like a dead one
 
-A node that is alive but slow is harder to handle than a dead one. Garbage-collection pauses, swapping or scheduling can freeze a process for seconds or, on large heaps, minutes, while other nodes decide it has crashed [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#describing-nodes-and-network-behaviour). Failure detectors work by timeout, so they cannot tell a crashed node from a slow node, a lost message or a delayed one; the best possible in practice is a detector that is wrong for a while but eventually right [\[1\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability). The remedies are a timeout on every outbound call [\[6\]](../sources/distributed-system-design-azure-transient-fault-handling.md#determine-an-appropriate-retry-count-and-interval) and algorithms whose correctness never depends on timing, so a false suspicion costs only progress [\[7\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction-to-consensus). Subtler partial faults that health checks miss but users feel, which research calls gray failure, are not covered by the wiki's saved sources [?].
+A node that is alive but slow is harder to handle than a dead one. Garbage-collection pauses, swapping or scheduling can freeze a process for seconds, or minutes on large heaps, while other nodes decide it has crashed [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#describing-nodes-and-network-behaviour). Failure detectors work by timeout, so they cannot tell a crashed node from a slow node or a lost message; the best possible is a detector that is wrong for a while but eventually right [\[1\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability). The remedies are a timeout on every outbound call [\[10\]](../sources/distributed-system-design-azure-transient-fault-handling.md#determine-an-appropriate-retry-count-and-interval) and algorithms whose correctness never depends on timing, so a false suspicion costs only progress [\[4\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction-to-consensus). Subtler partial faults that health checks miss but users feel, called gray failure, are not covered by the wiki's saved sources [?].
 
-#### 5.1.3 Byzantine faults and bugs
+#### 5.1.3 A Byzantine node or a bug breaks the protocol
 
-A Byzantine node deviates from the protocol in arbitrary ways, maliciously or not [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#describing-nodes-and-network-behaviour). On the network, TLS stops an attacker from eavesdropping, altering, spoofing or replaying traffic, though not from blocking it [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#describing-nodes-and-network-behaviour). A software bug is in principle the same kind of fault, but every node runs the same code, so Byzantine-tolerant algorithms, which assume fewer than a third of nodes are faulty, cannot mask it; the term is usually kept for deliberate misbehaviour [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#describing-nodes-and-network-behaviour). Defending against bugs is therefore a matter of how changes are tested and rolled out (see "Bad changes and deployments").
+A Byzantine node deviates from the protocol in arbitrary ways, maliciously or not [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#describing-nodes-and-network-behaviour). On the network, TLS stops an attacker from eavesdropping, altering, spoofing or replaying traffic, though not from blocking it [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#describing-nodes-and-network-behaviour). A software bug is in principle the same kind of fault. Every node runs the same code, though, so Byzantine-tolerant algorithms, which assume fewer than a third of nodes are faulty, cannot mask it [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#describing-nodes-and-network-behaviour). In the shop, a bug in the payment code fails on every instance at once [→]. Defending against bugs is therefore a matter of how changes are tested and rolled out, under [a bad change](#541-a-bad-change-takes-down-what-was-working) [→].
 
 ### 5.2 The network misbehaves
 
-The first fallacy of distributed computing is that the network is reliable [\[3\]](../sources/distributed-system-design-wikipedia-fallacies.md#the-fallacies). Messages get lost, delayed and reordered, and sometimes whole groups of nodes can't talk to each other [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#describing-nodes-and-network-behaviour).
+The first fallacy of distributed computing is that the network is reliable [\[7\]](../sources/distributed-system-design-wikipedia-fallacies.md#the-fallacies). Messages get lost, delayed and reordered, and sometimes whole groups of nodes cannot reach each other [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#describing-nodes-and-network-behaviour).
 
-#### 5.2.1 Lost and delayed messages
+#### 5.2.1 Messages get lost and delayed
 
-Links may lose, duplicate or reorder messages, and latency varies with congestion, retransmission and route changes [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#describing-nodes-and-network-behaviour). Code that assumes otherwise stalls or waits forever during an outage, holding memory, and may never retry its stalled work [\[8\]](../sources/distributed-system-design-wikipedia-fallacies.md#the-effects-of-the-fallacies). Cloud environments add transient faults from shared, throttled resources, replaced hardware and the routers and load balancers in between [\[9\]](../sources/distributed-system-design-azure-transient-fault-handling.md#why-do-transient-faults-occur-in-the-cloud). The remedies: a timeout on every outbound call, set before any retry logic [\[6\]](../sources/distributed-system-design-azure-transient-fault-handling.md#determine-an-appropriate-retry-count-and-interval); retries after a delay for faults likely to clear [\[10\]](../sources/distributed-system-design-azure-retry-pattern.md#retry-strategies); and deduplication, so that retrying over a lossy link is safe [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#describing-nodes-and-network-behaviour). Retried operations should be idempotent, since a request can succeed while its response is lost [\[11\]](../sources/distributed-system-design-azure-retry-pattern.md#idempotency).
+Links may lose, duplicate or reorder messages, and latency varies with congestion, retransmission and route changes [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#describing-nodes-and-network-behaviour). Code that assumes otherwise stalls or waits forever during an outage, holds memory, and may never retry its stalled work [\[11\]](../sources/distributed-system-design-wikipedia-fallacies.md#the-effects-of-the-fallacies). Cloud environments add transient faults from shared, throttled resources, replaced hardware, and the routers and load balancers in between [\[3\]](../sources/distributed-system-design-azure-transient-fault-handling.md#why-do-transient-faults-occur-in-the-cloud). In the shop, a checkout call to inventory can hang with no answer [→]. The remedies are a timeout on every outbound call, set before any retry logic [\[10\]](../sources/distributed-system-design-azure-transient-fault-handling.md#determine-an-appropriate-retry-count-and-interval); a retry after a delay for faults likely to clear [\[5\]](../sources/distributed-system-design-azure-retry-pattern.md#retry-strategies); and deduplication, so that retrying over a lossy link is safe [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#describing-nodes-and-network-behaviour). A retried operation should be idempotent, since a request can succeed while its response is lost [\[12\]](../sources/distributed-system-design-azure-retry-pattern.md#idempotency).
 
-#### 5.2.2 Partitions and split brain
+#### 5.2.2 A partition splits the system
 
-A partition is a network fault that cuts off groups of nodes for an extended time [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#describing-nodes-and-network-behaviour). Since no system is safe from it, a system must choose during one: stay consistent and return errors, or stay available and possibly serve stale data [\[12\]](../sources/distributed-system-design-wikipedia-cap-theorem.md#explanation). A partition can also cause split brain: in a high-availability cluster whose heartbeat links fail, each node believes it is the only one running and accepts its own updates, which can corrupt data [\[13\]](../sources/failure-modes-wikipedia-split-brain.md#state). The pessimistic remedy is a quorum: only the side with a majority stays available, and the others fence themselves off [\[14\]](../sources/failure-modes-wikipedia-split-brain.md#approaches-for-dealing-with-split-brain). Optimistic systems keep both sides running and reconcile afterwards [\[14\]](../sources/failure-modes-wikipedia-split-brain.md#approaches-for-dealing-with-split-brain). Raft is a worked example of the quorum approach, covered in [How does Raft elect a leader and keep every server's log consistent through crashes and network partitions?](how-does-raft-elect-a-leader-and-keep-every-servers-log-consistent.md).
+A partition cuts groups of nodes off from each other for an extended time [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#describing-nodes-and-network-behaviour). No system is safe from it, so during one a system must choose: stay consistent and return errors, or stay available and possibly serve stale data [\[13\]](../sources/distributed-system-design-wikipedia-cap-theorem.md#explanation). A partition can also cause split brain: when a cluster's heartbeat links fail, each node believes it is the only one running and accepts its own updates, which can corrupt data [\[14\]](../sources/failure-modes-wikipedia-split-brain.md#state). In the shop, two database replicas could each accept the last item's sale [→]. The pessimistic remedy is a majority: only the side with a majority stays available, and the others fence themselves off [\[15\]](../sources/failure-modes-wikipedia-split-brain.md#approaches-for-dealing-with-split-brain). Optimistic systems keep both sides running and reconcile afterwards [\[15\]](../sources/failure-modes-wikipedia-split-brain.md#approaches-for-dealing-with-split-brain). [The Raft narrative](how-does-raft-elect-a-leader-and-keep-every-servers-log-consistent.md) works the majority approach through a split.
 
 ### 5.3 Load turns faults into collapse
 
 These failures need no broken part, only too much work. Each feeds on itself: a slow component holds resources, callers retry, and the extra load slows it further [→].
 
-#### 5.3.1 Overload
+#### 5.3.1 Overload exceeds capacity
 
-When demand exceeds capacity, the system slows or fails; autoscaling helps, but new capacity takes time and money [\[15\]](../sources/distributed-system-design-azure-throttling-pattern.md#context-and-problem). Throttling caps use instead: per-client rate limits, turning off non-essential features, deferring low-priority work, and limiting outbound calls to an unhealthy dependency [\[16\]](../sources/distributed-system-design-azure-throttling-pattern.md#solution). A queue between callers and a service absorbs peaks so the service works at its own pace [\[17\]](../sources/failure-modes-azure-queue-based-load-leveling.md#solution). Neither is free: a queue keeps growing if producers outpace consumers on average, and scaling consumers without bounding their downstream rate just moves the overload [\[18\]](../sources/failure-modes-azure-queue-based-load-leveling.md#problems-and-considerations). In the shop, a sale-day spike could be met by turning off recommendations to keep checkout alive [→].
+When demand exceeds capacity, the system slows or fails. Autoscaling helps, but new capacity takes time and money [\[16\]](../sources/distributed-system-design-azure-throttling-pattern.md#context-and-problem). Throttling caps use instead: rate limits per client, turning off non-essential features, deferring low-priority work, and limiting calls to an unhealthy dependency [\[17\]](../sources/distributed-system-design-azure-throttling-pattern.md#solution). A queue between callers and a service absorbs peaks, so the service works at its own pace [\[18\]](../sources/failure-modes-azure-queue-based-load-leveling.md#solution). Neither is free: a queue keeps growing if producers outpace consumers on average, and scaling consumers without bounding their calls downstream only moves the overload [\[19\]](../sources/failure-modes-azure-queue-based-load-leveling.md#problems-and-considerations). In the shop, a sale-day spike could be met by turning off recommendations to keep checkout alive [→].
 
-#### 5.3.2 Cascading failure
+#### 5.3.2 A failure cascades from part to part
 
-A cascading failure spreads from one overloaded part to the next. In networks, an overloaded router goes down, traffic shifts to an alternative path, that path overloads, and so on [\[19\]](../sources/distributed-system-design-wikipedia-cascading-failure.md#in-computer-networks). In services, calls to a slow dependency block until they time out, holding threads, memory and connections, until unrelated parts of the system fail for lack of them [\[20\]](../sources/distributed-system-design-azure-circuit-breaker-pattern.md#context-and-problem). Two patterns contain it. A bulkhead partitions resources, such as one connection pool per downstream service, so one failing dependency exhausts only its own share [\[21\]](../sources/distributed-system-design-azure-bulkhead-pattern.md#solution). A circuit breaker counts recent failures and, past a threshold, fails calls at once instead of waiting, then lets a few trial calls through to detect recovery [\[22\]](../sources/distributed-system-design-azure-circuit-breaker-pattern.md#solution).
+A cascading failure spreads from one overloaded part to the next. In networks, an overloaded router goes down, its traffic shifts to another path, that path overloads, and so on [\[20\]](../sources/distributed-system-design-wikipedia-cascading-failure.md#in-computer-networks). In services, calls to a slow dependency block until they time out, holding threads, memory and connections, until unrelated parts fail for lack of them [\[21\]](../sources/distributed-system-design-azure-circuit-breaker-pattern.md#context-and-problem). In the shop, a slow inventory service could use up all of checkout's threads [→]. Two patterns contain a cascade. A bulkhead partitions resources, such as one connection pool per downstream service, so a failing dependency uses up only its own share [\[22\]](../sources/distributed-system-design-azure-bulkhead-pattern.md#solution). A circuit breaker counts recent failures and, past a threshold, fails calls at once instead of waiting; it then lets a few trial calls through to detect recovery [\[23\]](../sources/distributed-system-design-azure-circuit-breaker-pattern.md#solution).
 
-#### 5.3.3 Retry storms and thundering herds
+#### 5.3.3 Retries pile onto a struggling service
 
-Retries meant to ride out transient faults can stop a struggling service from recovering: clients that retry too often or too long overwhelm it during recovery [\[23\]](../sources/failure-modes-azure-retry-storm-antipattern.md#context-and-problem). Retries also multiply through layers: three retries at each of two levels make nine attempts [\[24\]](../sources/distributed-system-design-azure-transient-fault-handling.md#avoid-antipatterns). A thundering herd is the synchronized version: many waiters wake at once for something only one can use, a cache stampede when it hits a cache [\[25\]](../sources/failure-modes-wikipedia-thundering-herd.md#thundering-herd-problem---wikipedia). Remedies: cap retry count and duration, back off exponentially, honour the server's `Retry-After`, and use a circuit breaker [\[26\]](../sources/failure-modes-azure-retry-storm-antipattern.md#solution); add jitter so clients stop retrying in lockstep [\[27\]](../sources/failure-modes-wikipedia-thundering-herd.md#mitigation); and set a retry budget for each dependency, so many requests retrying a little can't add up to a cascade [\[24\]](../sources/distributed-system-design-azure-transient-fault-handling.md#avoid-antipatterns). Failures in which such load keeps a system down after the trigger is gone, which research calls metastable, are not covered by the wiki's saved sources [?].
+Retries meant to ride out transient faults can stop a struggling service from recovering: clients that retry too often or too long overwhelm it [\[24\]](../sources/failure-modes-azure-retry-storm-antipattern.md#context-and-problem). Retries also multiply through layers: three retries at each of two layers make nine attempts [\[25\]](../sources/distributed-system-design-azure-transient-fault-handling.md#avoid-antipatterns). A thundering herd is the synchronized form: many waiters wake at once for something only one can use, called a cache stampede when it hits a cache [\[26\]](../sources/failure-modes-wikipedia-thundering-herd.md#thundering-herd-problem---wikipedia). In the shop, every checkout retrying payment at once would keep payment down [→]. The remedies are to cap retry count and duration, back off exponentially, honour the server's `Retry-After`, and use a circuit breaker [\[27\]](../sources/failure-modes-azure-retry-storm-antipattern.md#solution); to add jitter, so clients stop retrying in lockstep [\[6\]](../sources/failure-modes-wikipedia-thundering-herd.md#mitigation); and to give each dependency a retry budget [\[25\]](../sources/distributed-system-design-azure-transient-fault-handling.md#avoid-antipatterns). Failures in which such load keeps a system down after the trigger is gone, called metastable, are not covered by the wiki's saved sources [?].
 
 ### 5.4 People change it
 
-#### 5.4.1 Bad changes and deployments
+Many outages start with a change, not a fault [→].
 
-Many outages start with a change, not a fault. In December 2012 a routine update to Gmail's load-balancing software, with an "all" where "some" was meant, cascaded into an 18-minute partial outage [\[28\]](../sources/distributed-system-design-wikipedia-cascading-failure.md#example). The remedies: make changes through automation that is itself tracked and reviewed [\[5\]](../sources/distributed-system-design-aws-well-architected-reliability-principles.md#design-principles); roll upgrades out one node at a time, which fault tolerance makes possible without clients noticing [\[1\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability); and test how the system fails and recovers, not only that it works [\[5\]](../sources/distributed-system-design-aws-well-architected-reliability-principles.md#design-principles). Taking nodes down for maintenance or upgrades can itself start a cascade [\[19\]](../sources/distributed-system-design-wikipedia-cascading-failure.md#in-computer-networks).
+#### 5.4.1 A bad change takes down what was working
+
+In December 2012, a routine update to Gmail's load-balancing software, with an "all" where "some" was meant, cascaded into an 18-minute partial outage [\[28\]](../sources/distributed-system-design-wikipedia-cascading-failure.md#example). In the shop, a new checkout release could reach every server before anyone sees it fail [→]. The remedies are to make changes through automation that is itself tracked and reviewed [\[9\]](../sources/distributed-system-design-aws-well-architected-reliability-principles.md#design-principles); to roll upgrades out one node at a time, which fault tolerance makes possible without clients noticing [\[1\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability); and to test how the system fails and recovers, not only that it works [\[9\]](../sources/distributed-system-design-aws-well-architected-reliability-principles.md#design-principles). Taking nodes down for maintenance or upgrades can itself start a cascade [\[20\]](../sources/distributed-system-design-wikipedia-cascading-failure.md#in-computer-networks).
 
 ## 6. Tensions and trade-offs
 
-**Retries against overload.** Retries fix transient faults, but an aggressive policy degrades a busy service further [\[29\]](../sources/distributed-system-design-azure-retry-pattern.md#impact-on-performance). The balance is bounded retries with backoff and jitter, a retry budget, and a circuit breaker for faults that persist [\[24\]](../sources/distributed-system-design-azure-transient-fault-handling.md#avoid-antipatterns), [\[30\]](../sources/distributed-system-design-azure-transient-fault-handling.md#manage-operations-that-continually-fail).
+**Retries against overload.** Retries fix transient faults, but an aggressive retry policy degrades a busy service further [\[29\]](../sources/distributed-system-design-azure-retry-pattern.md#impact-on-performance). The balance is bounded retries with backoff and jitter, a retry budget, and a circuit breaker for faults that persist [\[25\]](../sources/distributed-system-design-azure-transient-fault-handling.md#avoid-antipatterns), [\[30\]](../sources/distributed-system-design-azure-transient-fault-handling.md#manage-operations-that-continually-fail).
 
-**Timeouts: too short or too long.** Long timeouts let threads and connections pile up during an outage; short ones fail calls that would have succeeded [\[6\]](../sources/distributed-system-design-azure-transient-fault-handling.md#determine-an-appropriate-retry-count-and-interval).
+**Timeouts that are too short or too long.** Long timeouts let threads and connections pile up during an outage; short ones fail calls that would have succeeded [\[10\]](../sources/distributed-system-design-azure-transient-fault-handling.md#determine-an-appropriate-retry-count-and-interval).
 
-**Consistency against availability.** During a partition you choose between errors and possibly stale answers [\[12\]](../sources/distributed-system-design-wikipedia-cap-theorem.md#explanation), and the [design principles narrative](what-are-the-common-design-tenets-and-principles-for-distributed-systems.md#541-choose-consistency-deliberately) argues for choosing per operation.
+**Consistency against availability.** During a partition you choose between errors and possibly stale answers [\[13\]](../sources/distributed-system-design-wikipedia-cap-theorem.md#explanation); the [design principles narrative](what-are-the-common-design-tenets-and-principles-for-distributed-systems.md#541-choose-consistency-deliberately) argues for choosing per operation.
 
-**Absorbing load against moving it.** Queues and autoscaling absorb spikes, but unbounded consumers push the overload onto the next dependency [\[18\]](../sources/failure-modes-azure-queue-based-load-leveling.md#problems-and-considerations).
+**Absorbing load against moving it.** Queues and autoscaling absorb spikes, but consumers without a bound push the overload onto the next dependency [\[19\]](../sources/failure-modes-azure-queue-based-load-leveling.md#problems-and-considerations).
 
 ## 7. Classic case studies
 
-**Gmail, December 2012.** A faulty load-balancer update cut 40% of Gmail service worldwide for 18 minutes; it was fixed by fully updating a single node instead of partially updating all of them [\[28\]](../sources/distributed-system-design-wikipedia-cascading-failure.md#example). It shows a bad change and a cascade together. *What happened in the Gmail outage of 2012, and what does it teach?* is a case study of its own.
+**Gmail, December 2012.** A faulty load-balancer update cut 40% of Gmail's service worldwide for 18 minutes. Engineers fixed it by fully updating a single node instead of partially updating all of them [\[28\]](../sources/distributed-system-design-wikipedia-cascading-failure.md#example). It shows a bad change and a cascade together. *What happened in the Gmail outage of 2012, and what does it teach?* is a case study of its own.
 
-**ISP rerouting.** When a backbone node fails, redundant routing sends its traffic along a longer path through systems that never carried that much, which fail in turn; DNS failures then break connections not involved at all [\[28\]](../sources/distributed-system-design-wikipedia-cascading-failure.md#example). It shows redundancy turning one fault into a cascading failure.
+**An ISP reroutes around a failed node.** When a backbone node fails, routing sends its traffic along a longer path through systems that never carried that much, and they fail in turn; DNS failures then break connections that were not involved at all [\[28\]](../sources/distributed-system-design-wikipedia-cascading-failure.md#example). It shows redundancy turning one fault into a cascading failure.
 
 ## 8. Applying them [→]
 
-For each remote call in a design like the shop's checkout:
+Ask these questions of each remote call in a design like the shop's checkout:
 
-1. Does it have a timeout, and is retrying it safe (idempotent)?
+1. Does the call have a timeout, and is retrying it safe?
 2. Are its retries bounded, backed off, jittered and within a budget?
-3. When the dependency is down, does a circuit breaker or fallback answer instead, and is the dependency's resource pool isolated?
+3. When the dependency is down, does a circuit breaker or a fallback answer instead, and is the dependency's resource pool isolated?
 4. During a partition, which side keeps accepting writes?
 5. Under overload, what is shed first?
 6. Does a change reach one node before all of them?
@@ -151,7 +152,7 @@ For each remote call in a design like the shop's checkout:
 - [What are the common design tenets and principles for distributed systems?](what-are-the-common-design-tenets-and-principles-for-distributed-systems.md): the same defences, organized as principles.
 - [What is a distributed system?](what-is-a-distributed-system.md): why partial failure is the defining difficulty.
 - How should timeouts, retries and backoff be set?
-- How do services avoid cascading failures with circuit breakers and bulkheads?
+- How do circuit breakers and bulkheads stop a cascading failure?
 - What are metastable failures, and how do systems escape them?
 - What is gray failure, and how is it detected?
 
@@ -159,76 +160,77 @@ For each remote call in a design like the shop's checkout:
 
 ### 10.1 Sources read
 
-- [distributed-systems-kleppmann-cambridge-notes](../sources/distributed-systems-kleppmann-cambridge-notes.md): the system model (network, node and timing faults), failure detectors, fault tolerance, SPOFs and rolling upgrades.
+- [distributed-systems-kleppmann-cambridge-notes](../sources/distributed-systems-kleppmann-cambridge-notes.md): the system model of node, network and timing faults; fault tolerance and failure detection.
 - [distributed-system-design-wikipedia-fallacies](../sources/distributed-system-design-wikipedia-fallacies.md): the fallacies and their effects.
-- [distributed-system-design-azure-design-principles](../sources/distributed-system-design-azure-design-principles.md) and [distributed-system-design-aws-well-architected-reliability-principles](../sources/distributed-system-design-aws-well-architected-reliability-principles.md): redundancy, recovery, capacity and change.
-- [distributed-system-design-azure-transient-fault-handling](../sources/distributed-system-design-azure-transient-fault-handling.md), [distributed-system-design-azure-retry-pattern](../sources/distributed-system-design-azure-retry-pattern.md) and [failure-modes-azure-retry-storm-antipattern](../sources/failure-modes-azure-retry-storm-antipattern.md): transient faults, retries and retry storms.
-- [distributed-system-design-azure-circuit-breaker-pattern](../sources/distributed-system-design-azure-circuit-breaker-pattern.md), [distributed-system-design-azure-bulkhead-pattern](../sources/distributed-system-design-azure-bulkhead-pattern.md), [distributed-system-design-azure-throttling-pattern](../sources/distributed-system-design-azure-throttling-pattern.md) and [failure-modes-azure-queue-based-load-leveling](../sources/failure-modes-azure-queue-based-load-leveling.md): containing failures and overload.
-- [distributed-system-design-wikipedia-cascading-failure](../sources/distributed-system-design-wikipedia-cascading-failure.md), [failure-modes-wikipedia-thundering-herd](../sources/failure-modes-wikipedia-thundering-herd.md), [failure-modes-wikipedia-split-brain](../sources/failure-modes-wikipedia-split-brain.md) and [distributed-system-design-wikipedia-cap-theorem](../sources/distributed-system-design-wikipedia-cap-theorem.md): definitions and cases.
-- Recorded as links, not read: Bronson et al. on metastable failures (<https://sigops.org/s/conferences/hotos/2021/papers/hotos21-s11-bronson.pdf>) and Huang et al. on gray failure (<https://www.microsoft.com/en-us/research/wp-content/uploads/2017/06/paper-1.pdf>).
+- [distributed-system-design-azure-design-principles](../sources/distributed-system-design-azure-design-principles.md) and [distributed-system-design-aws-well-architected-reliability-principles](../sources/distributed-system-design-aws-well-architected-reliability-principles.md): the vendors' reliability principles.
+- [distributed-system-design-azure-transient-fault-handling](../sources/distributed-system-design-azure-transient-fault-handling.md), [distributed-system-design-azure-retry-pattern](../sources/distributed-system-design-azure-retry-pattern.md) and [failure-modes-azure-retry-storm-antipattern](../sources/failure-modes-azure-retry-storm-antipattern.md): transient faults, timeouts, retries and their dangers.
+- [distributed-system-design-azure-throttling-pattern](../sources/distributed-system-design-azure-throttling-pattern.md), [failure-modes-azure-queue-based-load-leveling](../sources/failure-modes-azure-queue-based-load-leveling.md), [distributed-system-design-azure-circuit-breaker-pattern](../sources/distributed-system-design-azure-circuit-breaker-pattern.md) and [distributed-system-design-azure-bulkhead-pattern](../sources/distributed-system-design-azure-bulkhead-pattern.md): overload and its containment.
+- [distributed-system-design-wikipedia-cascading-failure](../sources/distributed-system-design-wikipedia-cascading-failure.md), [failure-modes-wikipedia-thundering-herd](../sources/failure-modes-wikipedia-thundering-herd.md), [failure-modes-wikipedia-split-brain](../sources/failure-modes-wikipedia-split-brain.md) and [distributed-system-design-wikipedia-cap-theorem](../sources/distributed-system-design-wikipedia-cap-theorem.md): cascades and their examples, herds, split brain and the partition trade-off.
+- Recorded as links, not read: the metastable-failure and gray-failure papers, the Google SRE chapter on cascading failures, and the AWS article on timeouts and backoff.
 
 ### 10.2 Citations
 
 1. [distributed-systems-kleppmann-cambridge-notes: Fault tolerance and high availability](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability)
 2. [distributed-systems-kleppmann-cambridge-notes: Describing nodes and network behaviour](../sources/distributed-systems-kleppmann-cambridge-notes.md#describing-nodes-and-network-behaviour)
-3. [distributed-system-design-wikipedia-fallacies: The fallacies](../sources/distributed-system-design-wikipedia-fallacies.md#the-fallacies)
-4. [distributed-system-design-azure-design-principles: Core principles](../sources/distributed-system-design-azure-design-principles.md#core-principles)
-5. [distributed-system-design-aws-well-architected-reliability-principles: Design principles](../sources/distributed-system-design-aws-well-architected-reliability-principles.md#design-principles)
-6. [distributed-system-design-azure-transient-fault-handling: Determine an appropriate retry count and interval](../sources/distributed-system-design-azure-transient-fault-handling.md#determine-an-appropriate-retry-count-and-interval)
-7. [distributed-systems-kleppmann-cambridge-notes: Introduction to consensus](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction-to-consensus)
-8. [distributed-system-design-wikipedia-fallacies: The effects of the fallacies](../sources/distributed-system-design-wikipedia-fallacies.md#the-effects-of-the-fallacies)
-9. [distributed-system-design-azure-transient-fault-handling: Why do transient faults occur in the cloud?](../sources/distributed-system-design-azure-transient-fault-handling.md#why-do-transient-faults-occur-in-the-cloud)
-10. [distributed-system-design-azure-retry-pattern: Retry strategies](../sources/distributed-system-design-azure-retry-pattern.md#retry-strategies)
-11. [distributed-system-design-azure-retry-pattern: Idempotency](../sources/distributed-system-design-azure-retry-pattern.md#idempotency)
-12. [distributed-system-design-wikipedia-cap-theorem: Explanation](../sources/distributed-system-design-wikipedia-cap-theorem.md#explanation)
-13. [failure-modes-wikipedia-split-brain: State](../sources/failure-modes-wikipedia-split-brain.md#state)
-14. [failure-modes-wikipedia-split-brain: Approaches for dealing with split-brain](../sources/failure-modes-wikipedia-split-brain.md#approaches-for-dealing-with-split-brain)
-15. [distributed-system-design-azure-throttling-pattern: Context and problem](../sources/distributed-system-design-azure-throttling-pattern.md#context-and-problem)
-16. [distributed-system-design-azure-throttling-pattern: Solution](../sources/distributed-system-design-azure-throttling-pattern.md#solution)
-17. [failure-modes-azure-queue-based-load-leveling: Solution](../sources/failure-modes-azure-queue-based-load-leveling.md#solution)
-18. [failure-modes-azure-queue-based-load-leveling: Problems and considerations](../sources/failure-modes-azure-queue-based-load-leveling.md#problems-and-considerations)
-19. [distributed-system-design-wikipedia-cascading-failure: In computer networks](../sources/distributed-system-design-wikipedia-cascading-failure.md#in-computer-networks)
-20. [distributed-system-design-azure-circuit-breaker-pattern: Context and problem](../sources/distributed-system-design-azure-circuit-breaker-pattern.md#context-and-problem)
-21. [distributed-system-design-azure-bulkhead-pattern: Solution](../sources/distributed-system-design-azure-bulkhead-pattern.md#solution)
-22. [distributed-system-design-azure-circuit-breaker-pattern: Solution](../sources/distributed-system-design-azure-circuit-breaker-pattern.md#solution)
-23. [failure-modes-azure-retry-storm-antipattern: Context and problem](../sources/failure-modes-azure-retry-storm-antipattern.md#context-and-problem)
-24. [distributed-system-design-azure-transient-fault-handling: Avoid antipatterns](../sources/distributed-system-design-azure-transient-fault-handling.md#avoid-antipatterns)
-25. [failure-modes-wikipedia-thundering-herd: Thundering herd problem](../sources/failure-modes-wikipedia-thundering-herd.md#thundering-herd-problem---wikipedia)
-26. [failure-modes-azure-retry-storm-antipattern: Solution](../sources/failure-modes-azure-retry-storm-antipattern.md#solution)
-27. [failure-modes-wikipedia-thundering-herd: Mitigation](../sources/failure-modes-wikipedia-thundering-herd.md#mitigation)
+3. [distributed-system-design-azure-transient-fault-handling: Why do transient faults occur in the cloud?](../sources/distributed-system-design-azure-transient-fault-handling.md#why-do-transient-faults-occur-in-the-cloud)
+4. [distributed-systems-kleppmann-cambridge-notes: Introduction to consensus](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction-to-consensus)
+5. [distributed-system-design-azure-retry-pattern: Retry strategies](../sources/distributed-system-design-azure-retry-pattern.md#retry-strategies)
+6. [failure-modes-wikipedia-thundering-herd: Mitigation](../sources/failure-modes-wikipedia-thundering-herd.md#mitigation)
+7. [distributed-system-design-wikipedia-fallacies: The fallacies](../sources/distributed-system-design-wikipedia-fallacies.md#the-fallacies)
+8. [distributed-system-design-azure-design-principles: Core principles](../sources/distributed-system-design-azure-design-principles.md#core-principles)
+9. [distributed-system-design-aws-well-architected-reliability-principles: Design principles](../sources/distributed-system-design-aws-well-architected-reliability-principles.md#design-principles)
+10. [distributed-system-design-azure-transient-fault-handling: Determine an appropriate retry count and interval](../sources/distributed-system-design-azure-transient-fault-handling.md#determine-an-appropriate-retry-count-and-interval)
+11. [distributed-system-design-wikipedia-fallacies: The effects of the fallacies](../sources/distributed-system-design-wikipedia-fallacies.md#the-effects-of-the-fallacies)
+12. [distributed-system-design-azure-retry-pattern: Idempotency](../sources/distributed-system-design-azure-retry-pattern.md#idempotency)
+13. [distributed-system-design-wikipedia-cap-theorem: Explanation](../sources/distributed-system-design-wikipedia-cap-theorem.md#explanation)
+14. [failure-modes-wikipedia-split-brain: State](../sources/failure-modes-wikipedia-split-brain.md#state)
+15. [failure-modes-wikipedia-split-brain: Approaches for dealing with split-brain](../sources/failure-modes-wikipedia-split-brain.md#approaches-for-dealing-with-split-brain)
+16. [distributed-system-design-azure-throttling-pattern: Context and problem](../sources/distributed-system-design-azure-throttling-pattern.md#context-and-problem)
+17. [distributed-system-design-azure-throttling-pattern: Solution](../sources/distributed-system-design-azure-throttling-pattern.md#solution)
+18. [failure-modes-azure-queue-based-load-leveling: Solution](../sources/failure-modes-azure-queue-based-load-leveling.md#solution)
+19. [failure-modes-azure-queue-based-load-leveling: Problems and considerations](../sources/failure-modes-azure-queue-based-load-leveling.md#problems-and-considerations)
+20. [distributed-system-design-wikipedia-cascading-failure: In computer networks](../sources/distributed-system-design-wikipedia-cascading-failure.md#in-computer-networks)
+21. [distributed-system-design-azure-circuit-breaker-pattern: Context and problem](../sources/distributed-system-design-azure-circuit-breaker-pattern.md#context-and-problem)
+22. [distributed-system-design-azure-bulkhead-pattern: Solution](../sources/distributed-system-design-azure-bulkhead-pattern.md#solution)
+23. [distributed-system-design-azure-circuit-breaker-pattern: Solution](../sources/distributed-system-design-azure-circuit-breaker-pattern.md#solution)
+24. [failure-modes-azure-retry-storm-antipattern: Context and problem](../sources/failure-modes-azure-retry-storm-antipattern.md#context-and-problem)
+25. [distributed-system-design-azure-transient-fault-handling: Avoid antipatterns](../sources/distributed-system-design-azure-transient-fault-handling.md#avoid-antipatterns)
+26. [failure-modes-wikipedia-thundering-herd: Thundering herd problem](../sources/failure-modes-wikipedia-thundering-herd.md#thundering-herd-problem---wikipedia)
+27. [failure-modes-azure-retry-storm-antipattern: Solution](../sources/failure-modes-azure-retry-storm-antipattern.md#solution)
 28. [distributed-system-design-wikipedia-cascading-failure: Example](../sources/distributed-system-design-wikipedia-cascading-failure.md#example)
 29. [distributed-system-design-azure-retry-pattern: Impact on performance](../sources/distributed-system-design-azure-retry-pattern.md#impact-on-performance)
 30. [distributed-system-design-azure-transient-fault-handling: Manage operations that continually fail](../sources/distributed-system-design-azure-transient-fault-handling.md#manage-operations-that-continually-fail)
 
 ## 11. Metadata
 
-- **Version:** 1.1
+- **Version:** 2.0
 - **Template:** survey
 - **Language:** en
 - **Model:** claude-opus-5-5
 - **Created:** 2026-10-27
-- **Last modified:** 2026-10-27
-- **Words:** 2,180 (about 9 min)
+- **Last modified:** 2026-11-24
+- **Words:** 2,238 (about 10 min)
 - **History:**
+  - 2.0 (2026-11-24): Regenerated under sllmwiki 1.4.0's guides: a new spine and outline, the shop example set up once in the Overview and shown in each item, statement headings for every item, and terms cited where defined
   - 1.1 (2026-10-27): Lint: cited the slow-node remedies, corrected the majority bound to more than half, and named clock skew and event ordering as left out.
   - 1.0 (2026-10-27): First version.
 - **Reading plan:**
-  1. `distributed-system-design-wikipedia-cap-theorem`, in full: medium relevance, authority C, undated
-  2. `distributed-system-design-aws-well-architected-reliability-principles`, in full: medium relevance, authority A, undated
-  3. `distributed-system-design-azure-design-principles`, in full: medium relevance, authority A, undated
-  4. `distributed-system-design-wikipedia-fallacies`, in full: high relevance, authority C, undated
-  5. `distributed-system-design-wikipedia-cascading-failure`, in full: high relevance, authority C, undated
-  6. `failure-modes-wikipedia-thundering-herd`, in full: high relevance, authority C, undated
-  7. `failure-modes-wikipedia-split-brain`, in full: high relevance, authority C, undated
-  8. `distributed-systems-kleppmann-cambridge-notes`, in full: high relevance, authority B, 2021-10-01
-  9. `distributed-system-design-azure-retry-pattern`, in full: high relevance, authority A, undated
-  10. `distributed-system-design-azure-circuit-breaker-pattern`, in full: high relevance, authority A, undated
-  11. `distributed-system-design-azure-bulkhead-pattern`, in full: high relevance, authority A, undated
-  12. `distributed-system-design-azure-throttling-pattern`, in full: high relevance, authority A, undated
-  13. `distributed-system-design-azure-transient-fault-handling`, in full: high relevance, authority A, undated
-  14. `failure-modes-azure-retry-storm-antipattern`, in full: high relevance, authority A, undated
-  15. `failure-modes-azure-queue-based-load-leveling`, in full: high relevance, authority A, undated
-  16. `how-does-raft-elect-a-leader-and-keep-every-servers-log-consistent`, in full: existing narrative, high relevance: built on
+  1. `how-does-raft-elect-a-leader-and-keep-every-servers-log-consistent`, in full: existing narrative, background
+  2. `distributed-system-design-wikipedia-cap-theorem`, in full: medium relevance, authority C, undated
+  3. `distributed-system-design-aws-well-architected-reliability-principles`, in full: medium relevance, authority A, undated
+  4. `distributed-system-design-azure-design-principles`, in full: medium relevance, authority A, undated
+  5. `distributed-system-design-wikipedia-fallacies`, in full: high relevance, authority C, undated
+  6. `distributed-system-design-wikipedia-cascading-failure`, in full: high relevance, authority C, undated
+  7. `failure-modes-wikipedia-thundering-herd`, in full: high relevance, authority C, undated
+  8. `failure-modes-wikipedia-split-brain`, in full: high relevance, authority C, undated
+  9. `distributed-systems-kleppmann-cambridge-notes`, in full: high relevance, authority B, 2021-10-01
+  10. `distributed-system-design-azure-retry-pattern`, in full: high relevance, authority A, undated
+  11. `distributed-system-design-azure-circuit-breaker-pattern`, in full: high relevance, authority A, undated
+  12. `distributed-system-design-azure-bulkhead-pattern`, in full: high relevance, authority A, undated
+  13. `distributed-system-design-azure-throttling-pattern`, in full: high relevance, authority A, undated
+  14. `distributed-system-design-azure-transient-fault-handling`, in full: high relevance, authority A, undated
+  15. `failure-modes-azure-retry-storm-antipattern`, in full: high relevance, authority A, undated
+  16. `failure-modes-azure-queue-based-load-leveling`, in full: high relevance, authority A, undated
   17. `raft-ongaro-dissertation-ch3-basic-raft`, abstract only: low relevance
   18. `raft-ongaro-dissertation-ch9-leader-election`, abstract only: low relevance
   19. `raft-etcd-raft-readme`, abstract only: low relevance
