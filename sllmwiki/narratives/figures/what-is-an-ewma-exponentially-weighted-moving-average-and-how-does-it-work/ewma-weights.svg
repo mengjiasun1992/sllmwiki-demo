@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
+<desc>Weight of a sample j steps old in server A's EWMA: alpha(1 - alpha)^j with alpha = 1 - e^(-0.1) = 0.0952, for j = 0 to 40; the weight halves every ln 2 / -ln(1 - alpha) = 6.93 samples. Dashed: a simple moving average of k = 2/alpha - 1 = 20 samples, weight 1/20 = 0.05 each.</desc>
+<rect width="640" height="360" fill="#ffffff"/>
+<line x1="70" y1="300.0" x2="620" y2="300.0" stroke="#d0d0d0" stroke-width="1"/>
+<text x="62" y="304.0" text-anchor="end" font-size="12" fill="#111111" font-family="Helvetica, Arial, sans-serif">0.00</text>
+<line x1="70" y1="246.0" x2="620" y2="246.0" stroke="#d0d0d0" stroke-width="1"/>
+<text x="62" y="250.0" text-anchor="end" font-size="12" fill="#111111" font-family="Helvetica, Arial, sans-serif">0.02</text>
+<line x1="70" y1="192.0" x2="620" y2="192.0" stroke="#d0d0d0" stroke-width="1"/>
+<text x="62" y="196.0" text-anchor="end" font-size="12" fill="#111111" font-family="Helvetica, Arial, sans-serif">0.04</text>
+<line x1="70" y1="138.0" x2="620" y2="138.0" stroke="#d0d0d0" stroke-width="1"/>
+<text x="62" y="142.0" text-anchor="end" font-size="12" fill="#111111" font-family="Helvetica, Arial, sans-serif">0.06</text>
+<line x1="70" y1="84.0" x2="620" y2="84.0" stroke="#d0d0d0" stroke-width="1"/>
+<text x="62" y="88.0" text-anchor="end" font-size="12" fill="#111111" font-family="Helvetica, Arial, sans-serif">0.08</text>
+<line x1="70" y1="30.0" x2="620" y2="30.0" stroke="#d0d0d0" stroke-width="1"/>
+<text x="62" y="34.0" text-anchor="end" font-size="12" fill="#111111" font-family="Helvetica, Arial, sans-serif">0.10</text>
+<text x="70.0" y="318" text-anchor="middle" font-size="12" fill="#111111" font-family="Helvetica, Arial, sans-serif">0</text>
+<text x="204.1" y="318" text-anchor="middle" font-size="12" fill="#111111" font-family="Helvetica, Arial, sans-serif">10</text>
+<text x="338.3" y="318" text-anchor="middle" font-size="12" fill="#111111" font-family="Helvetica, Arial, sans-serif">20</text>
+<text x="472.4" y="318" text-anchor="middle" font-size="12" fill="#111111" font-family="Helvetica, Arial, sans-serif">30</text>
+<text x="606.6" y="318" text-anchor="middle" font-size="12" fill="#111111" font-family="Helvetica, Arial, sans-serif">40</text>
+<line x1="70" y1="300" x2="620" y2="300" stroke="#111111" stroke-width="1.2"/>
+<line x1="70" y1="30" x2="70" y2="300" stroke="#111111" stroke-width="1.2"/>
+<rect x="72.0" y="43.1" width="9.4" height="256.9" fill="#1f5fa8"/>
+<rect x="85.4" y="67.5" width="9.4" height="232.5" fill="#1f5fa8"/>
+<rect x="98.8" y="89.6" width="9.4" height="210.4" fill="#1f5fa8"/>
+<rect x="112.3" y="109.7" width="9.4" height="190.3" fill="#1f5fa8"/>
+<rect x="125.7" y="127.8" width="9.4" height="172.2" fill="#1f5fa8"/>
+<rect x="139.1" y="144.2" width="9.4" height="155.8" fill="#1f5fa8"/>
+<rect x="152.5" y="159.0" width="9.4" height="141.0" fill="#1f5fa8"/>
+<rect x="165.9" y="172.4" width="9.4" height="127.6" fill="#1f5fa8"/>
+<rect x="179.3" y="184.5" width="9.4" height="115.5" fill="#1f5fa8"/>
+<rect x="192.7" y="195.5" width="9.4" height="104.5" fill="#1f5fa8"/>
+<rect x="206.2" y="205.5" width="9.4" height="94.5" fill="#1f5fa8"/>
+<rect x="219.6" y="214.5" width="9.4" height="85.5" fill="#1f5fa8"/>
+<rect x="233.0" y="222.6" width="9.4" height="77.4" fill="#1f5fa8"/>
+<rect x="246.4" y="230.0" width="9.4" height="70.0" fill="#1f5fa8"/>
+<rect x="259.8" y="236.6" width="9.4" height="63.4" fill="#1f5fa8"/>
+<rect x="273.2" y="242.7" width="9.4" height="57.3" fill="#1f5fa8"/>
+<rect x="286.6" y="248.1" width="9.4" height="51.9" fill="#1f5fa8"/>
+<rect x="300.1" y="253.1" width="9.4" height="46.9" fill="#1f5fa8"/>
+<rect x="313.5" y="257.5" width="9.4" height="42.5" fill="#1f5fa8"/>
+<rect x="326.9" y="261.6" width="9.4" height="38.4" fill="#1f5fa8"/>
+<rect x="340.3" y="265.2" width="9.4" height="34.8" fill="#1f5fa8"/>
+<rect x="353.7" y="268.5" width="9.4" height="31.5" fill="#1f5fa8"/>
+<rect x="367.1" y="271.5" width="9.4" height="28.5" fill="#1f5fa8"/>
+<rect x="380.5" y="274.2" width="9.4" height="25.8" fill="#1f5fa8"/>
+<rect x="394.0" y="276.7" width="9.4" height="23.3" fill="#1f5fa8"/>
+<rect x="407.4" y="278.9" width="9.4" height="21.1" fill="#1f5fa8"/>
+<rect x="420.8" y="280.9" width="9.4" height="19.1" fill="#1f5fa8"/>
+<rect x="434.2" y="282.7" width="9.4" height="17.3" fill="#1f5fa8"/>
+<rect x="447.6" y="284.4" width="9.4" height="15.6" fill="#1f5fa8"/>
+<rect x="461.0" y="285.9" width="9.4" height="14.1" fill="#1f5fa8"/>
+<rect x="474.5" y="287.2" width="9.4" height="12.8" fill="#1f5fa8"/>
+<rect x="487.9" y="288.4" width="9.4" height="11.6" fill="#1f5fa8"/>
+<rect x="501.3" y="289.5" width="9.4" height="10.5" fill="#1f5fa8"/>
+<rect x="514.7" y="290.5" width="9.4" height="9.5" fill="#1f5fa8"/>
+<rect x="528.1" y="291.4" width="9.4" height="8.6" fill="#1f5fa8"/>
+<rect x="541.5" y="292.2" width="9.4" height="7.8" fill="#1f5fa8"/>
+<rect x="554.9" y="293.0" width="9.4" height="7.0" fill="#1f5fa8"/>
+<rect x="568.4" y="293.6" width="9.4" height="6.4" fill="#1f5fa8"/>
+<rect x="581.8" y="294.3" width="9.4" height="5.7" fill="#1f5fa8"/>
+<rect x="595.2" y="294.8" width="9.4" height="5.2" fill="#1f5fa8"/>
+<rect x="608.6" y="295.3" width="9.4" height="4.7" fill="#1f5fa8"/>
+<polyline points="70.0,165.0 338.3,165.0 338.3,300.0" fill="none" stroke="#b03a2e" stroke-width="2.5" stroke-dasharray="8 5"/>
+<text x="346.3" y="154.2" font-size="13" fill="#111111" font-family="Helvetica, Arial, sans-serif">SMA of 20 samples: 0.05 each, then 0 (dashed)</text>
+<line x1="169.7" y1="171.5" x2="169.7" y2="70.5" stroke="#111111" stroke-width="1"/>
+<text x="172.0" y="75.9" font-size="13" fill="#111111" font-family="Helvetica, Arial, sans-serif">half-life 6.9 samples: weight 0.048, half of 0.095</text>
+<text x="345.0" y="345" text-anchor="middle" font-size="14" fill="#111111" font-family="Helvetica, Arial, sans-serif">sample age (samples, one per second)</text>
+<text x="18" y="165.0" text-anchor="middle" font-size="14" fill="#111111" font-family="Helvetica, Arial, sans-serif" transform="rotate(-90 18 165.0)">weight in the average</text>
+</svg>

@@ -2,135 +2,163 @@
 
 ## 1. Abstract
 
-Anyone who builds or runs software that spans more than one machine needs to know what makes it a distributed system, because that is what decides which problems they will face. A distributed system is a set of independent computers, each with its own memory, that work toward a shared task by sending each other messages over a network. What sets it apart from one computer is that its parts fail independently, and a node often cannot tell whether a message, or another node, has failed.
+Anyone who builds software that runs on more than one machine needs to know what makes it a distributed system, because that decides which problems they will meet. A distributed system is a set of independent nodes, each with its own memory, that work on one task by sending each other messages over a network. Its parts fail independently, and a node that gets no reply cannot tell what happened at the other end.
 
 **Key takeaways:**
 
-- Independent nodes, private memory, coordination only by message passing.
-- There is no single agreed definition; the wiki uses van Steen and Tanenbaum's, with its two characteristics.
-- Partial failure is the defining difficulty: some parts fail while the rest keep running.
-- A request over the network can end in an unknown outcome.
-- There is no global clock.
+- Nodes with private memory work on one task, coordinating only by messages.
+- There is no single agreed definition; the wiki works with van Steen and Tanenbaum's.
+- Partial failure is the defining difficulty: one part breaks, the rest run on.
+- A request that gets no reply has an unknown outcome.
+- The nodes share no clock, and none sees the whole system.
 
 ## 2. Terminology
 
 | Term | Definition |
 |---|---|
-| **Node** | One computing element of a distributed system: a device or a software process. |
-| **Message passing** | Communication by sending and receiving messages over a network, with no shared memory. |
-| **Partial failure** | Some nodes or links fail while the others keep running. |
-| **Fault tolerance** | The system as a whole keeps working despite a fault in one of its parts. |
+| **Node** | One computing element of a distributed system: a hardware device or a software process [\[1\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#2-what-is-a-distributed-system). |
+| **Message passing** | Communication by sending messages over a network, with no shared memory [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction). |
+| **Fault** | One part of the system, such as a node or a network link, not working [\[3\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability). |
+| **Failure** | The system as a whole not working [\[3\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability). |
+| **Partial failure** | Some parts of the system have a fault while the rest keep running [\[4\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#about-distributed-systems). |
+| **RDMA** | Remote direct memory access: computers access each other's memory over a network [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction). |
+| **TCP** | The network protocol that splits a large message into small packets and reassembles them at the recipient [\[5\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#distributed-systems-and-computer-networking). |
 | **[→]** | Our own reasoning, after a statement or on a section's heading: a conclusion, comparison or example no cited source states. |
 
 ## 3. Overview
 
-Loading a web page is a distributed system at work. Your browser, a client, sends a request message to a web server, and the server sends back a response message with the page [\[1\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#distributed-systems-and-computer-networking). Two computers that share nothing but a network cooperate to do one thing for you [→].
+A distributed system is what you have once one job runs on several computers that talk over a network [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction). The web is one you use every day [\[5\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#distributed-systems-and-computer-networking). It matters because its parts break on their own, and the software must cope [\[4\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#about-distributed-systems). People build them anyway: some jobs are distributed by nature, and several nodes can be more reliable, nearer their users and able to hold more data than one machine [\[4\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#about-distributed-systems).
 
-You meet distributed systems whenever a service has more than one machine behind it: paying in an online shop sends a request to a payments service, which talks to a card network, which talks to your bank [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#example-remote-procedure-calls-rpc). They matter because they behave unlike a single program. A remote call looks like a local one, but the service may crash during the call, and a message may be lost or delayed; if no response comes back, the caller doesn't know whether the server received and processed the request [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#example-remote-procedure-calls-rpc). Leslie Lamport defined a distributed system by its failures, as "a system in which the failure of a computer you didn’t even know existed can render your own computer unusable" [\[3\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction).
+The running example: a customer pays £3.99 by card in an online shop. The shop's server sends a payment request to a payments service run by another company, which goes through a card network, such as Visa, to the card's bank [\[6\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#example-remote-procedure-calls-rpc). In the shop's code, the payment looks like a local function call [\[6\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#example-remote-procedure-calls-rpc). Behind it, the shop sends a request message, m1, and waits for the response, m2: "success" [\[6\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#example-remote-procedure-calls-rpc). Figure 3-1 shows the four machines and their messages.
+
+```mermaid
+sequenceDiagram
+    participant S as Online shop
+    participant P as Payments service
+    participant C as Card network
+    participant B as Card's bank
+    S->>P: m1: charge £3.99
+    P->>C: request
+    C->>B: request
+    B-->>C: reply
+    C-->>P: reply
+    P-->>S: m2: success
+```
+
+*Figure 3-1: One payment crosses four machines; each arrow is a message, the only way they share anything [\[6\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#example-remote-procedure-calls-rpc), [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction).*
+
+Ideally, a remote call looks the same as a local one [\[6\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#example-remote-procedure-calls-rpc). In practice it does not: the payments service may crash during the call, and m1 or m2 may be lost or delayed [\[6\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#example-remote-procedure-calls-rpc).
 
 ## 4. Definition
 
 ### 4.1 In short
 
-A distributed system is multiple computers, called nodes, communicating via a network and trying to achieve some task together [\[3\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction). Each node has its own memory, so the nodes can coordinate only by passing messages [\[4\]](../sources/distributed-systems-wikipedia-distributed-computing.md#introduction). In the running example, the browser and the server are the nodes, and the HTTP request and response are the messages [→].
-
-```mermaid
-flowchart LR
-    subgraph A[Node: browser]
-        MA[(own memory)]
-    end
-    subgraph B[Node: web server]
-        MB[(own memory)]
-    end
-    A -- request message --> B
-    B -- response message --> A
-    classDef node fill:#e8f0fe,color:#111
-    class A,B node
-```
-
-*Figure 4-1: Two nodes, each with private memory, that cooperate only by exchanging messages over a network.*
+A distributed system is several computers, called nodes, that communicate over a network and try to achieve a task together [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction). Each node has its own memory, so the nodes coordinate only by passing messages [\[7\]](../sources/distributed-systems-wikipedia-distributed-computing.md#introduction). In the payment, the four machines are the nodes, m1 and m2 are messages, and taking the payment is the task [→].
 
 ### 4.2 Precisely
 
-The field has no single agreed definition. Van Steen and Tanenbaum note that the literature's definitions are neither satisfactory nor in agreement, and give a loose characterization instead: [\[5\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#2-what-is-a-distributed-system)
+The field has no single agreed definition [\[7\]](../sources/distributed-systems-wikipedia-distributed-computing.md#introduction). Van Steen and Tanenbaum, finding the literature's definitions unsatisfactory and in disagreement, give a loose characterization [\[1\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#2-what-is-a-distributed-system):
 
-> "A distributed system is a collection of autonomous computing elements that appears to its users as a single coherent system." [\[5\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#2-what-is-a-distributed-system)
+> "A distributed system is a collection of autonomous computing elements that appears to its users as a single coherent system." [\[1\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#2-what-is-a-distributed-system)
 
-This wiki works with it, read through its two characteristics [→].
+This wiki works with it, through its two characteristics [→].
 
-- **Autonomous computing elements.** Each node can act on its own, yet the nodes are programmed toward common goals, which they reach by exchanging messages [\[6\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#21-characteristic-1-collection-of-autonomous-computing-elements). A node may be a hardware device or a software process, and the definition assumes nothing about the kind of nodes or how they are connected [\[5\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#2-what-is-a-distributed-system).
-- **A single coherent system.** Users, people or applications, believe they deal with one system, so the nodes must collaborate [\[5\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#2-what-is-a-distributed-system). The authors ask only that it *appear* coherent, behaving as its users expect no matter where, when and how they interact with it, because a full single-system view is often asking too much [\[7\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#22-characteristic-2-single-coherent-system).
+- **Autonomous computing elements.** Each node can act on its own, but the nodes are programmed toward common goals, which they reach by exchanging messages [\[8\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#21-characteristic-1-collection-of-autonomous-computing-elements). The definition assumes nothing about the kind of nodes or how they are connected [\[1\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#2-what-is-a-distributed-system).
+- **A single coherent system.** Users, people or applications, believe they deal with one system, so the nodes must collaborate [\[1\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#2-what-is-a-distributed-system). The authors ask only that it *appear* coherent, behaving as users expect wherever, whenever and however they use it; a full single-system view is often too much to ask [\[9\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#22-characteristic-2-single-coherent-system). The customer sees one checkout page, not four organizations [→].
 
-Three nuances matter beyond the short version. First, a node need not be a whole computer: the word "distributed" now also covers autonomous processes on one physical computer that interact by message passing [\[4\]](../sources/distributed-systems-wikipedia-distributed-computing.md#introduction). Second, coherence is a goal, not a test: Wikipedia adds that each computer may instead have its own user, with the system coordinating shared resources or providing communication between them [\[4\]](../sources/distributed-systems-wikipedia-distributed-computing.md#introduction). The web fits that second reading better than the first: you know the page comes from elsewhere [→]. Third, message passing describes most practical systems, not all: some supercomputers offer limited distributed shared memory, and remote direct memory access (RDMA) lets computers access each other's memory over a network [\[3\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction).
+Three nuances go beyond the short version.
+
+1. **A node need not be a computer.** The short version says computers [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction), but van Steen and Tanenbaum's node can be a software process [\[1\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#2-what-is-a-distributed-system). The word "distributed" now also covers autonomous processes on one physical computer that interact by message passing [\[7\]](../sources/distributed-systems-wikipedia-distributed-computing.md#introduction). So what decides membership is private memory and messages, not separate machines [→].
+2. **Coherence is a goal, not a test.** In another kind of distributed system, each computer has its own user, and the system coordinates shared resources or communication between them [\[7\]](../sources/distributed-systems-wikipedia-distributed-computing.md#introduction). Two phones exchanging a message form one, though neither user sees a single system [→].
+3. **Message passing is the rule, not a law.** Some supercomputers offer limited distributed shared memory, and RDMA lets computers reach each other's memory, yet most practical distributed systems use message passing [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction).
 
 ## 5. Key ideas
 
-**Partial failure.** Because nodes are networked and independent, at any moment only part of the system may have failed, and in a distributed system such failures are particularly hard to hide [\[7\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#22-characteristic-2-single-coherent-system). On a single computer a failing part usually crashes the whole machine, so software needn't handle it; a distributed system often wants the rest to keep working, and dealing with faults is what makes distributed computing fundamentally different, and often harder [\[8\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#about-distributed-systems). In a remote call, the service, the messages and the network can each go wrong on their own [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#example-remote-procedure-calls-rpc).
+**Parts fail independently.** On one computer, a faulty part usually crashes the whole machine, so software need not handle it [\[4\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#about-distributed-systems). In a distributed system, a node can crash or slow down, and the network can fail, at any moment [\[4\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#about-distributed-systems). A fault in one part while the rest keep running is a partial failure, which is hard to hide from users [\[4\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#about-distributed-systems), [\[9\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#22-characteristic-2-single-coherent-system). Leslie Lamport put it this way: a computer you never knew existed can fail and make yours unusable [\[9\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#22-characteristic-2-single-coherent-system). In the payment, the bank can be down while the shop's server runs on [→]. Systems therefore aim for fault tolerance: the whole keeps working despite faults, up to a maximum number, such as fewer than half of the nodes crashed [\[3\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability).
 
-**Unknown outcomes.** A failure may go unnoticed: communication may fail and processes may crash without the others knowing, nondeterministically [\[8\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#about-distributed-systems). So a request that gets no response has an unknown outcome: the client can resend it, but that may perform it twice, such as charging a card twice, and since it can't wait forever, it gives up after a timeout [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#example-remote-procedure-calls-rpc). If the page never loads, the browser cannot tell a lost request from a lost reply [→].
+**A missing reply has an unknown outcome.** Messages may be lost and nodes may crash without the others knowing [\[4\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#about-distributed-systems). If the shop sends m1 and no m2 arrives, the shop cannot tell whether the payments service received and processed the request [\[6\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#example-remote-procedure-calls-rpc). Resending m1 may charge the card twice, as Figure 5-1 shows [\[6\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#example-remote-procedure-calls-rpc). The shop cannot wait forever, so it gives up after a timeout [\[6\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#example-remote-procedure-calls-rpc).
 
-**No global clock.** Each independent node has its own notion of time, which raises fundamental questions of synchronization and coordination [\[6\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#21-characteristic-1-collection-of-autonomous-computing-elements).
+```mermaid
+sequenceDiagram
+    participant S as Online shop
+    participant P as Payments service
+    S->>P: m1: charge £3.99
+    Note over P: charges the card
+    P--xS: m2 is lost
+    Note over S: timeout: charged or not?
+    S->>P: m1 again
+    Note over P: charges the card again
+```
 
-**A limited view.** The system's structure, its topology, latency and number of computers, is not known in advance and may change while it runs, and each computer sees only part of it [\[4\]](../sources/distributed-systems-wikipedia-distributed-computing.md#introduction).
+*Figure 5-1: When m2 is lost, the shop cannot know whether the payment happened, and resending m1 can charge the card twice [\[6\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#example-remote-procedure-calls-rpc).*
 
-**Why build one anyway.** Some tasks are inherently distributed, such as messaging a friend's phone; more nodes can be more reliable than one, serve users from nearby, and handle problems too big for one machine [\[8\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#about-distributed-systems).
+**No node sees the whole system.** Each node has its own notion of time: there is no global clock, which makes synchronization and coordination hard [\[8\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#21-characteristic-1-collection-of-autonomous-computing-elements). Each computer also sees only part of the system [\[7\]](../sources/distributed-systems-wikipedia-distributed-computing.md#introduction). Its topology, latency and number of computers are not known in advance and may change while it runs [\[7\]](../sources/distributed-systems-wikipedia-distributed-computing.md#introduction). The shop knows the bank only through the replies that reach it [→].
 
 ## 6. Boundaries
 
-**Parallel computing.** The two overlap with no clear line, but a rough rule separates them: parallel processors may share memory, while distributed processors each have private memory and exchange messages [\[9\]](../sources/distributed-systems-wikipedia-distributed-computing.md#parallel-and-distributed-computing). Threads in one process are therefore out: they share an address space [\[3\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction).
+Three cases test the edge of the definition.
 
-**Computer networking.** Networking gets messages to their destination; distributed systems build on that and decide what messages to send and how to process them [\[1\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#distributed-systems-and-computer-networking). To a distributed system, the HTTP request is one message however many TCP packets carry it [\[1\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#distributed-systems-and-computer-networking).
+| Case | In or out | Why |
+|---|---|---|
+| The payments service runs as processes on one machine that exchange messages | In | In the wider sense, autonomous processes on one computer that pass messages form a distributed system [\[7\]](../sources/distributed-systems-wikipedia-distributed-computing.md#introduction). |
+| The payments service runs as threads in one process | Out | Threads in one process share an address space, so they pass data through memory, not messages [\[2\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction). |
+| A multiprocessor whose processors share memory | Out, roughly | Parallel and distributed computing overlap with no clear line; roughly, parallel processors may share memory, distributed ones have private memory and exchange messages [\[10\]](../sources/distributed-systems-wikipedia-distributed-computing.md#parallel-and-distributed-computing). |
 
-**The common mistake.** Newcomers assume the network is reliable, secure and homogeneous, that the topology does not change, that latency and transport cost are zero, that bandwidth is infinite and that there is one administrator [\[10\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#35-pitfalls). These are Peter Deutsch's false assumptions, and ignoring them at design time leads to flaws patched later [\[10\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#35-pitfalls). The principles that answer them are in [What are the common design tenets and principles for distributed systems?](what-are-the-common-design-tenets-and-principles-for-distributed-systems.md).
+**Computer networking is the layer below.** Networking gets messages to their destination; distributed systems build on it and decide what messages to send and how to process them [\[5\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#distributed-systems-and-computer-networking). To the payment, m1 is one message, however many TCP packets carry it [\[5\]](../sources/distributed-systems-kleppmann-cambridge-notes.md#distributed-systems-and-computer-networking).
+
+**The common mistake is to trust the network.** Peter Deutsch listed the false assumptions newcomers make: a reliable, secure, homogeneous network with fixed topology, zero latency and transport cost, infinite bandwidth and one administrator [\[11\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#35-pitfalls). Ignoring them at design time gives flaws patched later [\[11\]](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#35-pitfalls). [Distrust the network](what-are-the-common-design-tenets-and-principles-for-distributed-systems.md#512-distrust-the-network) answers them.
 
 ## 7. Where to go next
 
-- How should a distributed system handle failures: timeouts, retries and backoff?
-- How do nodes order events without a global clock?
-- How do nodes agree on one value: consensus and Raft?
-- What trade-off does the CAP theorem describe?
+- [Can a timeout tell a slow node from a dead one?](what-are-the-classic-failure-modes-of-large-scale-distributed-systems-and-their-mitigations.md#512-a-slow-node-looks-like-a-dead-one)
+- [How can a resent payment avoid charging twice?](what-are-the-common-design-tenets-and-principles-for-distributed-systems.md#523-make-operations-idempotent)
+- [How do nodes order events without a global clock?](what-are-the-common-design-tenets-and-principles-for-distributed-systems.md#542-order-events-without-a-global-clock)
+- [How do nodes agree on one history despite faults?](how-does-raft-elect-a-leader-and-keep-every-servers-log-consistent.md)
+- [What does a system give up when a partition splits it?](what-are-the-common-design-tenets-and-principles-for-distributed-systems.md#541-choose-consistency-deliberately)
 
 ## 8. References
 
 ### 8.1 Sources read
 
-- [distributed-systems-kleppmann-cambridge-notes](../sources/distributed-systems-kleppmann-cambridge-notes.md): the short definition, Lamport's definition by failure, a remote call and its unknown outcome, reasons to distribute, partial failure, and the line between distributed systems and networking.
-- [distributed-systems-van-steen-tanenbaum-brief-intro](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md): the definition the wiki works with, its two characteristics, no global clock, and the false assumptions.
-- [distributed-systems-wikipedia-distributed-computing](../sources/distributed-systems-wikipedia-distributed-computing.md): the commonly cited properties and the parallel versus distributed criterion.
+- [distributed-systems-kleppmann-cambridge-notes](../sources/distributed-systems-kleppmann-cambridge-notes.md): the short definition, the payment example and its unknown outcome, why to distribute, partial failure, fault and failure, fault tolerance, and the line between distributed systems and networking.
+- [distributed-systems-van-steen-tanenbaum-brief-intro](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md): the definition the wiki works with, its two characteristics, no global clock, Lamport's description, and Deutsch's false assumptions.
+- [distributed-systems-wikipedia-distributed-computing](../sources/distributed-systems-wikipedia-distributed-computing.md): the commonly cited properties, the wider sense of "distributed", and the rough line between parallel and distributed computing.
 
 ### 8.2 Citations
 
-1. [distributed-systems-kleppmann-cambridge-notes: Distributed systems and computer networking](../sources/distributed-systems-kleppmann-cambridge-notes.md#distributed-systems-and-computer-networking)
-2. [distributed-systems-kleppmann-cambridge-notes: Example: Remote Procedure Calls (RPC)](../sources/distributed-systems-kleppmann-cambridge-notes.md#example-remote-procedure-calls-rpc)
-3. [distributed-systems-kleppmann-cambridge-notes: Introduction](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction)
-4. [distributed-systems-wikipedia-distributed-computing: Introduction](../sources/distributed-systems-wikipedia-distributed-computing.md#introduction)
-5. [distributed-systems-van-steen-tanenbaum-brief-intro: 2 What is a distributed system?](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#2-what-is-a-distributed-system)
-6. [distributed-systems-van-steen-tanenbaum-brief-intro: 2.1 Characteristic 1: collection of autonomous computing elements](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#21-characteristic-1-collection-of-autonomous-computing-elements)
-7. [distributed-systems-van-steen-tanenbaum-brief-intro: 2.2 Characteristic 2: single coherent system](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#22-characteristic-2-single-coherent-system)
-8. [distributed-systems-kleppmann-cambridge-notes: About distributed systems](../sources/distributed-systems-kleppmann-cambridge-notes.md#about-distributed-systems)
-9. [distributed-systems-wikipedia-distributed-computing: Parallel and distributed computing](../sources/distributed-systems-wikipedia-distributed-computing.md#parallel-and-distributed-computing)
-10. [distributed-systems-van-steen-tanenbaum-brief-intro: 3.5 Pitfalls](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#35-pitfalls)
+1. [distributed-systems-van-steen-tanenbaum-brief-intro: 2 What is a distributed system?](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#2-what-is-a-distributed-system)
+2. [distributed-systems-kleppmann-cambridge-notes: Introduction](../sources/distributed-systems-kleppmann-cambridge-notes.md#introduction)
+3. [distributed-systems-kleppmann-cambridge-notes: Fault tolerance and high availability](../sources/distributed-systems-kleppmann-cambridge-notes.md#fault-tolerance-and-high-availability)
+4. [distributed-systems-kleppmann-cambridge-notes: About distributed systems](../sources/distributed-systems-kleppmann-cambridge-notes.md#about-distributed-systems)
+5. [distributed-systems-kleppmann-cambridge-notes: Distributed systems and computer networking](../sources/distributed-systems-kleppmann-cambridge-notes.md#distributed-systems-and-computer-networking)
+6. [distributed-systems-kleppmann-cambridge-notes: Example: Remote Procedure Calls (RPC)](../sources/distributed-systems-kleppmann-cambridge-notes.md#example-remote-procedure-calls-rpc)
+7. [distributed-systems-wikipedia-distributed-computing: Introduction](../sources/distributed-systems-wikipedia-distributed-computing.md#introduction)
+8. [distributed-systems-van-steen-tanenbaum-brief-intro: 2.1 Characteristic 1: collection of autonomous computing elements](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#21-characteristic-1-collection-of-autonomous-computing-elements)
+9. [distributed-systems-van-steen-tanenbaum-brief-intro: 2.2 Characteristic 2: single coherent system](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#22-characteristic-2-single-coherent-system)
+10. [distributed-systems-wikipedia-distributed-computing: Parallel and distributed computing](../sources/distributed-systems-wikipedia-distributed-computing.md#parallel-and-distributed-computing)
+11. [distributed-systems-van-steen-tanenbaum-brief-intro: 3.5 Pitfalls](../sources/distributed-systems-van-steen-tanenbaum-brief-intro.md#35-pitfalls)
 
 ## 9. Metadata
 
-- **Version:** 1.1
+- **Version:** 2.0
 - **Template:** concept_brief_overview
 - **Language:** en
 - **Model:** claude-opus-5-5
 - **Created:** 2026-10-23
-- **Last modified:** 2026-10-25
-- **Words:** 1,243 (about 5 min)
+- **Last modified:** 2026-11-24
+- **Words:** 1,393 (about 6 min)
 - **History:**
+  - 2.0 (2026-11-24): Regenerated under sllmwiki 1.4.0's guides: a new spine on one card payment, set up once; fault and failure named as the failure-modes survey names them; a lost reply's unknown outcome drawn as a sequence; boundaries with parallel computing and networking in one table
   - 1.1 (2026-10-25): Openly licensed sources only, for a public demo: the AWS article's claims re-cited to Kleppmann's notes (a remote call and its unknown outcome) and Lamport's definition to his quotation there; the batch-cluster boundary removed
   - 1.0 (2026-10-23): First version.
 - **Reading plan:**
-  1. `what-are-the-common-design-tenets-and-principles-for-distributed-systems`, in full: existing narrative, medium relevance
-  2. `distributed-systems-wikipedia-distributed-computing`, in full: medium relevance, authority B, undated
-  3. `distributed-systems-van-steen-tanenbaum-brief-intro`, in full: high relevance, authority A, 2016-09-01
-  4. `distributed-systems-kleppmann-cambridge-notes`, in full: high relevance, authority A, 2021-10-01
-  5. `distributed-system-design-wikipedia-fallacies`, abstract only: low relevance
-  6. `distributed-system-design-aws-well-architected-reliability-principles`, abstract only: low relevance
-  7. `ewma-linkerd-beyond-round-robin`, abstract only: low relevance
+  1. `what-are-the-common-design-tenets-and-principles-for-distributed-systems`, in full: existing narrative, background
+  2. `how-does-raft-elect-a-leader-and-keep-every-servers-log-consistent`, in full: existing narrative, background
+  3. `distributed-systems-wikipedia-distributed-computing`, in full: medium relevance, authority B, undated
+  4. `distributed-systems-van-steen-tanenbaum-brief-intro`, in full: high relevance, authority A, 2016-09-01
+  5. `distributed-systems-kleppmann-cambridge-notes`, in full: high relevance, authority A, 2021-10-01
+  6. `distributed-system-design-wikipedia-fallacies`, abstract only: low relevance
+  7. `distributed-system-design-aws-well-architected-reliability-principles`, abstract only: low relevance
   8. `distributed-system-design-azure-design-principles`, abstract only: low relevance
   9. `distributed-system-design-azure-retry-pattern`, abstract only: low relevance
   10. `distributed-system-design-azure-circuit-breaker-pattern`, abstract only: low relevance
@@ -143,10 +171,11 @@ Three nuances matter beyond the short version. First, a node need not be a whole
   17. `distributed-system-design-waldo-note-on-distributed-computing`, not read: a link, no saved copy
   18. `distributed-systems-lamport-definition-email`, not read: a link, no saved copy
   19. `distributed-system-design-aws-challenges-distributed-systems`, not read: a link, no saved copy
-  20. `distributed-system-design-hamilton-internet-scale-services`, not read: a link, no saved copy
-  21. `distributed-system-design-aws-timeouts-retries-backoff`, not read: a link, no saved copy
-  22. `distributed-system-design-google-sre-cascading-failures`, not read: a link, no saved copy
-  23. `distributed-system-design-brewer-cap-twelve-years-later`, not read: a link, no saved copy
-  24. `distributed-system-design-ongaro-raft-consensus`, not read: a link, no saved copy
-  25. `distributed-system-design-lamport-time-clocks`, not read: a link, no saved copy
-  26. `distributed-system-design-saltzer-end-to-end-arguments`, not read: a link, no saved copy
+  20. `ewma-linkerd-beyond-round-robin`, not read: a link, no saved copy
+  21. `distributed-system-design-hamilton-internet-scale-services`, not read: a link, no saved copy
+  22. `distributed-system-design-aws-timeouts-retries-backoff`, not read: a link, no saved copy
+  23. `distributed-system-design-google-sre-cascading-failures`, not read: a link, no saved copy
+  24. `distributed-system-design-brewer-cap-twelve-years-later`, not read: a link, no saved copy
+  25. `distributed-system-design-ongaro-raft-consensus`, not read: a link, no saved copy
+  26. `distributed-system-design-lamport-time-clocks`, not read: a link, no saved copy
+  27. `distributed-system-design-saltzer-end-to-end-arguments`, not read: a link, no saved copy

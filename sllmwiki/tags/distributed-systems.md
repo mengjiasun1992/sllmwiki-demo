@@ -11,7 +11,7 @@ Systems of independent networked computers that coordinate by passing messages t
 
 ## Narratives
 
-- [What is a distributed system?](../narratives/what-is-a-distributed-system.md) · 5 min
+- [What is a distributed system?](../narratives/what-is-a-distributed-system.md) · 6 min
 - [What are the common design tenets and principles for distributed systems?](../narratives/what-are-the-common-design-tenets-and-principles-for-distributed-systems.md) · 10 min (supporting)
 
 ## Sources
