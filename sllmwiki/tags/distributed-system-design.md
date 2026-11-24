@@ -1,6 +1,6 @@
 # distributed-system-design
 
-<!-- sllmwiki:generated: rewritten by wiki-check.py --fix; edit tags.yaml and the manifests instead -->
+<!-- sllmwiki:generated: rewritten by sllmwiki wiki-check --fix; edit tags.yaml and the manifests instead -->
 
 Design tenets and principles for building distributed systems: failure, consistency, scalability, idempotency, backpressure
 
@@ -15,7 +15,7 @@ Design tenets and principles for building distributed systems: failure, consiste
 
 - [What are the common design tenets and principles for distributed systems?](../narratives/what-are-the-common-design-tenets-and-principles-for-distributed-systems.md) · 10 min
 - [What is a distributed system?](../narratives/what-is-a-distributed-system.md) · 5 min (supporting)
-- [How does Raft elect a leader and keep every server's log consistent through crashes and network partitions?](../narratives/how-does-raft-elect-a-leader-and-keep-every-servers-log-consistent.md) · 9 min (supporting)
+- [How does Raft elect a leader and keep every server's log consistent through crashes and network partitions?](../narratives/how-does-raft-elect-a-leader-and-keep-every-servers-log-consistent.md) · 10 min (supporting)
 
 ## Sources
 

@@ -1,6 +1,6 @@
 # consensus
 
-<!-- sllmwiki:generated: rewritten by wiki-check.py --fix; edit tags.yaml and the manifests instead -->
+<!-- sllmwiki:generated: rewritten by sllmwiki wiki-check --fix; edit tags.yaml and the manifests instead -->
 
 Consensus: getting a group of servers to agree on values despite failures, the core of replicated state machines
 

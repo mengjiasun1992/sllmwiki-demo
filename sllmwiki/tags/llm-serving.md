@@ -1,6 +1,6 @@
 # llm-serving
 
-<!-- sllmwiki:generated: rewritten by wiki-check.py --fix; edit tags.yaml and the manifests instead -->
+<!-- sllmwiki:generated: rewritten by sllmwiki wiki-check --fix; edit tags.yaml and the manifests instead -->
 
 Serving large language models: running inference for many requests on limited accelerator memory
 

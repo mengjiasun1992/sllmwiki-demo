@@ -1,6 +1,6 @@
 # distributed-systems
 
-<!-- sllmwiki:generated: rewritten by wiki-check.py --fix; edit tags.yaml and the manifests instead -->
+<!-- sllmwiki:generated: rewritten by sllmwiki wiki-check --fix; edit tags.yaml and the manifests instead -->
 
 Systems of independent networked computers that coordinate by passing messages to appear as one system
 

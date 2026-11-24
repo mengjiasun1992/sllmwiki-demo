@@ -1,6 +1,6 @@
 # ewma
 
-<!-- sllmwiki:generated: rewritten by wiki-check.py --fix; edit tags.yaml and the manifests instead -->
+<!-- sllmwiki:generated: rewritten by sllmwiki wiki-check --fix; edit tags.yaml and the manifests instead -->
 
 The exponentially weighted moving average: its recurrence, smoothing factor, and uses in software
 
