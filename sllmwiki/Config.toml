@@ -22,14 +22,20 @@ reader_annotations = false  # true: readers' own annotations, [* date username] 
 # max_words = 3000
 # abstract_words = [150, 300]
 
+[structural-llm-wiki-templates.concept_brief_overview]
+max_words = 1300            # 1.4.0's guides ask for an example set up in full and each source view stated; the distributed-system brief needs about 1,240
+
 [structural-llm-wiki-templates.technical_brief_overview]
-max_words = 2400            # 1.4.0's guide adds a toy build-up and worked steps; Raft's brief needs about 2,300
+max_words = 2600            # a toy build-up, worked steps and their captions; the EWMA brief needs about 2,480
 
 [structural-llm-wiki-templates.survey]
-max_words = 2400            # room for figures' captions; the failure-modes survey needs about 2,250
+max_words = 2600            # figures' captions and worked tensions; the design-tenets survey needs about 2,450
 
 [structural-llm-wiki-templates.comparison]
-max_words = 1700            # room for figures' captions; the attention comparison needs about 1,550
+max_words = 1900            # figures' captions and derived rules; the EWMA comparison needs about 1,830
+
+[structural-llm-wiki-templates.skim_read]
+max_words = 2200            # the key part worked on the paper's own examples; the CALM primer needs about 2,060
 
 [structural-llm-wiki-addons]
 obsidian = true             # true: set the wiki up to open sllmwiki/ as an Obsidian vault (rerun /sllmwiki:init)
