@@ -19,6 +19,9 @@ max_image_kb = 100          # an SVG or PNG figure's size, at most
 # max_words = 3000
 # abstract_words = [150, 300]
 
+[structural-llm-wiki-templates.technical_brief_overview]
+max_words = 2400            # 1.4.0's guide adds a toy build-up and worked steps; Raft's brief needs about 2,300
+
 [structural-llm-wiki-addons]
 obsidian = true             # true: set the wiki up to open sllmwiki/ as an Obsidian vault (rerun /sllmwiki:init)
 
