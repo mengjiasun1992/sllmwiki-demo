@@ -8,8 +8,8 @@ The Raft consensus algorithm: leader election, log replication and safety for a 
 
 ## Narratives
 
-- [How does Raft elect a leader and keep every server's log consistent through crashes and network partitions?](../narratives/how-does-raft-elect-a-leader-and-keep-every-servers-log-consistent.md) · 10 min
-- [Can you walk me through the classic failure modes in large scale distributed system and what are the common solutions to prevent or mitigate each one?](../narratives/what-are-the-classic-failure-modes-of-large-scale-distributed-systems-and-their-mitigations.md) · 10 min (supporting)
+- [How does Raft elect a leader and keep every server's log consistent through crashes and network partitions?](../narratives/how-does-raft-elect-a-leader-and-keep-every-servers-log-consistent.md) · 12 min
+- [Can you walk me through the classic failure modes in large scale distributed system and what are the common solutions to prevent or mitigate each one?](../narratives/what-are-the-classic-failure-modes-of-large-scale-distributed-systems-and-their-mitigations.md) · 11 min (supporting)
 
 ## Sources
 
