@@ -263,11 +263,11 @@ When samples arrive evenly, $\alpha$ is computed once [\[3\]](../sources/ewma-wi
   - 1.0 (2026-10-23): First version.
 - **Reading plan:**
   1. `when-should-software-use-an-ewma-instead-of-other-moving-averages`, in full: existing narrative, background
-  2. `moving-averages-wikipedia-moving-average`, in full: medium relevance, authority B, undated
-  3. `ewma-wikipedia-load-computing`, in full: medium relevance, authority B, undated
-  4. `ewma-wikipedia-ewma-chart`, in full: medium relevance, authority B, undated
-  5. `ewma-wikipedia-low-pass-filter`, in full: medium relevance, authority B, undated
-  6. `ewma-wikipedia-exponential-smoothing`, in full: high relevance, authority B, undated
+  2. `moving-averages-wikipedia-moving-average`, in full: medium relevance, authority C, undated
+  3. `ewma-wikipedia-load-computing`, in full: medium relevance, authority C, undated
+  4. `ewma-wikipedia-ewma-chart`, in full: medium relevance, authority C, undated
+  5. `ewma-wikipedia-low-pass-filter`, in full: medium relevance, authority C, undated
+  6. `ewma-wikipedia-exponential-smoothing`, in full: high relevance, authority C, undated
   7. `ewma-finagle-ema-source`, in full: high relevance, authority A, undated
   8. `ewma-finagle-peak-ewma-source`, in full: high relevance, authority A, undated
   9. `ewma-finagle-clients-docs`, in full: high relevance, authority A, undated

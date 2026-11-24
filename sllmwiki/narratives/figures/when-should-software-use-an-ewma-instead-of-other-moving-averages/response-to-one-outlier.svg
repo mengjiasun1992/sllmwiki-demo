@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" width="640" height="360">
+<desc>Input 100 ms except one 300 ms sample at t = 0. EWMA alpha = 1/8: 100 + 25 x (7/8)^t from t = 0 (125, 112.8 at t = 5, 103.4 at t = 15). SMA k = 15: 100 + 200/15 = 113.3 for t = 0 to 14, then 100. Moving median k = 15: 100 throughout.</desc>
+<rect width="640" height="360" fill="#ffffff"/>
+<line x1="70" y1="277.5" x2="620" y2="277.5" stroke="#d0d0d0" stroke-width="1"/>
+<text x="62" y="281.5" text-anchor="end" font-size="12" fill="#111111" font-family="Helvetica, Arial, sans-serif">100</text>
+<line x1="70" y1="221.2" x2="620" y2="221.2" stroke="#d0d0d0" stroke-width="1"/>
+<text x="62" y="225.2" text-anchor="end" font-size="12" fill="#111111" font-family="Helvetica, Arial, sans-serif">150</text>
+<line x1="70" y1="165.0" x2="620" y2="165.0" stroke="#d0d0d0" stroke-width="1"/>
+<text x="62" y="169.0" text-anchor="end" font-size="12" fill="#111111" font-family="Helvetica, Arial, sans-serif">200</text>
+<line x1="70" y1="108.8" x2="620" y2="108.8" stroke="#d0d0d0" stroke-width="1"/>
+<text x="62" y="112.8" text-anchor="end" font-size="12" fill="#111111" font-family="Helvetica, Arial, sans-serif">250</text>
+<line x1="70" y1="52.5" x2="620" y2="52.5" stroke="#d0d0d0" stroke-width="1"/>
+<text x="62" y="56.5" text-anchor="end" font-size="12" fill="#111111" font-family="Helvetica, Arial, sans-serif">300</text>
+<line x1="70" y1="300" x2="620" y2="300" stroke="#111111" stroke-width="1.2"/>
+<line x1="70" y1="30" x2="70" y2="300" stroke="#111111" stroke-width="1.2"/>
+<text x="70.0" y="318.0" text-anchor="middle" font-size="13" fill="#111111" font-family="Helvetica, Arial, sans-serif">-5</text>
+<text x="148.6" y="318.0" text-anchor="middle" font-size="13" fill="#111111" font-family="Helvetica, Arial, sans-serif">0</text>
+<text x="305.7" y="318.0" text-anchor="middle" font-size="13" fill="#111111" font-family="Helvetica, Arial, sans-serif">10</text>
+<text x="462.9" y="318.0" text-anchor="middle" font-size="13" fill="#111111" font-family="Helvetica, Arial, sans-serif">20</text>
+<text x="620.0" y="318.0" text-anchor="middle" font-size="13" fill="#111111" font-family="Helvetica, Arial, sans-serif">30</text>
+<polyline points="70.0,277.5 85.7,277.5 101.4,277.5 117.1,277.5 132.9,277.5 148.6,249.4 164.3,252.9 180.0,256.0 195.7,258.7 211.4,261.0 227.1,263.1 242.9,264.9 258.6,266.5 274.3,267.8 290.0,269.0 305.7,270.1 321.4,271.0 337.1,271.8 352.9,272.5 368.6,273.2 384.3,273.7 400.0,274.2 415.7,274.6 431.4,275.0 447.1,275.3 462.9,275.6 478.6,275.8 494.3,276.0 510.0,276.2 525.7,276.4 541.4,276.5 557.1,276.6 572.9,276.7 588.6,276.8 604.3,276.9 620.0,277.0" fill="none" stroke="#1f5fa8" stroke-width="2.5"/>
+<polyline points="70.0,277.5 148.6,277.5 148.6,262.5 384.3,262.5 384.3,277.5 620.0,277.5" fill="none" stroke="#b03a2e" stroke-width="2.5" stroke-dasharray="8 5"/>
+<polyline points="70.0,277.5 620.0,277.5" fill="none" stroke="#2e7d32" stroke-width="2"/>
+<circle cx="70.0" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="85.7" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="101.4" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="117.1" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="132.9" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="148.6" cy="52.5" r="2.5" fill="#111111"/>
+<circle cx="164.3" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="180.0" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="195.7" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="211.4" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="227.1" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="242.9" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="258.6" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="274.3" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="290.0" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="305.7" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="321.4" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="337.1" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="352.9" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="368.6" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="384.3" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="400.0" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="415.7" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="431.4" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="447.1" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="462.9" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="478.6" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="494.3" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="510.0" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="525.7" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="541.4" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="557.1" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="572.9" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="588.6" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="604.3" cy="277.5" r="2.5" fill="#111111"/>
+<circle cx="620.0" cy="277.5" r="2.5" fill="#111111"/>
+<text x="164.3" y="56.5" text-anchor="start" font-size="13" fill="#111111" font-family="Helvetica, Arial, sans-serif">input: one 300 ms sample at t = 0 (dots)</text>
+<text x="180.0" y="235.4" text-anchor="start" font-size="13" fill="#111111" font-family="Helvetica, Arial, sans-serif">EWMA: 125, then fades</text>
+<text x="620.0" y="252.5" text-anchor="end" font-size="13" fill="#111111" font-family="Helvetica, Arial, sans-serif">SMA k = 15: 113.3 for 15 samples (dashed)</text>
+<text x="620.0" y="295.5" text-anchor="end" font-size="13" fill="#111111" font-family="Helvetica, Arial, sans-serif">median k = 15: stays 100 (green)</text>
+<text x="345.0" y="345" text-anchor="middle" font-size="14" fill="#111111" font-family="Helvetica, Arial, sans-serif">sample index t</text>
+<text x="18" y="165.0" text-anchor="middle" font-size="14" fill="#111111" font-family="Helvetica, Arial, sans-serif" transform="rotate(-90 18 165.0)">smoothed latency (ms)</text>
+</svg>
