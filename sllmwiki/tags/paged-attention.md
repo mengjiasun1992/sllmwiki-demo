@@ -1,6 +1,6 @@
 # paged-attention
 
-<!-- sllmwiki:generated: rewritten by wiki-check.py --fix; edit tags.yaml and the manifests instead -->
+<!-- sllmwiki:generated: rewritten by sllmwiki wiki-check --fix; edit tags.yaml and the manifests instead -->
 
 Paged attention: storing the attention key-value cache in fixed-size blocks, as an operating system pages memory
 

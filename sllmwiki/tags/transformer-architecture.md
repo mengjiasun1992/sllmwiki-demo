@@ -1,6 +1,6 @@
 # transformer-architecture
 
-<!-- sllmwiki:generated: rewritten by wiki-check.py --fix; edit tags.yaml and the manifests instead -->
+<!-- sllmwiki:generated: rewritten by sllmwiki wiki-check --fix; edit tags.yaml and the manifests instead -->
 
 Transformer models: the attention-based network design behind modern language models
 

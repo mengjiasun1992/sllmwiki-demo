@@ -1,6 +1,6 @@
 # raft
 
-<!-- sllmwiki:generated: rewritten by wiki-check.py --fix; edit tags.yaml and the manifests instead -->
+<!-- sllmwiki:generated: rewritten by sllmwiki wiki-check --fix; edit tags.yaml and the manifests instead -->
 
 The Raft consensus algorithm: leader election, log replication and safety for a replicated log
 

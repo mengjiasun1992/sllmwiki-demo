@@ -1,6 +1,6 @@
 # machine-learning
 
-<!-- sllmwiki:generated: rewritten by wiki-check.py --fix; edit tags.yaml and the manifests instead -->
+<!-- sllmwiki:generated: rewritten by sllmwiki wiki-check --fix; edit tags.yaml and the manifests instead -->
 
 Machine learning: models that learn their behaviour from data
 

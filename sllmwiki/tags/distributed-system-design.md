@@ -1,6 +1,6 @@
 # distributed-system-design
 
-<!-- sllmwiki:generated: rewritten by wiki-check.py --fix; edit tags.yaml and the manifests instead -->
+<!-- sllmwiki:generated: rewritten by sllmwiki wiki-check --fix; edit tags.yaml and the manifests instead -->
 
 Design tenets and principles for building distributed systems: failure, consistency, scalability, idempotency, backpressure
 

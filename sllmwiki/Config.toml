@@ -13,6 +13,9 @@ language = "en"             # narratives' language, such as "zh-Hans"; sources k
 picture_formats = ["mermaid", "svg", "png"]  # the kinds of picture a narrative may use: mermaid diagrams, SVG and PNG figures
 max_pictures = 5            # pictures in one narrative, at most; 0: none
 max_image_kb = 100          # an SVG or PNG figure's size, at most
+audience = "sllmwiki/.templates/audience.md"  # who this wiki is written for, over the skill and its guides; a markdown file outside the Obsidian vault, or "" for none
+visibility = ""             # "private" or "public": who can see this wiki when GitHub can't say (another host, gh signed out, GitHub unreachable); a repository GitHub shows public is always public
+reader_annotations = false  # true: readers' own annotations, [* date username] quote blocks at a section's end, agreed with them first
 
 # A template's word budgets, over its own. For example:
 # [structural-llm-wiki-templates.technical_brief_overview]
