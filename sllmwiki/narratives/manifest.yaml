@@ -405,3 +405,4 @@ how-does-classic-attention-compare-with-paged-attention-in-transformers:
   models:
     1.0: claude-haiku-5-5
     1.1: claude-haiku-5-5
+    2.0: claude-opus-5-5

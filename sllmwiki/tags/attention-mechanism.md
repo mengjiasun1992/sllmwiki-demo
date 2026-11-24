@@ -8,7 +8,7 @@ Attention: how a transformer weighs other tokens when it builds each token's rep
 
 ## Narratives
 
-- [Can you compare the classic attention mechanism and paged attention mechanism for transformer model architecture?](../narratives/how-does-classic-attention-compare-with-paged-attention-in-transformers.md) · 5 min
+- [Can you compare the classic attention mechanism and paged attention mechanism for transformer model architecture?](../narratives/how-does-classic-attention-compare-with-paged-attention-in-transformers.md) · 7 min
 
 ## Sources
 
