@@ -1,6 +1,6 @@
 # failure-modes
 
-<!-- sllmwiki:generated: rewritten by wiki-check.py --fix; edit tags.yaml and the manifests instead -->
+<!-- sllmwiki:generated: rewritten by sllmwiki wiki-check --fix; edit tags.yaml and the manifests instead -->
 
 Classic failure modes of large-scale distributed systems (crashes, partitions, overload, cascading and metastable failures, retry storms, bad changes) and how to prevent or mitigate them
 

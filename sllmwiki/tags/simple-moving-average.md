@@ -1,6 +1,6 @@
 # simple-moving-average
 
-<!-- sllmwiki:generated: rewritten by wiki-check.py --fix; edit tags.yaml and the manifests instead -->
+<!-- sllmwiki:generated: rewritten by sllmwiki wiki-check --fix; edit tags.yaml and the manifests instead -->
 
 Simple and weighted windowed moving averages, the alternatives to an EWMA
 

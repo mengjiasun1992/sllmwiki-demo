@@ -1,6 +1,6 @@
 # calm-theorem
 
-<!-- sllmwiki:generated: rewritten by wiki-check.py --fix; edit tags.yaml and the manifests instead -->
+<!-- sllmwiki:generated: rewritten by sllmwiki wiki-check --fix; edit tags.yaml and the manifests instead -->
 
 The CALM theorem: consistency as logical monotonicity, which distributed programs need no coordination
 
